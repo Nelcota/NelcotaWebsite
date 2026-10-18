@@ -1,0 +1,157 @@
+---
+import { type Locale, t } from '../i18n/utils.ts';
+import type { Snippets } from '../lib/snippets.ts';
+import CopyButton from './CopyButton.astro';
+import Icon from './Icon.astro';
+
+interface Props {
+  locale: Locale;
+  snippets: Snippets;
+}
+const { locale, snippets } = Astro.props;
+const dict = t(locale);
+const rendered = snippets.tabs;
+---
+
+<section id="build" class="scroll-mt-24 bg-surface/60 py-16 md:py-24" aria-labelledby="build-title">
+  <div class="container-page grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+    <div>
+      <h2 id="build-title" class="text-3xl font-semibold tracking-tight sm:text-4xl">{dict.build.title}</h2>
+      <p class="mt-3 text-lg text-pretty text-muted">{dict.build.intro}</p>
+      <ul class="mt-6 flex flex-wrap gap-2">
+        {
+          dict.build.links.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                rel="noopener"
+                class="pill border border-line bg-surface text-ink transition-colors hover:border-mint-deep hover:text-mint-ink"
+              >
+                <Icon name="book" size={14} />
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="card overflow-hidden" data-tabs>
+      <div role="tablist" aria-label={dict.build.tablistLabel} class="flex gap-1 border-b border-line/70 bg-raised/60 p-2">
+        {
+          rendered.map((tab, index) => (
+            <button
+              type="button"
+              role="tab"
+              id={`tab-${tab.id}`}
+              aria-controls={`panel-${tab.id}`}
+              aria-selected={index === 0 ? 'true' : 'false'}
+              tabindex={index === 0 ? 0 : -1}
+              class="rounded-full px-4 py-1.5 text-sm font-semibold text-muted transition-colors aria-selected:bg-surface aria-selected:text-ink aria-selected:shadow-card hover:text-ink"
+            >
+              {tab.label}
+            </button>
+          ))
+        }
+      </div>
+
+      {
+        rendered.map((tab, index) => (
+          <div
+            role="tabpanel"
+            id={`panel-${tab.id}`}
+            aria-labelledby={`tab-${tab.id}`}
+            tabindex="0"
+            hidden={index !== 0}
+            class="space-y-4 p-4 sm:p-5"
+          >
+            {tab.blocks.map((block) => (
+              <figure class="relative">
+                <figcaption class="mb-1.5 text-xs font-semibold tracking-wide text-muted uppercase">{block.title}</figcaption>
+                <pre
+                  class="code-block rounded-2xl border border-line/70 bg-code p-4 pr-24 text-ink"
+                  tabindex="0"
+                ><code id={block.id} set:html={block.html} /></pre>
+                <CopyButton target={block.id} locale={locale} />
+              </figure>
+            ))}
+          </div>
+        ))
+      }
+      <p data-copy-status role="status" aria-live="polite" class="sr-only"></p>
+    </div>
+  </div>
+
+  <style is:inline set:html={snippets.css}></style>
+</section>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('[data-tabs]')) {
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const panels = tabs.map((tab) => document.getElementById(tab.getAttribute('aria-controls') ?? ''));
+
+    const select = (index: number, focus = false) => {
+      tabs.forEach((tab, i) => {
+        const active = i === index;
+        tab.setAttribute('aria-selected', String(active));
+        tab.tabIndex = active ? 0 : -1;
+        const panel = panels[i];
+        if (panel) panel.hidden = !active;
+        if (active && focus) tab.focus();
+      });
+    };
+
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => select(i));
+      tab.addEventListener('keydown', (event) => {
+        const count = tabs.length;
+        let next = i;
+        if (event.key === 'ArrowRight') next = (i + 1) % count;
+        else if (event.key === 'ArrowLeft') next = (i - 1 + count) % count;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = count - 1;
+        else return;
+        event.preventDefault();
+        select(next, true);
+      });
+    });
+
+    const status = root.querySelector<HTMLElement>('[data-copy-status]');
+    for (const button of root.querySelectorAll<HTMLButtonElement>('[data-copy]')) {
+      const label = button.querySelector<HTMLElement>('[data-copy-label]');
+      const idle = label?.textContent ?? '';
+      let timer = 0;
+      button.addEventListener('click', async () => {
+        const code = document.getElementById(button.dataset.copy ?? '')?.textContent ?? '';
+        let message = button.dataset.copied ?? '';
+        try {
+          await navigator.clipboard.writeText(code);
+          button.dataset.state = 'done';
+        } catch {
+          message = button.dataset.failed ?? '';
+          button.dataset.state = 'failed';
+        }
+        if (label) label.textContent = message;
+        if (status) status.textContent = message;
+        clearTimeout(timer);
+        timer = window.setTimeout(() => {
+          if (label) label.textContent = idle;
+          delete button.dataset.state;
+        }, 2000);
+      });
+    }
+  }
+</script>
+
+<style>
+  [data-state='done'] .copy-icon-idle {
+    display: none;
+  }
+  [data-state='done'] .copy-icon-done {
+    display: block;
+  }
+  [data-state='done'] {
+    border-color: var(--color-mint-deep);
+    color: var(--color-mint-ink);
+  }
+</style>

@@ -1,0 +1,62 @@
+---
+import { getImage } from 'astro:assets';
+import mascot from '../assets/mascot.png';
+import { type Locale, t } from '../i18n/utils.ts';
+import Base from '../layouts/Base.astro';
+import { loadProjects } from '../lib/projects.ts';
+import { ORG_URL, SITE_NAME, spdxUrl, withBase } from '../lib/site.ts';
+import { buildSnippets } from '../lib/snippets.ts';
+import CodeTabs from './CodeTabs.astro';
+import Contribute from './Contribute.astro';
+import Hero from './Hero.astro';
+import Projects from './Projects.astro';
+import Why from './Why.astro';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const dict = t(locale);
+const projects = await loadProjects();
+
+// Highlighted snippets are rendered before <Base> so their stylesheet hash lands in the CSP <meta>.
+const snippets = await buildSnippets(dict);
+Astro.csp?.insertStyleHash(snippets.cssHash);
+const site = Astro.site ?? new URL('http://localhost:4321/');
+const logo = await getImage({ src: mascot, width: 512, height: 512, format: 'png' });
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${ORG_URL}#organization`,
+      name: SITE_NAME,
+      url: new URL(withBase('/'), site).href,
+      logo: new URL(logo.src, site).href,
+      sameAs: [ORG_URL, 'https://nelcota.com'],
+      description: dict.meta.description,
+    },
+    ...projects.all.map((project) => ({
+      '@type': 'SoftwareSourceCode',
+      name: project.data.name,
+      description: project.data.description[locale],
+      codeRepository: project.data.url,
+      url: project.data.url,
+      programmingLanguage: project.github?.language ?? project.data.language,
+      license: spdxUrl(project.github?.license ?? project.data.license),
+      ...(project.github?.latestRelease ? { version: project.github.latestRelease.tag } : {}),
+      ...(project.github ? { dateModified: project.github.pushedAt } : {}),
+      author: { '@id': `${ORG_URL}#organization` },
+    })),
+  ],
+};
+---
+
+<Base locale={locale} jsonLd={jsonLd} fetchedAt={projects.fetchedAt} source={projects.source}>
+  <Hero locale={locale} />
+  <Projects locale={locale} projects={projects} />
+  <CodeTabs locale={locale} snippets={snippets} />
+  <Why locale={locale} />
+  <Contribute locale={locale} />
+</Base>

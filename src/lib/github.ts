@@ -101,7 +101,11 @@ async function apiGet<T>(path: string, options: FetchOptions): Promise<T | null>
     const remaining = remainingHeader === null ? null : Number(remainingHeader);
     const rateLimited = response.status === 403 || response.status === 429;
     const reason = rateLimited && remaining === 0 ? 'rate limit exceeded' : response.statusText;
-    throw new GithubApiError(`GET ${path} failed: ${response.status} ${reason}`, response.status, remaining);
+    throw new GithubApiError(
+      `GET ${path} failed: ${response.status} ${reason}`,
+      response.status,
+      remaining,
+    );
   }
 
   return (await response.json()) as T;
@@ -127,7 +131,8 @@ function normalizeRepo(repo: ApiRepo, latestRelease: GithubRelease | null): Gith
     forks: repo.forks_count,
     openIssues: repo.open_issues_count,
     language: repo.language,
-    license: repo.license?.spdx_id && repo.license.spdx_id !== 'NOASSERTION' ? repo.license.spdx_id : null,
+    license:
+      repo.license?.spdx_id && repo.license.spdx_id !== 'NOASSERTION' ? repo.license.spdx_id : null,
     pushedAt: repo.pushed_at,
     defaultBranch: repo.default_branch,
     archived: repo.archived,
@@ -140,7 +145,10 @@ function normalizeRepo(repo: ApiRepo, latestRelease: GithubRelease | null): Gith
  * Throws when the repository list itself cannot be fetched; a failing release
  * request only degrades that repo (previous snapshot value, then null).
  */
-export async function fetchOrgSnapshot(org: string, options: FetchOptions = {}): Promise<GithubSnapshot> {
+export async function fetchOrgSnapshot(
+  org: string,
+  options: FetchOptions = {},
+): Promise<GithubSnapshot> {
   const warn = options.onWarning ?? (() => {});
   const repos: ApiRepo[] = [];
 
@@ -161,10 +169,14 @@ export async function fetchOrgSnapshot(org: string, options: FetchOptions = {}):
         let release: GithubRelease | null = null;
         try {
           release = normalizeRelease(
-            await apiGet<ApiRelease>(`/repos/${encodeURIComponent(org)}/${encodeURIComponent(repo.name)}/releases/latest`, options),
+            await apiGet<ApiRelease>(
+              `/repos/${encodeURIComponent(org)}/${encodeURIComponent(repo.name)}/releases/latest`,
+              options,
+            ),
           );
         } catch (error) {
-          const fallback = options.previous?.repos.find((r) => r.name === repo.name)?.latestRelease ?? null;
+          const fallback =
+            options.previous?.repos.find((r) => r.name === repo.name)?.latestRelease ?? null;
           warn(
             `Latest release of ${org}/${repo.name} unavailable (${error instanceof Error ? error.message : String(error)}). ` +
               (fallback ? `Keeping ${fallback.tag} from the snapshot.` : 'Showing no release.'),

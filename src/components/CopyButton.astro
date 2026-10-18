@@ -1,0 +1,24 @@
+---
+import { type Locale, t } from '../i18n/utils.ts';
+import Icon from './Icon.astro';
+
+interface Props {
+  /** id of the element whose textContent is copied */
+  target: string;
+  locale: Locale;
+}
+const { target, locale } = Astro.props;
+const dict = t(locale);
+---
+
+<button
+  type="button"
+  data-copy={target}
+  data-copied={dict.build.copied}
+  data-failed={dict.build.copyFailed}
+  class="absolute top-2 right-2 inline-flex h-8 items-center gap-1.5 rounded-full border border-line bg-surface px-3 text-xs font-medium text-muted transition-colors hover:text-ink"
+>
+  <Icon name="copy" size={14} class="copy-icon-idle" />
+  <Icon name="check" size={14} class="copy-icon-done hidden" />
+  <span data-copy-label>{dict.build.copy}</span>
+</button>

@@ -1,0 +1,51 @@
+---
+import { Picture } from 'astro:assets';
+import { getRelativeLocaleUrl } from 'astro:i18n';
+import mascot from '../assets/mascot.png';
+import Icon from '../components/Icon.astro';
+import { t } from '../i18n/utils.ts';
+import Base from '../layouts/Base.astro';
+
+const en = t('en');
+const pt = t('pt-br');
+---
+
+<Base locale="en" title={`${en.notFound.title} · Nelcota`} description={en.notFound.body} noindex>
+  <section class="container-page flex flex-col items-center py-20 text-center md:py-28">
+    <div class="rounded-[2rem] bg-[#edfef2] p-3 shadow-card ring-1 ring-mint/40">
+      <Picture
+        src={mascot}
+        formats={['avif', 'webp']}
+        widths={[160, 320]}
+        sizes="160px"
+        width={160}
+        height={160}
+        alt={en.a11y.mascotAlt}
+        loading="eager"
+        fetchpriority="high"
+        class="size-40 rounded-[1.4rem]"
+      />
+    </div>
+    <p class="mt-8 font-mono text-sm text-muted">404</p>
+    <h1 class="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">{en.notFound.title}</h1>
+    <p class="mt-3 max-w-md text-pretty text-muted">{en.notFound.body}</p>
+    <p lang="pt-BR" class="mt-1 max-w-md text-pretty text-muted">{pt.notFound.body}</p>
+    <div class="mt-8 flex flex-wrap justify-center gap-3">
+      <a
+        href={getRelativeLocaleUrl('en')}
+        class="inline-flex h-11 items-center gap-2 rounded-full bg-mint px-5 font-semibold text-on-mint"
+      >
+        <Icon name="arrow" size={16} class="rotate-180" />
+        {en.notFound.home}
+      </a>
+      <a
+        href={getRelativeLocaleUrl('pt-br')}
+        hreflang="pt-BR"
+        lang="pt-BR"
+        class="inline-flex h-11 items-center gap-2 rounded-full border border-line bg-surface px-5 font-semibold text-ink"
+      >
+        {pt.notFound.home}
+      </a>
+    </div>
+  </section>
+</Base>

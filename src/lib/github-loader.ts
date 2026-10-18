@@ -57,7 +57,9 @@ export function githubLoader({ org, snapshot, token }: GithubLoaderOptions): Loa
           onWarning: (message) => logger.warn(message),
         });
         source = 'api';
-        logger.info(`Fetched ${data.repos.length} public repositories of ${org} from the GitHub API.`);
+        logger.info(
+          `Fetched ${data.repos.length} public repositories of ${org} from the GitHub API.`,
+        );
       } catch (error) {
         const reason = error instanceof Error ? error.message : String(error);
         logger.warn(
