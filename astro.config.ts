@@ -1,0 +1,132 @@
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import sitemap from '@astrojs/sitemap';
+import tailwindcss from '@tailwindcss/vite';
+import { defineConfig, fontProviders } from 'astro/config';
+
+/**
+ * SITE_URL / BASE_PATH are injected by the GitHub Pages workflow
+ * (actions/configure-pages) so the same build works on a user site,
+ * a project site or a custom domain. Defaults match a user/org site.
+ */
+const siteUrl = process.env.SITE_URL ?? 'https://nelcota.github.io';
+const basePath = process.env.BASE_PATH ?? '/';
+
+/**
+ * The theme bootstrap script is inlined in <head> before first paint.
+ * Its SHA-256 is added to the CSP so the page can keep a strict policy
+ * (no 'unsafe-inline'). `pnpm csp-hash` prints the same value for the Caddyfile.
+ */
+const themeInit = readFileSync(new URL('./src/scripts/theme-init.js', import.meta.url), 'utf8');
+const themeInitHash = `sha256-${createHash('sha256').update(themeInit).digest('base64')}` as const;
+
+// Latin subset shipped with the fonts (same range Fontsource uses).
+const latin = [
+  'U+0000-00FF',
+  'U+0131',
+  'U+0152-0153',
+  'U+02BB-02BC',
+  'U+02C6',
+  'U+02DA',
+  'U+02DC',
+  'U+0304',
+  'U+0308',
+  'U+0329',
+  'U+2000-206F',
+  'U+20AC',
+  'U+2122',
+  'U+2191',
+  'U+2193',
+  'U+2212',
+  'U+2215',
+  'U+FEFF',
+  'U+FFFD',
+] as const;
+
+export default defineConfig({
+  site: siteUrl,
+  base: basePath,
+  output: 'static',
+  trailingSlash: 'ignore',
+  compressHTML: true,
+  build: {
+    // One page, small CSS: inlining removes a render-blocking request.
+    inlineStylesheets: 'always',
+  },
+  i18n: {
+    defaultLocale: 'en',
+    locales: ['en', 'pt-br'],
+    routing: { prefixDefaultLocale: false },
+  },
+  fonts: [
+    {
+      provider: fontProviders.local(),
+      name: 'Inter',
+      cssVariable: '--font-inter',
+      fallbacks: ['sans-serif'],
+      options: {
+        variants: [
+          {
+            weight: '100 900',
+            style: 'normal',
+            src: ['./src/assets/fonts/inter-latin-wght-normal.woff2'],
+            display: 'swap',
+            unicodeRange: [...latin],
+          },
+        ],
+      },
+    },
+    {
+      provider: fontProviders.local(),
+      name: 'JetBrains Mono',
+      cssVariable: '--font-jetbrains-mono',
+      fallbacks: ['monospace'],
+      options: {
+        variants: [
+          {
+            weight: '100 800',
+            style: 'normal',
+            src: ['./src/assets/fonts/jetbrains-mono-latin-wght-normal.woff2'],
+            display: 'swap',
+            unicodeRange: [...latin],
+          },
+        ],
+      },
+    },
+  ],
+  image: {
+    responsiveStyles: false,
+  },
+  security: {
+    csp: {
+      directives: [
+        "default-src 'none'",
+        "img-src 'self' data:",
+        "font-src 'self'",
+        "connect-src 'self'",
+        "manifest-src 'self'",
+        "base-uri 'none'",
+        "form-action 'none'",
+      ],
+      scriptDirective: {
+        resources: ["'self'"],
+        hashes: [themeInitHash],
+      },
+      styleDirective: {
+        resources: ["'self'"],
+      },
+    },
+  },
+  integrations: [
+    sitemap({
+      i18n: {
+        defaultLocale: 'en',
+        locales: { en: 'en', 'pt-br': 'pt-BR' },
+      },
+      filter: (page) => !page.includes('/404'),
+    }),
+  ],
+  vite: {
+    plugins: [tailwindcss()],
+  },
+});
