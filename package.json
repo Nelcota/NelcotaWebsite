@@ -19,8 +19,9 @@
     "format": "biome format --write .",
     "test": "playwright test",
     "lhci": "lhci autorun",
-    "snapshot": "node --experimental-strip-types scripts/snapshot.ts",
-    "astro": "astro"
+    "snapshot": "node scripts/snapshot.ts",
+    "astro": "astro",
+    "csp-hash": "node scripts/csp-hash.ts"
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.4",
