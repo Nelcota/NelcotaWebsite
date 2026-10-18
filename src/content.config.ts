@@ -1,5 +1,6 @@
+import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
-import { defineCollection, z } from 'astro:content';
+import { z } from 'astro/zod';
 import snapshot from './data/github-snapshot.json';
 import { githubLoader } from './lib/github-loader.ts';
 
@@ -23,9 +24,7 @@ const projects = defineCollection({
     language: z.string(),
     stack: z.array(z.string()),
     description: localized,
-    links: z
-      .array(z.object({ label: localized, href: z.url() }))
-      .default([]),
+    links: z.array(z.object({ label: localized, href: z.url() })).default([]),
   }),
 });
 
