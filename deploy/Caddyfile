@@ -1,0 +1,45 @@
+# Example Caddyfile for self-hosting the static site on a VPS.
+#
+#   pnpm build && rsync -a --delete dist/ user@vps:/srv/nelcota-site/
+#   caddy run --config deploy/Caddyfile
+#
+# Replace the hostname; Caddy obtains and renews the TLS certificate automatically.
+
+nelcota.example.com {
+	root * /srv/nelcota-site
+
+	# zstd first, gzip fallback (Brotli is not built into Caddy).
+	encode zstd gzip
+
+	# Hashed assets (/_astro/*) can be cached forever; HTML must revalidate.
+	@immutable path /_astro/*
+	header @immutable Cache-Control "public, max-age=31536000, immutable"
+	@html path / /index.html /pt-br /pt-br/ /pt-br/index.html /404.html
+	header @html Cache-Control "public, max-age=0, must-revalidate"
+
+	header {
+		# Strict CSP. The only inline script is the theme bootstrap in <head>; its hash is
+		# printed by `pnpm csp-hash` and must be updated if src/scripts/theme-init.js changes.
+		# Astro's bundled scripts are inlined and hashed in the page's own <meta http-equiv>
+		# CSP, so the header below allows 'self' and that script hash; the <meta> policy is
+		# applied in addition (the browser enforces both).
+		Content-Security-Policy "default-src 'none'; script-src 'self' ''sha256-9RyxxcU7GdBS6WPnPreQyMV5br2gKzx/MY1X3eTcZ8E=''; style-src 'self' 'unsafe-hashes' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests"
+		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+		Cross-Origin-Opener-Policy "same-origin"
+		Cross-Origin-Resource-Policy "same-origin"
+		-Server
+	}
+
+	# Astro's default "directory" build format: /pt-br -> /pt-br/index.html
+	try_files {path} {path}/index.html
+	handle_errors {
+		@notfound expression {http.error.status_code} == 404
+		rewrite @notfound /404.html
+		file_server
+	}
+	file_server
+}

@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Lint, types, build, tests, Lighthouse
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Raises the GitHub API rate limit for the build-time loader (falls back to the snapshot otherwise).
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+        # Version comes from the "packageManager" field in package.json.
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Biome (lint + format)
+        run: pnpm lint
+
+      - name: astro check (types)
+        run: pnpm check
+
+      - name: Build
+        run: pnpm build
+
+      - name: Size budgets (JS ≤ 5 KB gzip, CSS ≤ 20 KB gzip)
+        run: pnpm sizes
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Playwright smoke tests
+        run: pnpm test
+
+      - name: Lighthouse CI
+        run: pnpm lhci
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: reports
+          path: |
+            playwright-report
+            test-results
+            .lighthouseci
+          if-no-files-found: ignore
+          retention-days: 14
