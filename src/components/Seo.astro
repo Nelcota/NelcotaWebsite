@@ -1,0 +1,49 @@
+---
+import { getAbsoluteLocaleUrl } from 'astro:i18n';
+import { bcp47, type Locale, locales, ogLocale } from '../i18n/utils.ts';
+import { withBase } from '../lib/site.ts';
+
+interface Props {
+  locale: Locale;
+  title: string;
+  description: string;
+  ogAlt: string;
+  /** Localized pages share the same path in every locale; 404 passes `noindex`. */
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown> | undefined;
+}
+const { locale, title, description, ogAlt, noindex = false, jsonLd } = Astro.props;
+
+const site = Astro.site ?? new URL('http://localhost:4321/');
+const canonical = new URL(getAbsoluteLocaleUrl(locale));
+const ogImage = new URL(withBase(`og/${locale}.png`), site);
+const alternates = locales.map((alt) => ({ locale: alt, href: getAbsoluteLocaleUrl(alt) }));
+const serialized = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : null;
+---
+
+<meta name="description" content={description} />
+{noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical.href} />}
+{
+  !noindex &&
+    alternates.map((alt) => <link rel="alternate" hreflang={bcp47[alt.locale]} href={alt.href} />)
+}
+{!noindex && <link rel="alternate" hreflang="x-default" href={getAbsoluteLocaleUrl('en')} />}
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Nelcota" />
+<meta property="og:locale" content={ogLocale[locale]} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical.href} />
+<meta property="og:image" content={ogImage.href} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:alt" content={ogAlt} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage.href} />
+<meta name="twitter:image:alt" content={ogAlt} />
+
+{serialized && <script type="application/ld+json" is:inline set:html={serialized} />}

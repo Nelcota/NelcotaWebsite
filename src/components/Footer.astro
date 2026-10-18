@@ -1,0 +1,57 @@
+---
+import { formatDate, type Locale, t } from '../i18n/utils.ts';
+import { OFFICIAL_SITE, ORG_URL } from '../lib/site.ts';
+import Icon from './Icon.astro';
+import Mascot from './Mascot.astro';
+
+interface Props {
+  locale: Locale;
+  fetchedAt?: string | null;
+  source?: 'api' | 'snapshot' | null;
+}
+const { locale, fetchedAt = null, source = null } = Astro.props;
+const dict = t(locale);
+---
+
+<footer class="border-t border-line/70 bg-surface/60">
+  <div class="container-page grid gap-8 py-12 md:grid-cols-[1.4fr_1fr_1fr]">
+    <div class="space-y-3">
+      <p class="flex items-center gap-2 font-semibold text-ink">
+        <Mascot size={26} />
+        Nelcota
+      </p>
+      <p class="max-w-prose text-sm text-muted">{dict.footer.builtWith}</p>
+      <p class="text-sm text-muted">{dict.footer.licenses}</p>
+      <p class="text-sm text-muted">{dict.footer.fonts}</p>
+    </div>
+
+    <nav aria-label={dict.nav.github} class="text-sm">
+      <ul class="space-y-2">
+        <li>
+          <a href={ORG_URL} rel="me noopener" class="inline-flex items-center gap-2 text-ink hover:text-mint-ink">
+            <Icon name="github" size={18} />
+            {dict.footer.github}
+          </a>
+        </li>
+        <li>
+          <a href={OFFICIAL_SITE} rel="noopener" class="inline-flex items-center gap-2 text-ink hover:text-mint-ink">
+            <Icon name="globe" size={18} />
+            {dict.footer.site}
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="text-sm text-muted">
+      {
+        fetchedAt && (
+          <p>
+            {dict.footer.dataAsOf}{' '}
+            <time datetime={fetchedAt}>{formatDate(fetchedAt, locale)}</time>
+            {source === 'snapshot' ? ` (${dict.footer.dataFromSnapshot}).` : '.'}
+          </p>
+        )
+      }
+    </div>
+  </div>
+</footer>

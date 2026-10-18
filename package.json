@@ -21,7 +21,10 @@
     "lhci": "lhci autorun",
     "snapshot": "node scripts/snapshot.ts",
     "astro": "astro",
-    "csp-hash": "node scripts/csp-hash.ts"
+    "csp-hash": "node scripts/csp-hash.ts",
+    "sizes": "node scripts/sizes.ts",
+    "test:ci": "pnpm build && playwright test && pnpm sizes && lhci autorun",
+    "subset-fonts": "node scripts/subset-fonts.ts"
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.4",
@@ -36,9 +39,13 @@
   "devDependencies": {
     "@astrojs/check": "0.9.10",
     "@biomejs/biome": "2.5.15",
+    "@fontsource-variable/inter": "5.3.0",
+    "@fontsource/inter": "5.3.0",
+    "@fontsource/jetbrains-mono": "5.3.0",
     "@lhci/cli": "0.15.1",
     "@playwright/test": "1.64.1",
     "@types/node": "26.6.5",
+    "subset-font": "2.9.0",
     "typescript": "6.0.3"
   },
   "pnpm": {

@@ -67,7 +67,8 @@ export default defineConfig({
       options: {
         variants: [
           {
-            weight: '100 900',
+            // Variable font trimmed to the 400–700 range (see scripts/subset-fonts.ts).
+            weight: '400 700',
             style: 'normal',
             src: ['./src/assets/fonts/inter-latin-wght-normal.woff2'],
             display: 'swap',
@@ -84,9 +85,9 @@ export default defineConfig({
       options: {
         variants: [
           {
-            weight: '100 800',
+            weight: 400,
             style: 'normal',
-            src: ['./src/assets/fonts/jetbrains-mono-latin-wght-normal.woff2'],
+            src: ['./src/assets/fonts/jetbrains-mono-latin-400-normal.woff2'],
             display: 'swap',
             unicodeRange: [...latin],
           },
@@ -96,6 +97,10 @@ export default defineConfig({
   ],
   image: {
     responsiveStyles: false,
+  },
+  markdown: {
+    // No Markdown code blocks are rendered; code snippets use src/lib/highlight.ts (CSP-safe classes).
+    syntaxHighlight: false,
   },
   security: {
     csp: {

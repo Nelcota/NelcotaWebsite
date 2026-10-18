@@ -1,0 +1,97 @@
+---
+import { getRelativeLocaleUrl } from 'astro:i18n';
+import { bcp47, type Locale, otherLocale, t } from '../i18n/utils.ts';
+import { ORG_URL, SITE_NAME } from '../lib/site.ts';
+import Icon from './Icon.astro';
+import Mascot from './Mascot.astro';
+import ThemeToggle from './ThemeToggle.astro';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const dict = t(locale);
+const other = otherLocale(locale);
+const home = getRelativeLocaleUrl(locale);
+const switchUrl = getRelativeLocaleUrl(other);
+
+const anchors = [
+  { href: '#projects', label: dict.nav.projects },
+  { href: '#build', label: dict.nav.build },
+  { href: '#contribute', label: dict.nav.contribute },
+];
+---
+
+<header class="fixed inset-x-0 top-0 z-40 border-b border-line/70 bg-canvas/85 backdrop-blur-md">
+  <div class="container-page flex h-16 items-center gap-2">
+    <a href={home} class="flex items-center gap-2 rounded-full pr-2 font-semibold tracking-tight text-ink">
+      <Mascot size={30} />
+      <span>{SITE_NAME}</span>
+    </a>
+
+    <nav aria-label={dict.a11y.mainNav} class="ml-4 hidden items-center gap-1 md:flex">
+      {
+        anchors.map((anchor) => (
+          <a
+            href={anchor.href}
+            class="rounded-full px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-raised hover:text-ink"
+          >
+            {anchor.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="ml-auto flex items-center gap-1">
+      <a
+        href={switchUrl}
+        hreflang={bcp47[other]}
+        lang={bcp47[other]}
+        title={dict.nav.switchLocale}
+        class="inline-flex h-10 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-muted transition-colors hover:bg-raised hover:text-ink"
+      >
+        <Icon name="globe" size={18} />
+        <span>{dict.nav.switchLocaleShort}</span>
+        <span class="sr-only">: {dict.nav.switchLocale}</span>
+      </a>
+
+      <ThemeToggle label={dict.a11y.toggleTheme} />
+
+      <a
+        href={ORG_URL}
+        rel="me noopener"
+        aria-label={dict.nav.github}
+        title={dict.nav.github}
+        class="inline-flex size-10 items-center justify-center rounded-full text-muted transition-colors hover:bg-raised hover:text-ink"
+      >
+        <Icon name="github" />
+      </a>
+
+      <details class="relative md:hidden">
+        <summary
+          class="flex size-10 cursor-pointer list-none items-center justify-center rounded-full text-muted transition-colors hover:bg-raised hover:text-ink [&::-webkit-details-marker]:hidden"
+          aria-label={dict.nav.menu}
+          title={dict.nav.menu}
+        >
+          <Icon name="menu" />
+        </summary>
+        <nav aria-label={dict.nav.menu} class="card absolute top-12 right-0 min-w-44 p-2">
+          <ul>
+            {
+              anchors.map((anchor) => (
+                <li>
+                  <a
+                    href={anchor.href}
+                    class="block rounded-xl px-3 py-2 text-sm font-medium text-ink hover:bg-raised"
+                  >
+                    {anchor.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
