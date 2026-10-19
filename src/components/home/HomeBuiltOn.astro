@@ -33,7 +33,11 @@ const STACK: readonly Item[] = [
   { name: 'TypeScript', mark: brand('typescript') },
   { name: 'Linux', mark: brand('linux') },
 ];
-const copies = [0, 1] as const;
+/**
+ * One set is narrower than a wide screen, so two copies left a gap before the
+ * loop restarted. Four copies cover any viewport up to ~4800px.
+ */
+const copies = [0, 1, 2, 3] as const;
 ---
 
 <section class="overflow-x-clip py-14 md:py-20" aria-labelledby="built-title">
@@ -46,7 +50,7 @@ const copies = [0, 1] as const;
     <div class="logos-track">
       {
         copies.map((copy) => (
-          <ul class="logos-set" aria-hidden={copy === 1 ? 'true' : undefined}>
+          <ul class="logos-set" aria-hidden={copy > 0 ? 'true' : undefined}>
             {STACK.map((item) => (
               <li class="logo">
                 {item.mark && <Mark mark={item.mark} size={22} />}
@@ -88,17 +92,18 @@ const copies = [0, 1] as const;
     filter: grayscale(1);
     opacity: 0.85;
   }
+  /* Each set moves by its own width, so the loop is seamless with any number of copies. */
   @media (prefers-reduced-motion: no-preference) {
-    .logos-track {
+    .logos-set {
       animation: logos 40s linear infinite;
     }
   }
-  :global([data-motion-paused]) .logos-track {
+  :global([data-motion-paused]) .logos-set {
     animation-play-state: paused;
   }
   @keyframes logos {
     to {
-      transform: translateX(-50%);
+      transform: translateX(-100%);
     }
   }
 </style>
