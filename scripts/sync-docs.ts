@@ -98,6 +98,20 @@ function gitSource(directory: string): DocsSource {
   };
 }
 
+function isMissingFile(error: unknown): boolean {
+  return error instanceof Error && 'code' in error && error.code === 'ENOENT';
+}
+
+/** The vendored file, or null when it is missing. Permission or disk errors surface as they are. */
+async function readVendored(path: string): Promise<Buffer | null> {
+  try {
+    return await readFile(join(VENDOR_DIR, path));
+  } catch (error) {
+    if (isMissingFile(error)) return null;
+    throw error;
+  }
+}
+
 const sha256 = (data: Buffer): string => createHash('sha256').update(data).digest('hex');
 
 async function readLock(): Promise<DocsLock> {
@@ -144,11 +158,7 @@ async function check(): Promise<void> {
       problems.push(`${path}: in the manifest but not synced (run pnpm docs:sync)`);
       continue;
     }
-    const data = await readFile(join(VENDOR_DIR, path)).catch((error: unknown) => {
-      // Only a missing file is a sync problem; permission or disk errors must surface as they are.
-      if (error instanceof Error && 'code' in error && error.code === 'ENOENT') return null;
-      throw error;
-    });
+    const data = await readVendored(path);
     if (data == null) {
       problems.push(`${path}: missing from vendor/nelcota-docs/`);
       continue;

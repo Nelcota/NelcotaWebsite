@@ -32,7 +32,9 @@ function setupScrollSpy(): void {
   if (sections.length === 0) return;
 
   const sectionsInOrder = sections
-    .toSorted((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1))
+    .toSorted((a, b) =>
+      (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0 ? -1 : 1,
+    )
     .map((section) => section.id);
 
   const mark = (id: string | null): void => {

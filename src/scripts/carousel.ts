@@ -5,6 +5,9 @@
  * the ends; the bar follows the scroll position. Without JS the track still
  * scrolls.
  */
+/** Sub-pixel widths never reach the exact end of the track. */
+const END_TOLERANCE_PX = 1;
+
 function setupCarousel(root: HTMLElement): void {
   const track = root.querySelector<HTMLElement>('[data-carousel-track]');
   if (track == null) return;
@@ -19,9 +22,8 @@ function setupCarousel(root: HTMLElement): void {
   const sync = (): void => {
     const max = track.scrollWidth - track.clientWidth;
     const progress = max > 0 ? track.scrollLeft / max : 1;
-    // A pixel of tolerance: sub-pixel widths never reach the exact end.
-    prev?.toggleAttribute('disabled', track.scrollLeft <= 1);
-    next?.toggleAttribute('disabled', track.scrollLeft >= max - 1);
+    prev?.toggleAttribute('disabled', track.scrollLeft <= END_TOLERANCE_PX);
+    next?.toggleAttribute('disabled', track.scrollLeft >= max - END_TOLERANCE_PX);
     bar?.style.setProperty('--progress', String(Math.min(1, Math.max(0, progress))));
   };
 
