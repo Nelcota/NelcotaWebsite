@@ -134,6 +134,30 @@ const isNelcota = (product: Product): boolean => product === 'nelcota';
   .product-head.is-nelcota {
     box-shadow: inset 0 3px 0 var(--color-pop-forest);
   }
+  /* Each rival wears its own color as softly as Nelcota wears mint: a faint wash and a muted top bar. */
+  .product-head[data-col='supabase'] {
+    --tone: var(--color-pop-lime);
+  }
+  .product-head[data-col='pocketbase'] {
+    --tone: var(--color-pop-lilac);
+  }
+  /* Pink is the most saturated of the four: a lighter mix keeps it level with the others. */
+  .product-head[data-col='appwrite'] {
+    --tone: var(--color-pop-pink);
+    --tone-light-wash: 6%;
+  }
+  .product-head:not(.is-nelcota) {
+    --tone-wash: light-dark(
+      color-mix(in oklab, var(--tone) var(--tone-light-wash, 12%), transparent),
+      color-mix(in oklab, var(--tone) 6%, transparent)
+    );
+    --tone-bar: light-dark(
+      color-mix(in oklab, var(--tone) 75%, transparent),
+      color-mix(in oklab, var(--tone) 45%, transparent)
+    );
+    background-image: linear-gradient(var(--tone-wash), var(--tone-wash));
+    box-shadow: inset 0 3px 0 var(--tone-bar);
+  }
 
   .mark {
     display: inline-flex;
@@ -204,6 +228,11 @@ const isNelcota = (product: Product): boolean => product === 'nelcota';
       background-image: linear-gradient(var(--color-mint-wash), var(--color-mint-wash));
       box-shadow:
         inset 0 3px 0 var(--color-pop-forest),
+        inset 0 -1px 0 var(--color-line);
+    }
+    .compare thead th.product-head:not(.is-nelcota) {
+      box-shadow:
+        inset 0 3px 0 var(--tone-bar),
         inset 0 -1px 0 var(--color-line);
     }
     .data-row:hover > * {
