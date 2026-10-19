@@ -1,0 +1,29 @@
+---
+/**
+ * Text split into words at build time, each in its own span, so headings can
+ * be revealed word by word (src/scripts/motion/). Without JS or with reduced
+ * motion the words simply sit there as normal text; screen readers read the
+ * sentence as usual because the spans carry no roles or labels.
+ */
+interface Props {
+  text: string;
+  class?: string;
+}
+const { text, class: className } = Astro.props;
+const words = text.split(/\s+/).filter((word) => word.length > 0);
+---
+
+{
+  words.map((word, index) => (
+    <>
+      <span class:list={['word', className]}>{word}</span>
+      {index < words.length - 1 && ' '}
+    </>
+  ))
+}
+
+<style>
+  .word {
+    display: inline-block;
+  }
+</style>

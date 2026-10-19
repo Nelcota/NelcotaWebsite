@@ -1,0 +1,145 @@
+---
+import { bcp47, type Locale, t } from '../../i18n/utils.ts';
+import { parseFigure } from '../../lib/figures.ts';
+import { DOCS } from '../../lib/site.ts';
+import Icon, { type IconName } from '../Icon.astro';
+import Eyebrow from './Eyebrow.astro';
+import Title from './Title.astro';
+
+/**
+ * "Fast in Rust": copy and a loose cluster of line icons on the left (the
+ * reference's "Our vision" block), and on the right a card with folder tabs,
+ * "Numbers" (counters that count up, data-count-to) and "Conditions" (how they
+ * were measured). Figures and conditions: docs/goals/execution-report.md,
+ * release-candidate campaign on main, execution 1.
+ */
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const dict = t(locale);
+const speed = dict.landing.speed;
+const stats = dict.why.speed;
+const [numbersTab, conditionsTab] = speed.tabs;
+
+/** Decorative icons scattered under the copy, each with its own tilt (classes i1…i7). */
+const SCATTER: readonly IconName[] = ['zap', 'activity', 'clock', 'server', 'code', 'refresh', 'shieldCheck'];
+---
+
+<section id="speed" class="scroll-mt-24 overflow-x-clip py-12 md:py-20" aria-labelledby="speed-title">
+  <div class="mx-auto grid max-w-[90rem] items-center gap-14 px-5 sm:px-8 lg:grid-cols-[0.8fr_1.2fr]">
+    <div>
+      <Eyebrow parts={speed.eyebrow} />
+      <Title id="speed-title" parts={speed.title} class="mt-5" />
+      <p class="mt-5 max-w-md leading-relaxed text-pretty text-muted" data-fade>{dict.story.speedIntro}</p>
+      <a href={DOCS.releaseTests} rel="noopener" class="link-more mt-5 text-[0.9375rem]" data-fade>
+        {stats.method}
+        <Icon name="external" size={14} />
+      </a>
+      <div class="scatter mt-10" aria-hidden="true">
+        {SCATTER.map((name, index) => <Icon name={name} size={30} class:list={['scatter-icon', `i${index + 1}`]} />)}
+      </div>
+    </div>
+
+    <div class="card overflow-hidden" data-tabs data-fade>
+      <div role="tablist" aria-label={speed.eyebrow.join(' ')} class="folder-tabs">
+        <button type="button" role="tab" id="tab-speed-numbers" aria-controls="panel-speed-numbers" aria-selected="true" class="folder-tab">
+          {numbersTab}
+        </button>
+        <button type="button" role="tab" id="tab-speed-conditions" aria-controls="panel-speed-conditions" aria-selected="false" tabindex="-1" class="folder-tab">
+          {conditionsTab}
+        </button>
+      </div>
+
+      {/* biome-ignore lint/a11y/noNoninteractiveTabindex: the APG tabs pattern makes a panel focusable when it starts with text */}
+      <div role="tabpanel" id="panel-speed-numbers" aria-labelledby="tab-speed-numbers" tabindex="0" class="p-4 sm:p-6">
+        <ul class="grid grid-cols-2 gap-3 sm:gap-4">
+          {
+            stats.stats.map((stat, index) => {
+              const figure = parseFigure(stat.value, locale);
+
+              return (
+                <li class:list={['stat', `st${index + 1}`]}>
+                  <span class="text-[clamp(2.25rem,5vw,3.75rem)] leading-none font-semibold tracking-[-0.05em]" aria-hidden="true" data-count-to={figure.target} data-decimals={figure.decimals} data-locale={bcp47[locale]}>
+                    {stat.value}
+                  </span>
+                  <span class="sr-only">{stat.value}</span>
+                  <span class="mt-1 block text-sm font-semibold">{stat.unit}</span>
+                  <span class="mt-3 block text-[0.8125rem] leading-snug">{stat.label}</span>
+                </li>
+              );
+            })
+          }
+        </ul>
+      </div>
+
+      {/* biome-ignore lint/a11y/noNoninteractiveTabindex: the APG tabs pattern makes a panel focusable when it starts with text */}
+      <div role="tabpanel" id="panel-speed-conditions" aria-labelledby="tab-speed-conditions" tabindex="0" class="p-6 sm:p-8" hidden>
+        <ul class="grid gap-3">
+          {
+            speed.conditions.map((condition) => (
+              <li class="flex items-start gap-3 text-[0.9375rem] text-ink">
+                <Icon name="check" size={18} class="mt-0.5 shrink-0 text-mint-ink" />
+                {condition}
+              </li>
+            ))
+          }
+        </ul>
+        <p class="mt-6 text-sm leading-relaxed text-faint">{stats.engine}. {stats.note}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import '../../scripts/tabs.ts';
+</script>
+
+<style>
+  /* Folder tabs: the selected one is a dark tab whose corner bends into the card. */
+  .folder-tabs {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.75rem 0.75rem 0;
+    background-color: var(--color-raised);
+  }
+  .folder-tab {
+    min-height: 2.75rem;
+    padding: 0.6rem 1.25rem;
+    border-radius: 1rem 1rem 0 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-muted);
+  }
+  .folder-tab[aria-selected='true'] {
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+  }
+
+  .stat {
+    display: block;
+    padding: 1.25rem;
+    border-radius: 1.25rem;
+  }
+  .st1 { background-color: var(--color-night); color: #eef3f0; }
+  .st2 { background-color: #cdbdff; color: #1c1440; }
+  .st3 { background-color: #f1dfb8; color: #2a2112; }
+  .st4 { background-color: #1b7640; color: #f3f8f4; }
+
+  .scatter {
+    position: relative;
+    height: 9rem;
+    max-width: 20rem;
+    color: var(--color-ink);
+  }
+  :global(.scatter-icon) {
+    position: absolute;
+  }
+  .scatter :global(.i1) { top: 0; left: 8%; transform: rotate(-12deg); }
+  .scatter :global(.i2) { top: 2.5rem; left: 0; transform: rotate(8deg); }
+  .scatter :global(.i3) { top: 3rem; left: 24%; }
+  .scatter :global(.i4) { top: 4.5rem; left: 44%; transform: rotate(-6deg); }
+  .scatter :global(.i5) { top: 1rem; left: 62%; transform: rotate(14deg); }
+  .scatter :global(.i6) { top: 6rem; left: 12%; transform: rotate(-18deg); }
+  .scatter :global(.i7) { top: 5.5rem; left: 70%; transform: rotate(10deg); }
+</style>

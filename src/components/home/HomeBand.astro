@@ -1,0 +1,193 @@
+---
+import { type Locale, t } from '../../i18n/utils.ts';
+import Icon, { type IconName } from '../Icon.astro';
+
+/**
+ * The lime band: the four promises in huge type, scrolling sideways forever,
+ * with line icons scattered below (the reference's "Inspired by people" band).
+ * The words are also given once as plain text for screen readers. It stops
+ * with reduced motion and has its own pause button (WCAG 2.2.2).
+ */
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const dict = t(locale);
+const words = dict.landing.band;
+
+/** One mark between the words, cycling through these. */
+const MARKS: readonly IconName[] = ['zap', 'shieldCheck', 'server', 'code'];
+const SCATTER: readonly IconName[] = ['key', 'folder', 'lock', 'activity', 'table', 'refresh', 'clock', 'layout', 'package'];
+const copies = [0, 1] as const;
+---
+
+<section class="px-3 py-10 sm:px-4" aria-label={words.join(', ')}>
+  <div class="band-lime relative mx-auto max-w-[90rem] overflow-hidden rounded-[2rem] pt-10 pb-24 sm:pt-14">
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker-track">
+        {
+          copies.map(() => (
+            <span class="ticker-set">
+              {words.map((word, index) => (
+                <>
+                  <span class="ticker-word">{word}</span>
+                  <span class="ticker-mark">
+                    <Icon name={MARKS[index % MARKS.length] ?? 'zap'} size={40} />
+                  </span>
+                </>
+              ))}
+            </span>
+          ))
+        }
+      </div>
+    </div>
+    <p class="sr-only">{words.join(', ')}</p>
+
+    <ul class="scatter-band" aria-hidden="true">
+      {SCATTER.map((name, index) => <li class:list={['bob-icon', `n${index + 1}`]}><Icon name={name} size={24} /></li>)}
+    </ul>
+
+    <button
+      type="button"
+      class="band-pause inline-flex size-11 items-center justify-center rounded-full bg-[#1d2306] text-[#e3f76a]"
+      aria-pressed="false"
+      aria-label={dict.cta.pauseMotion}
+      data-tooltip={dict.cta.pauseMotion}
+      data-motion-pause
+    >
+      <Icon name="pause" size={16} class="motion-icon-pause" />
+      <Icon name="play" size={16} class="motion-icon-play" />
+    </button>
+  </div>
+</section>
+
+
+<style>
+  .band-lime {
+    background-color: #e3f76a;
+    color: #1d2306;
+  }
+  .ticker {
+    overflow: hidden;
+  }
+  .ticker-track {
+    display: flex;
+    width: max-content;
+  }
+  .ticker-set {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+  }
+  .ticker-word {
+    font-size: clamp(3.5rem, 11vw, 9rem);
+    font-weight: 700;
+    letter-spacing: -0.05em;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .ticker-mark {
+    display: inline-flex;
+    width: 4.5rem;
+    height: 4.5rem;
+    align-items: center;
+    justify-content: center;
+    margin-inline: 2rem;
+    border-radius: 1.25rem;
+    background-color: #1d2306;
+    color: #e3f76a;
+    transform: rotate(-8deg);
+  }
+  .scatter-band {
+    position: relative;
+    height: 6rem;
+    margin-top: 2rem;
+  }
+  .bob-icon {
+    position: absolute;
+    display: inline-flex;
+    width: 3rem;
+    height: 3rem;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid #1d2306;
+    border-radius: 999px;
+    background-color: #f2fbb8;
+  }
+  .n1 { left: 6%; top: 1rem; }
+  .n2 { left: 16%; top: 3rem; }
+  .n3 { left: 27%; top: 0.5rem; }
+  .n4 { left: 38%; top: 2.75rem; }
+  .n5 { left: 49%; top: 0; }
+  .n6 { left: 60%; top: 2.5rem; }
+  .n7 { left: 71%; top: 0.75rem; }
+  .n8 { left: 81%; top: 3rem; }
+  .n9 { left: 90%; top: 1rem; }
+  /* Phones keep every other icon, so they never overlap. */
+  @media (width < 40rem) {
+    .n2, .n4, .n6, .n8 {
+      display: none;
+    }
+    .n7 {
+      left: 62%;
+    }
+    .n9 {
+      left: 80%;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ticker-track {
+      animation: ticker 32s linear infinite;
+    }
+    .bob-icon {
+      animation: bob-float 3.2s ease-in-out infinite alternate;
+    }
+    .n2, .n5, .n8 { animation-delay: -1.2s; }
+    .n3, .n6, .n9 { animation-delay: -2.1s; }
+  }
+  :global([data-motion-paused]) .ticker-track,
+  :global([data-motion-paused]) .bob-icon {
+    animation-play-state: paused;
+  }
+  @keyframes ticker {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes bob-float {
+    to {
+      transform: translateY(-0.6rem) rotate(6deg);
+    }
+  }
+
+
+  /* Pinned to the band's corner; [data-tooltip] alone would make it position: relative. */
+  .band-pause {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+  }
+  @media (width >= 40rem) {
+    .band-pause {
+      right: 1.5rem;
+      bottom: 1.5rem;
+    }
+  }
+
+  /* The pause button swaps its icon (Icon renders its own svg, outside this scope). */
+  :global(.motion-icon-play) {
+    display: none;
+  }
+  [aria-pressed='true'] :global(.motion-icon-play) {
+    display: block;
+  }
+  [aria-pressed='true'] :global(.motion-icon-pause) {
+    display: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-motion-pause] {
+      display: none;
+    }
+  }
+</style>

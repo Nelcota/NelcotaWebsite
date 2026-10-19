@@ -1,0 +1,32 @@
+---
+import Mascot from './Mascot.astro';
+
+/**
+ * The Nelcota app icon: the mascot on a rounded forest-green square, the same
+ * lockup as tela.nelcota.com. Decorative: it always sits next to the name.
+ */
+interface Props {
+  /** Square side in px (the mascot inside is about 70% of it). */
+  size?: 32 | 40;
+  class?: string;
+}
+const { size = 32, class: className } = Astro.props;
+const SQUARE: Readonly<Record<32 | 40, string>> = { 32: 'size-8 rounded-[0.625rem]', 40: 'size-10 rounded-xl' };
+const INNER: Readonly<Record<32 | 40, 20 | 28>> = { 32: 20, 40: 28 };
+---
+
+<span
+  class:list={['brand-mark inline-flex shrink-0 items-center justify-center', SQUARE[size], className]}
+  aria-hidden="true"
+>
+  <Mascot size={INNER[size]} />
+</span>
+
+<style>
+  .brand-mark {
+    background-color: #1d5c39;
+    box-shadow:
+      inset 0 1px 0 #ffffff26,
+      0 1px 2px #0b0d0c33;
+  }
+</style>

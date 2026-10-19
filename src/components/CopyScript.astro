@@ -1,0 +1,11 @@
+---
+/**
+ * The copy-button behaviour. CopyButton and the docs shell both render this
+ * component instead of importing the script themselves: with a single importer
+ * Astro inlines it, rather than splitting it into a chained chunk request.
+ */
+---
+
+<script>
+  import '../scripts/copy-button.ts';
+</script>

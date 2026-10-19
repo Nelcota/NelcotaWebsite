@@ -1,0 +1,113 @@
+---
+import { type Locale, t } from '../../i18n/utils.ts';
+import BrandMark from '../BrandMark.astro';
+import Mark, { brand, type MarkSpec } from '../Mark.astro';
+import Title from './Title.astro';
+
+/**
+ * "Works with your stack": a dock of app-icon tiles with Nelcota in the middle
+ * (the reference's integrations dock). Tiles grow under the pointer like a
+ * dock (CSS only). Every logo is something the product really supports:
+ * the TypeScript and Rust SDKs, curl, Docker or systemd on Linux, source
+ * builds on macOS and Windows, GitHub releases, PostgreSQL.
+ */
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const dock = t(locale).landing.dock;
+
+const LEFT: ReadonlyArray<{ name: string; mark: MarkSpec }> = [
+  { name: 'TypeScript', mark: brand('typescript') },
+  { name: 'Rust', mark: brand('rust') },
+  { name: 'curl', mark: brand('curl') },
+  { name: 'Docker', mark: brand('docker') },
+];
+const RIGHT: ReadonlyArray<{ name: string; mark: MarkSpec }> = [
+  { name: 'PostgreSQL', mark: brand('postgresql') },
+  { name: 'Linux', mark: brand('linux') },
+  { name: 'macOS', mark: brand('apple') },
+  { name: 'Windows', mark: brand('windows') },
+];
+---
+
+<section class="overflow-x-clip py-12 md:py-20" aria-labelledby="dock-title">
+  <div class="mx-auto max-w-[90rem] px-5 text-center sm:px-8">
+    <ul class="dock mx-auto" aria-label={dock.title.join(' ')} data-fade>
+      {
+        LEFT.map((item) => (
+          <li class="dock-tile">
+            <Mark mark={item.mark} size={26} />
+            <span class="sr-only">{item.name}</span>
+          </li>
+        ))
+      }
+      <li class="dock-tile dock-main" aria-hidden="true">
+        <BrandMark size={40} />
+      </li>
+      {
+        RIGHT.map((item) => (
+          <li class="dock-tile">
+            <Mark mark={item.mark} size={26} />
+            <span class="sr-only">{item.name}</span>
+          </li>
+        ))
+      }
+    </ul>
+    <Title id="dock-title" parts={dock.title} class="mt-14" />
+    <p class="mx-auto mt-5 max-w-lg leading-relaxed text-pretty text-muted" data-fade>{dock.body}</p>
+  </div>
+</section>
+
+<style>
+  /* Never wider than the screen: on phones the dock scrolls sideways inside itself. */
+  .dock {
+    display: flex;
+    width: fit-content;
+    max-width: 100%;
+    align-items: flex-end;
+    gap: 0.5rem;
+    padding: 0.6rem;
+    overflow-x: auto;
+    border-radius: 1.5rem;
+    background-color: var(--color-surface);
+    box-shadow: 0 18px 40px -24px #0b0d0c66;
+    scrollbar-width: none;
+  }
+  /* Positioned so the sr-only names stay inside the tile, not out past the screen edge. */
+  .dock-tile {
+    position: relative;
+    display: inline-flex;
+    width: 3.25rem;
+    height: 3.25rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem;
+    background-color: var(--color-canvas);
+    transition: transform 200ms var(--ease-soft);
+    transform-origin: bottom center;
+  }
+  .dock-main {
+    width: 4.5rem;
+    height: 4.5rem;
+    background-color: transparent;
+  }
+  /* Phones keep the six tiles nearest Nelcota, so the dock fits the screen. */
+  @media (width < 40rem) {
+    .dock-tile:nth-child(1),
+    .dock-tile:nth-child(9) {
+      display: none;
+    }
+  }
+  /* The dock magnifies the tile under the pointer and, a little, its neighbours. */
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .dock-tile:hover {
+      transform: scale(1.35);
+    }
+    .dock-tile:hover + .dock-tile,
+    .dock-tile:has(+ .dock-tile:hover) {
+      transform: scale(1.15);
+    }
+  }
+</style>

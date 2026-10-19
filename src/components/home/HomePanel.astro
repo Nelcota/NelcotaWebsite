@@ -1,0 +1,67 @@
+---
+import overviewDark from '../../assets/screens/nelcota-overview-dark.png';
+import overviewLight from '../../assets/screens/nelcota-overview-light.png';
+import tablesDark from '../../assets/screens/nelcota-table-dark.png';
+import tablesLight from '../../assets/screens/nelcota-table-light.png';
+import { type Locale, t } from '../../i18n/utils.ts';
+import { docHref } from '../../lib/docs/links.ts';
+import Icon from '../Icon.astro';
+import Screenshot from '../Screenshot.astro';
+import Eyebrow from './Eyebrow.astro';
+import Title from './Title.astro';
+
+/**
+ * The real admin panel as a wide media card that grows towards the screen
+ * edges as it scrolls in (data-panel-frame), with arrows to switch between the
+ * Overview and Tables screens (carousel.ts) and a "Panel guide" pill in the
+ * corner, like the "Watch" button of the reference.
+ */
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const dict = t(locale);
+const panel = dict.landing.panel;
+const [overviewLabel, tablesLabel] = panel.screens;
+
+const SCREENS = [
+  { light: overviewLight, dark: overviewDark, label: overviewLabel, alt: dict.showcase.overviewAlt },
+  { light: tablesLight, dark: tablesDark, label: tablesLabel, alt: dict.showcase.tableAlt },
+] as const;
+---
+
+<section id="panel" class="scroll-mt-24 overflow-x-clip pt-24 pb-24 md:pt-32 md:pb-32" aria-labelledby="panel-title">
+  <div class="mx-auto max-w-[90rem] px-5 sm:px-8">
+    <Eyebrow parts={panel.eyebrow} />
+    <Title id="panel-title" parts={panel.title} class="mt-5" />
+
+    <div class="panel-frame relative mt-12 overflow-hidden rounded-[2rem] bg-pop-ink p-2 sm:p-3" data-carousel data-panel-frame>
+      <ul class="flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none]" data-carousel-track>
+        {
+          SCREENS.map((screen) => (
+            <li class="w-full shrink-0 snap-center">
+              <figure>
+                <Screenshot light={screen.light} dark={screen.dark} alt={screen.alt} sizes="(min-width: 90rem) 86rem, calc(100vw - 3.5rem)" class="rounded-[1.4rem] border-0" />
+                <figcaption class="sr-only">{screen.label}</figcaption>
+              </figure>
+            </li>
+          ))
+        }
+      </ul>
+
+      <a href={docHref('panel', locale)} class="absolute bottom-6 left-6 inline-flex h-9 items-center gap-1.5 rounded-full bg-white px-4 text-xs font-semibold text-[#111213] shadow-lg sm:bottom-8 sm:left-8">
+        <Icon name="book" size={14} />
+        {dict.panel.docs}
+      </a>
+      <div class="absolute right-6 bottom-6 flex gap-2 sm:right-8 sm:bottom-8">
+        <button type="button" class="carousel-arrow" aria-label={panel.prev} data-carousel-prev>
+          <Icon name="chevronRight" size={16} class="rotate-180" />
+        </button>
+        <button type="button" class="carousel-arrow" aria-label={panel.next} data-carousel-next>
+          <Icon name="chevronRight" size={16} />
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+

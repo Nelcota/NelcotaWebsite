@@ -1,0 +1,15 @@
+---
+import type { TwoTone } from '../../i18n/types.ts';
+
+/** Small caps label over a heading; the second word takes the brand color ("GET MORE CLOSER"). */
+interface Props {
+  parts: TwoTone;
+  class?: string;
+}
+const { parts, class: className } = Astro.props;
+const [plain, accent] = parts;
+---
+
+<p class:list={['eyebrow', className]} data-fade>
+  {plain} <span class="eyebrow-accent">{accent}</span>
+</p>

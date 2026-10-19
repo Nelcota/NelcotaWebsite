@@ -1,0 +1,74 @@
+---
+import { type Locale, t } from '../../i18n/utils.ts';
+import Icon from '../Icon.astro';
+import Eyebrow from './Eyebrow.astro';
+import Title from './Title.astro';
+
+/**
+ * "Free. For real.": the reference's membership cards, reused for what Nelcota
+ * actually costs: nothing for the license, your own server for hosting and no
+ * per-request pricing. The middle card is highlighted. Hosting sizes come from
+ * docs/deploy.md (2–3 small projects on a 1 GB VPS).
+ */
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const free = t(locale).landing.free;
+---
+
+<section class="overflow-x-clip py-12 md:py-20" aria-labelledby="free-title">
+  <div class="mx-auto grid max-w-[90rem] items-center gap-14 px-5 sm:px-8 lg:grid-cols-[0.8fr_1.2fr]">
+    <div>
+      <span class="flex size-10 items-center justify-center rounded-xl bg-ink text-canvas" aria-hidden="true"><Icon name="scale" size={20} /></span>
+      <Eyebrow parts={free.eyebrow} class="mt-6" />
+      <Title id="free-title" parts={free.title} class="mt-4" />
+      <p class="mt-5 max-w-md leading-relaxed text-pretty text-muted" data-fade>{free.body}</p>
+    </div>
+
+    <ul class="plans" data-stagger>
+      {
+        free.plans.map((plan, index) => (
+          <li class:list={['plan', `p${index + 1}`]}>
+            <p class="flex items-center justify-between gap-2 text-sm font-semibold">
+              {plan.label}
+              {plan.badge && <span class="rounded-full bg-white px-2 py-0.5 text-[0.6875rem] font-bold text-[#111213]">{plan.badge}</span>}
+            </p>
+            <p class="mt-6 text-[clamp(2rem,4vw,2.75rem)] leading-none font-semibold tracking-[-0.04em]">{plan.price}</p>
+            {plan.unit.length > 0 && <p class="mt-1 text-sm font-medium opacity-80">{plan.unit}</p>}
+            <p class="mt-6 text-[0.875rem] leading-relaxed">{plan.body}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .plans {
+    display: grid;
+    gap: 1rem;
+  }
+  @media (width >= 48rem) {
+    .plans {
+      grid-template-columns: repeat(3, 1fr);
+      align-items: center;
+    }
+    .p1 { transform: rotate(-3deg) translateY(1rem); }
+    .p3 { transform: rotate(3deg) translateY(1rem); }
+    .p2 { z-index: 1; transform: translateY(-0.5rem); }
+  }
+  .plan {
+    min-height: 15rem;
+    padding: 1.5rem;
+    border: 1px solid #0b0d0c10;
+    border-radius: 1.5rem;
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    box-shadow: 0 24px 48px -28px #0b0d0c66;
+  }
+  .p2 {
+    background-color: #ff6b3d;
+    color: #1f0b04;
+  }
+</style>

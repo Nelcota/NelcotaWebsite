@@ -1,0 +1,109 @@
+---
+import { Picture } from 'astro:assets';
+import mascotWave from '../../assets/mascot/wave.webp';
+import { type Locale, t } from '../../i18n/utils.ts';
+import { docHref } from '../../lib/docs/links.ts';
+import { REPO_URL } from '../../lib/site.ts';
+import Icon from '../Icon.astro';
+import Eyebrow from './Eyebrow.astro';
+import Title from './Title.astro';
+
+/**
+ * The closing pair of big cards (the reference's "Meets new people" and
+ * "Archive of new arts"): the documentation on a forest-green card with the
+ * waving mascot, and the code on a white card with a large code motif.
+ */
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const [docs, code] = t(locale).landing.duo;
+---
+
+<section class="px-3 pb-10 sm:px-4" data-hides-sticky-cta aria-label={`${docs.title.join(' ')} · ${code.title.join(' ')}`}>
+  <div class="mx-auto grid max-w-[90rem] gap-3 sm:gap-4 lg:grid-cols-2">
+    <article class="duo duo-docs" data-fade>
+      <Picture src={mascotWave} formats={['avif', 'webp']} widths={[220, 440]} sizes="220px" alt="" loading="lazy" class="duo-art h-auto w-[8.5rem] sm:w-[13.75rem]" />
+      <div class="relative">
+        <Eyebrow parts={docs.eyebrow} class="duo-eyebrow" />
+        <Title parts={docs.title} as="h2" size="card" tone="ink" class="duo-title mt-3" />
+        <p class="mt-3 max-w-sm text-[0.9375rem] leading-relaxed">{docs.body}</p>
+        <a href={docHref('index', locale)} class="mt-6 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-white px-5 text-sm font-semibold text-[#111213]">
+          {docs.cta}
+          <Icon name="arrow" size={15} />
+        </a>
+      </div>
+    </article>
+
+    <article class="duo duo-code" data-fade>
+      <span class="duo-motif" aria-hidden="true"></span>
+      <div class="relative">
+        <Eyebrow parts={code.eyebrow} />
+        <Title parts={code.title} as="h2" size="card" tone="soft" class="mt-3" />
+        <p class="mt-3 max-w-sm text-[0.9375rem] leading-relaxed text-muted">{code.body}</p>
+        <a href={REPO_URL} rel="noopener" class="btn btn-primary mt-6">
+          <Icon name="github" size={16} />
+          {code.cta}
+        </a>
+      </div>
+    </article>
+  </div>
+</section>
+
+<style>
+  /* On phones the top padding leaves room for the art, so it never covers the text. */
+  .duo {
+    position: relative;
+    display: flex;
+    min-height: 26rem;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+    padding: 10rem 2rem 2rem;
+    border-radius: 2rem;
+  }
+  @media (width >= 40rem) {
+    .duo {
+      padding: 2.5rem;
+    }
+  }
+  .duo-docs {
+    background-color: #1b7640;
+    color: #f3f8f4;
+  }
+  /* The heading tokens are ink-on-canvas: on the green card the text follows the card. */
+  .duo-docs :global(.duo-title),
+  .duo-docs :global(.duo-title span) {
+    color: inherit;
+  }
+  .duo-docs :global(.eyebrow),
+  .duo-docs :global(.eyebrow-accent) {
+    color: #c9f2d6;
+  }
+  .duo-art {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    transform: rotate(8deg);
+  }
+  .duo-code {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-line);
+  }
+  /* Small enough to stay in the empty top corner, clear of the heading. */
+  .duo-motif {
+    position: absolute;
+    top: 1.5rem;
+    right: 2rem;
+    color: var(--color-raised);
+    font-family: var(--font-mono);
+    font-size: clamp(3rem, 6vw, 5rem);
+    font-weight: 700;
+    line-height: 0.95;
+    white-space: pre;
+  }
+  /* Drawn as generated content: it is a picture, not text to read or contrast-check. */
+  .duo-motif::before {
+    content: "{ }\A</>";
+  }
+</style>

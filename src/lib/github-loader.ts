@@ -1,83 +1,65 @@
-import type { Loader } from 'astro/loaders';
-import { z } from 'astro/zod';
-import { fetchOrgSnapshot, type GithubSnapshot } from './github.ts';
+import type { Loader, LoaderContext } from 'astro/loaders';
+import { errorMessage, fetchRepoSnapshot, isGithubUnavailable } from './github.ts';
+import {
+  type GithubRepoEntry,
+  type GithubSnapshot,
+  githubRepoEntrySchema,
+  snapshotEntry,
+} from './github-schema.ts';
 
-export const githubReleaseSchema = z.object({
-  tag: z.string(),
-  name: z.string().nullable(),
-  url: z.url(),
-  publishedAt: z.string().nullable(),
-});
-
-export const githubRepoSchema = z.object({
-  name: z.string(),
-  url: z.url(),
-  description: z.string().nullable(),
-  homepage: z.string().nullable(),
-  stars: z.number().int().nonnegative(),
-  forks: z.number().int().nonnegative(),
-  openIssues: z.number().int().nonnegative(),
-  language: z.string().nullable(),
-  license: z.string().nullable(),
-  pushedAt: z.string(),
-  defaultBranch: z.string(),
-  archived: z.boolean(),
-  latestRelease: githubReleaseSchema.nullable(),
-  /** ISO timestamp of the data; the snapshot date when the API was unavailable. */
-  fetchedAt: z.string(),
-  source: z.enum(['api', 'snapshot']),
-});
-
-export type GithubRepoEntry = z.infer<typeof githubRepoSchema>;
+export type { GithubRelease, GithubRepoEntry } from './github-schema.ts';
 
 export interface GithubLoaderOptions {
-  org: string;
-  /** Committed fallback used when the API fails or is rate limited. */
-  snapshot: GithubSnapshot;
-  token?: string | undefined;
+  /** "owner/name" */
+  readonly repo: string;
+  /** Committed fallback used when the API fails or is rate limited (already validated). */
+  readonly snapshot: GithubSnapshot;
+  readonly token?: string | undefined;
+}
+
+const ENTRY_ID = 'repo';
+
+/** Live data from the API, or the snapshot when GitHub or the network fails. */
+async function resolveEntry(
+  { repo, snapshot, token }: GithubLoaderOptions,
+  logger: LoaderContext['logger'],
+): Promise<GithubRepoEntry> {
+  try {
+    const data = await fetchRepoSnapshot(repo, {
+      token,
+      previous: snapshot,
+      onWarning: (message) => logger.warn(message),
+    });
+    logger.info(`Fetched ${repo} and ${data.repo.releases.length} releases from GitHub.`);
+    return { ...data.repo, fetchedAt: data.fetchedAt, source: 'api' };
+  } catch (error) {
+    if (!isGithubUnavailable(error)) throw error;
+
+    logger.warn(
+      `GitHub API unavailable (${errorMessage(error)}). Falling back to src/data/github-snapshot.json ` +
+        `from ${snapshot.fetchedAt}. Run \`pnpm snapshot\` to refresh it.`,
+    );
+    return snapshotEntry(snapshot);
+  }
 }
 
 /**
- * Content Layer loader: one entry per public repository of the organization.
- * The build never breaks on network trouble: it falls back to the committed
- * snapshot and logs a warning.
+ * Content Layer loader with a single entry: the Nelcota repository and its
+ * recent releases. The build never breaks on network trouble: it falls back to
+ * the committed snapshot and logs a warning.
  */
-export function githubLoader({ org, snapshot, token }: GithubLoaderOptions): Loader {
+export function githubLoader(options: GithubLoaderOptions): Loader {
   return {
     name: 'nelcota-github-loader',
-    schema: githubRepoSchema,
+    schema: githubRepoEntrySchema,
     async load({ store, logger, parseData, generateDigest, meta }) {
-      let data: GithubSnapshot = snapshot;
-      let source: GithubRepoEntry['source'] = 'snapshot';
-
-      try {
-        data = await fetchOrgSnapshot(org, {
-          token,
-          previous: snapshot,
-          onWarning: (message) => logger.warn(message),
-        });
-        source = 'api';
-        logger.info(
-          `Fetched ${data.repos.length} public repositories of ${org} from the GitHub API.`,
-        );
-      } catch (error) {
-        const reason = error instanceof Error ? error.message : String(error);
-        logger.warn(
-          `GitHub API unavailable (${reason}). Falling back to src/data/github-snapshot.json ` +
-            `from ${snapshot.fetchedAt}. Run \`pnpm snapshot\` to refresh it.`,
-        );
-      }
+      const data = await resolveEntry(options, logger);
 
       store.clear();
-      for (const repo of data.repos) {
-        const entry = await parseData({
-          id: repo.name,
-          data: { ...repo, fetchedAt: data.fetchedAt, source },
-        });
-        store.set({ id: repo.name, data: entry, digest: generateDigest(entry) });
-      }
+      const entry = await parseData({ id: ENTRY_ID, data: { ...data } });
+      store.set({ id: ENTRY_ID, data: entry, digest: generateDigest(entry) });
 
-      meta.set('source', source);
+      meta.set('source', data.source);
       meta.set('fetchedAt', data.fetchedAt);
     },
   };

@@ -1,24 +1,70 @@
 ---
 import { type Locale, t } from '../i18n/utils.ts';
+import CopyScript from './CopyScript.astro';
 import Icon from './Icon.astro';
 
 interface Props {
   /** id of the element whose textContent is copied */
   target: string;
   locale: Locale;
+  /** `inverse` for buttons on the always-dark code block of the mint CTA band. */
+  tone?: Tone;
+  /** id of the caption naming what is copied, so the button is not just "Copy". */
+  describedBy?: string | undefined;
+  /** In the flow of its container instead of pinned to the top-right corner. */
+  inline?: boolean;
 }
-const { target, locale } = Astro.props;
+
+type Tone = 'default' | 'inverse' | 'primary';
+
+const TONE_CLASS: Readonly<Record<Tone, string>> = {
+  default: 'text-faint hover:bg-raised hover:text-ink',
+  inverse: 'text-cta-muted hover:bg-white/10 hover:text-white',
+  /** A full primary button, for the hero's install bar. */
+  primary: 'btn btn-primary',
+};
+
+/** Size and type per tone: the small mono chip, or a regular pill button. */
+const BASE_CLASS: Readonly<Record<Tone, string>> = {
+  default: 'hit-area h-7 rounded-[var(--radius-control)] px-2 font-mono text-xs',
+  inverse: 'hit-area h-7 rounded-[var(--radius-control)] px-2 font-mono text-xs',
+  primary: 'h-11 px-5 text-sm',
+};
+
+const { target, locale, tone = 'default', describedBy, inline = false } = Astro.props;
+const toneClass = TONE_CLASS[tone];
 const dict = t(locale);
+
 ---
 
 <button
   type="button"
   data-copy={target}
-  data-copied={dict.build.copied}
-  data-failed={dict.build.copyFailed}
-  class="absolute top-2 right-2 inline-flex h-8 items-center gap-1.5 rounded-full border border-line bg-surface px-3 text-xs font-medium text-muted transition-colors hover:text-ink"
+  data-copied={dict.code.copied}
+  data-failed={dict.code.copyFailed}
+  aria-describedby={describedBy}
+  class:list={[
+    'inline-flex shrink-0 items-center gap-1.5 transition-colors',
+    BASE_CLASS[tone],
+    inline ? 'relative' : 'absolute top-2 right-3',
+    toneClass,
+  ]}
 >
-  <Icon name="copy" size={14} class="copy-icon-idle" />
-  <Icon name="check" size={14} class="copy-icon-done hidden" />
-  <span data-copy-label>{dict.build.copy}</span>
+  <Icon name="copy" size={13} class="copy-icon-idle" />
+  <Icon name="check" size={13} class="copy-icon-done hidden" />
+  <span data-copy-label>{dict.code.copy}</span>
 </button>
+
+<CopyScript />
+
+<style>
+  [data-state='done'] .copy-icon-idle {
+    display: none;
+  }
+  [data-state='done'] .copy-icon-done {
+    display: block;
+  }
+  [data-state='done']:not(.btn-primary) {
+    color: var(--color-mint-ink);
+  }
+</style>

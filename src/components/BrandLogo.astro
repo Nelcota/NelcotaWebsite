@@ -1,0 +1,43 @@
+---
+import { type BrandName, brandFill, brandSymbolId } from '../lib/brand-logos.ts';
+import { SPRITE_URL } from '../lib/sprite.ts';
+
+export type { BrandName };
+
+/**
+ * An official brand mark. The path data lives in the shared sprite file
+ * (src/lib/sprite.ts); this only references it, so a logo costs a few
+ * bytes of HTML wherever it appears.
+ */
+
+/**
+ * Brand colors too dark for the graphite background get a lighter shade of the
+ * same hue in dark mode (via currentColor, since the CSP forbids inline styles).
+ */
+const DARK_MODE_TINTS: Partial<Record<BrandName, string>> = {
+  postgresql: 'text-[light-dark(#4169E1,#8DA9FF)]',
+};
+
+interface Props {
+  name: BrandName;
+  /** Accessible name; omit when a visible label sits next to the logo (then it is hidden from AT). */
+  alt?: string;
+  size?: number;
+  class?: string;
+}
+const { name, alt, size = 18, class: className } = Astro.props;
+const tint = DARK_MODE_TINTS[name];
+---
+
+<svg
+  role={alt ? 'img' : undefined}
+  aria-label={alt}
+  aria-hidden={alt ? undefined : 'true'}
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill={brandFill(name)}
+  class:list={[tint, className]}
+>
+  <use href={`${SPRITE_URL}#${brandSymbolId(name)}`} />
+</svg>

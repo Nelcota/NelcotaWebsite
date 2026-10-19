@@ -1,0 +1,42 @@
+---
+import type { Locale } from '../i18n/utils.ts';
+import type { CodeLang } from '../lib/highlight.ts';
+import type { CodeBlock } from '../lib/snippets.ts';
+import CopyButton from './CopyButton.astro';
+import Mark, { brand, icon, type MarkSpec } from './Mark.astro';
+
+/**
+ * A highlighted snippet: a header naming the language (and the file, when it
+ * has one), the code, and a copy button. Source files get line numbers;
+ * terminal sessions do not. Token CSS is emitted once by the page.
+ */
+interface Props {
+  block: CodeBlock;
+  locale: Locale;
+  class?: string;
+}
+const { block, locale, class: className } = Astro.props;
+
+const LANGUAGE: Readonly<Record<CodeLang, { label: string; mark: MarkSpec; numbered: boolean }>> = {
+  shellscript: { label: 'Terminal', mark: icon('terminal'), numbered: false },
+  sql: { label: 'SQL', mark: brand('postgresql'), numbered: true },
+  typescript: { label: 'TypeScript', mark: brand('typescript'), numbered: true },
+  rust: { label: 'Rust', mark: brand('rust'), numbered: true },
+  toml: { label: 'TOML', mark: icon('code'), numbered: true },
+  json: { label: 'JSON', mark: icon('code'), numbered: false },
+  http: { label: 'HTTP', mark: icon('code'), numbered: false },
+};
+const language = LANGUAGE[block.lang];
+const isTitleRedundant = block.title.toLowerCase() === language.label.toLowerCase();
+---
+
+<figure class:list={['relative bg-code', className]}>
+  <figcaption id={`${block.id}-caption`} class="flex h-11 items-center gap-2 border-b border-line pr-24 pl-4 text-xs">
+    <Mark mark={language.mark} size={14} />
+    <span class="font-medium text-ink">{language.label}</span>
+    {!isTitleRedundant && <span class="truncate font-mono text-faint">{block.title}</span>}
+  </figcaption>
+  {/* biome-ignore lint/a11y/noNoninteractiveTabindex: scrollable code must be reachable by keyboard */}
+  <pre class:list={['code-block px-5 py-4 text-ink', language.numbered && 'code-numbered']} tabindex="0"><code id={block.id} set:html={block.html} /></pre>
+  <CopyButton target={block.id} locale={locale} describedBy={`${block.id}-caption`} />
+</figure>

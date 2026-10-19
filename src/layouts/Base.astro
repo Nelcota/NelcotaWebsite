@@ -16,10 +16,11 @@ interface Props {
   noindex?: boolean;
   jsonLd?: Record<string, unknown> | undefined;
   fetchedAt?: string | null;
-  source?: 'api' | 'snapshot' | null;
+  /** Locale-independent page path ('' for home), for canonical/hreflang and the language switch. */
+  path?: string;
 }
 
-const { locale, noindex = false, jsonLd, fetchedAt = null, source = null } = Astro.props;
+const { locale, noindex = false, jsonLd, fetchedAt = null, path = '' } = Astro.props;
 const dict = t(locale);
 const title = Astro.props.title ?? dict.meta.title;
 const description = Astro.props.description ?? dict.meta.description;
@@ -30,7 +31,7 @@ const appleTouchIcon = await getImage({ src: mascot, width: 180, height: 180, fo
 <html lang={bcp47[locale]}>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     {/* Applies the stored theme before first paint; hashed in the CSP (see astro.config.ts). */}
     <script is:inline set:html={themeInit} />
     <title>{title}</title>
@@ -41,27 +42,31 @@ const appleTouchIcon = await getImage({ src: mascot, width: 180, height: 180, fo
       ogAlt={dict.meta.ogAlt}
       noindex={noindex}
       jsonLd={jsonLd}
+      path={path}
     />
-    <Font cssVariable="--font-inter" preload />
+    <Font cssVariable="--font-manrope" preload />
     <Font cssVariable="--font-jetbrains-mono" />
-    <link rel="icon" href={withBase('favicon.svg')} type="image/svg+xml" />
+    <link rel="icon" href={withBase('favicon.png')} type="image/png" sizes="192x192" />
     <link rel="apple-touch-icon" href={appleTouchIcon.src} />
     <link rel="manifest" href={withBase('manifest.webmanifest')} />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f6faf7" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d1310" />
+    <link rel="stylesheet" href={withBase('print.css')} media="print" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f5f5f4" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#101113" />
     <meta name="color-scheme" content="light dark" />
   </head>
   <body class="flex min-h-dvh flex-col">
     <a
       href="#main"
-      class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-mint focus:px-4 focus:py-2 focus:font-semibold focus:text-on-mint"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-(--z-skip-link) focus:rounded-[var(--radius-control)] focus:bg-ink focus:px-4 focus:py-2 focus:font-medium focus:text-on-ink"
     >
       {dict.a11y.skipToContent}
     </a>
-    <Header locale={locale} />
-    <main id="main" class="flex-1 pt-16">
+    <Header locale={locale} path={path} />
+    <main id="main" class="flex-1 overflow-x-clip pt-[calc(4rem+env(safe-area-inset-top))]">
       <slot />
     </main>
-    <Footer locale={locale} fetchedAt={fetchedAt} source={source} />
+    <p data-copy-status role="status" aria-live="polite" class="sr-only"></p>
+    <Footer locale={locale} fetchedAt={fetchedAt} />
   </body>
 </html>
+

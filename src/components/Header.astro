@@ -1,97 +1,151 @@
 ---
 import { getRelativeLocaleUrl } from 'astro:i18n';
 import { bcp47, type Locale, otherLocale, t } from '../i18n/utils.ts';
-import { ORG_URL, SITE_NAME } from '../lib/site.ts';
+import { docsIndexUrl } from '../lib/docs/links.ts';
+import { REPO_URL, SITE_NAME } from '../lib/site.ts';
+import BrandMark from './BrandMark.astro';
 import Icon from './Icon.astro';
-import Mascot from './Mascot.astro';
 import ThemeToggle from './ThemeToggle.astro';
 
+/**
+ * The top bar, gallery style: the app-icon logo on the left; small text links,
+ * language, theme and GitHub on the right. "Get started" carries a dot, the
+ * way the highlighted item does in the reference. Transparent over the page,
+ * it turns translucent with a hairline once the page scrolls (global.css).
+ * On phones the links move into a full-screen sheet. On the home page
+ * scroll-spy.ts marks the section being read.
+ */
 interface Props {
   locale: Locale;
+  path?: string;
 }
-const { locale } = Astro.props;
+const { locale, path = '' } = Astro.props;
 const dict = t(locale);
+const nav = dict.nav;
 const other = otherLocale(locale);
 const home = getRelativeLocaleUrl(locale);
-const switchUrl = getRelativeLocaleUrl(other);
+const switchUrl = getRelativeLocaleUrl(other, path);
+const isDocs = path.startsWith('docs');
 
-const anchors = [
-  { href: '#projects', label: dict.nav.projects },
-  { href: '#build', label: dict.nav.build },
-  { href: '#contribute', label: dict.nav.contribute },
+// In page order; the last two leave the home page.
+const links = [
+  { href: `${home}#how-it-works`, label: nav.howItWorks },
+  { href: `${home}#speed`, label: nav.speed },
+  { href: `${home}#security`, label: nav.security },
+  { href: `${home}#start`, label: nav.getStarted, isHighlight: true },
+  { href: getRelativeLocaleUrl(locale, 'compare/'), label: nav.compare, current: path.startsWith('compare') },
+  { href: docsIndexUrl(locale), label: nav.docs, current: isDocs },
 ];
+
+const iconButton =
+  'inline-flex size-11 items-center justify-center rounded-full text-muted transition-colors hover:bg-raised hover:text-ink lg:size-9';
 ---
 
-<header class="fixed inset-x-0 top-0 z-40 border-b border-line/70 bg-canvas/85 backdrop-blur-md">
-  <div class="container-page flex h-16 items-center gap-2">
-    <a href={home} class="flex items-center gap-2 rounded-full pr-2 font-semibold tracking-tight text-ink">
-      <Mascot size={30} />
+<header class="header-bar fixed inset-x-0 top-0 z-(--z-header) border-b border-transparent pt-[env(safe-area-inset-top)] backdrop-blur-md">
+  <div class="mx-auto flex h-16 w-full max-w-[90rem] items-center gap-2 px-5 sm:px-8">
+    <a href={home} class="flex h-11 shrink-0 items-center gap-2.5 text-[0.9375rem] font-semibold tracking-tight text-ink">
+      <BrandMark />
       <span>{SITE_NAME}</span>
     </a>
 
-    <nav aria-label={dict.a11y.mainNav} class="ml-4 hidden items-center gap-1 md:flex">
+    <nav aria-label={dict.a11y.mainNav} class="ml-auto hidden items-center gap-6 lg:flex">
       {
-        anchors.map((anchor) => (
+        links.map((link) => (
           <a
-            href={anchor.href}
-            class="rounded-full px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-raised hover:text-ink"
+            href={link.href}
+            aria-current={link.current ? 'page' : undefined}
+            data-spy
+            class="nav-link relative inline-flex items-center gap-1.5 py-2 text-[0.8125rem] font-medium whitespace-nowrap text-muted transition-colors hover:text-ink aria-[current]:text-ink"
           >
-            {anchor.label}
+            {link.isHighlight && <span class="size-1.5 rounded-full bg-ink" aria-hidden="true" />}
+            {link.label}
           </a>
         ))
       }
     </nav>
 
-    <div class="ml-auto flex items-center gap-1">
+    <div class="ml-auto flex items-center gap-1 lg:ml-6">
       <a
         href={switchUrl}
         hreflang={bcp47[other]}
+        data-locale-switch
         lang={bcp47[other]}
-        title={dict.nav.switchLocale}
-        class="inline-flex h-10 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-muted transition-colors hover:bg-raised hover:text-ink"
+        data-tooltip={nav.switchLocale}
+        class="inline-flex h-11 min-w-11 items-center justify-center rounded-full px-2.5 font-mono text-xs tracking-wider text-muted transition-colors hover:bg-raised hover:text-ink lg:h-9 lg:min-w-0"
       >
-        <Icon name="globe" size={18} />
-        <span>{dict.nav.switchLocaleShort}</span>
-        <span class="sr-only">: {dict.nav.switchLocale}</span>
+        <span>{nav.switchLocaleShort}</span>
+        <span class="sr-only">: {nav.switchLocale}</span>
+      </a>
+      <ThemeToggle label={dict.a11y.toggleTheme} class={iconButton} />
+      <a href={REPO_URL} rel="noopener" aria-label={nav.github} data-tooltip={nav.github} class:list={[iconButton, 'max-lg:hidden']}>
+        <Icon name="github" size={18} />
       </a>
 
-      <ThemeToggle label={dict.a11y.toggleTheme} />
-
-      <a
-        href={ORG_URL}
-        rel="me noopener"
-        aria-label={dict.nav.github}
-        title={dict.nav.github}
-        class="inline-flex size-10 items-center justify-center rounded-full text-muted transition-colors hover:bg-raised hover:text-ink"
-      >
-        <Icon name="github" />
-      </a>
-
-      <details class="relative md:hidden">
+      <details class="lg:hidden" data-mobile-menu>
         <summary
-          class="flex size-10 cursor-pointer list-none items-center justify-center rounded-full text-muted transition-colors hover:bg-raised hover:text-ink [&::-webkit-details-marker]:hidden"
-          aria-label={dict.nav.menu}
-          title={dict.nav.menu}
+          class:list={[iconButton, 'cursor-pointer list-none [&::-webkit-details-marker]:hidden']}
+          aria-label={nav.menu}
+          data-tooltip={nav.menu}
         >
-          <Icon name="menu" />
+          <Icon name="menu" size={18} class="menu-icon-open" />
+          <Icon name="x" size={18} class="menu-icon-close" />
         </summary>
-        <nav aria-label={dict.nav.menu} class="card absolute top-12 right-0 min-w-44 p-2">
-          <ul>
+        <nav
+          aria-label={nav.menu}
+          class="fixed inset-x-0 top-[calc(4rem+env(safe-area-inset-top))] bottom-0 overflow-y-auto overscroll-contain bg-canvas px-5 pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
+        >
+          <ul class="grid gap-1">
             {
-              anchors.map((anchor) => (
+              links.map((link) => (
                 <li>
                   <a
-                    href={anchor.href}
-                    class="block rounded-xl px-3 py-2 text-sm font-medium text-ink hover:bg-raised"
+                    href={link.href}
+                    aria-current={link.current ? 'page' : undefined}
+                    data-spy
+                    class="flex items-center gap-3 rounded-[var(--radius-card)] px-3 py-3.5 text-2xl font-semibold tracking-[-0.03em] text-ink hover:bg-raised aria-[current]:text-mint-ink"
                   >
-                    {anchor.label}
+                    {link.isHighlight && <span class="size-2 rounded-full bg-ink" aria-hidden="true" />}
+                    {link.label}
                   </a>
                 </li>
               ))
             }
+            <li>
+              <a href={REPO_URL} rel="noopener" class="flex items-center gap-3 rounded-[var(--radius-card)] px-3 py-3.5 text-2xl font-semibold tracking-[-0.03em] text-ink hover:bg-raised">
+                GitHub
+                <Icon name="external" size={18} class="text-faint" />
+              </a>
+            </li>
           </ul>
         </nav>
       </details>
     </div>
   </div>
 </header>
+
+<script>
+  import '../scripts/mobile-menu.ts';
+  import '../scripts/scroll-spy.ts';
+</script>
+
+<style>
+  /* Icon renders its own <svg>, outside this component's scope: target it globally. */
+  :global(.menu-icon-close) {
+    display: none;
+  }
+  [data-mobile-menu][open] :global(.menu-icon-open) {
+    display: none;
+  }
+  [data-mobile-menu][open] :global(.menu-icon-close) {
+    display: block;
+  }
+
+  /*
+   * The bar's backdrop-filter would make it the containing block of the fixed
+   * phone sheet (clipping it to the bar): drop the blur and go solid while open.
+   */
+  :global(.header-bar:has([data-mobile-menu][open])) {
+    backdrop-filter: none;
+    background-color: var(--color-canvas);
+  }
+</style>

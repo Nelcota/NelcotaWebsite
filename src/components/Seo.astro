@@ -1,7 +1,7 @@
 ---
 import { getAbsoluteLocaleUrl } from 'astro:i18n';
 import { bcp47, type Locale, locales, ogLocale } from '../i18n/utils.ts';
-import { withBase } from '../lib/site.ts';
+import { SITE_NAME, withBase } from '../lib/site.ts';
 
 interface Props {
   locale: Locale;
@@ -11,13 +11,15 @@ interface Props {
   /** Localized pages share the same path in every locale; 404 passes `noindex`. */
   noindex?: boolean;
   jsonLd?: Record<string, unknown> | undefined;
+  /** Locale-independent path of the page, without leading slash ('' for home). */
+  path?: string;
 }
-const { locale, title, description, ogAlt, noindex = false, jsonLd } = Astro.props;
+const { locale, title, description, ogAlt, noindex = false, jsonLd, path = '' } = Astro.props;
 
 const site = Astro.site ?? new URL('http://localhost:4321/');
-const canonical = new URL(getAbsoluteLocaleUrl(locale));
+const canonical = new URL(getAbsoluteLocaleUrl(locale, path));
 const ogImage = new URL(withBase(`og/${locale}.png`), site);
-const alternates = locales.map((alt) => ({ locale: alt, href: getAbsoluteLocaleUrl(alt) }));
+const alternates = locales.map((alt) => ({ locale: alt, href: getAbsoluteLocaleUrl(alt, path) }));
 const serialized = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : null;
 ---
 
@@ -27,10 +29,10 @@ const serialized = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : nu
   !noindex &&
     alternates.map((alt) => <link rel="alternate" hreflang={bcp47[alt.locale]} href={alt.href} />)
 }
-{!noindex && <link rel="alternate" hreflang="x-default" href={getAbsoluteLocaleUrl('en')} />}
+{!noindex && <link rel="alternate" hreflang="x-default" href={getAbsoluteLocaleUrl('en', path)} />}
 
 <meta property="og:type" content="website" />
-<meta property="og:site_name" content="Nelcota" />
+<meta property="og:site_name" content={SITE_NAME} />
 <meta property="og:locale" content={ogLocale[locale]} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />

@@ -5,6 +5,7 @@ import {
   type HighlighterGeneric,
   type ThemedTokenWithVariants,
 } from 'shiki';
+import { DARK_THEME, LIGHT_THEME } from './syntax-theme.ts';
 
 /**
  * Build-time syntax highlighting that emits classes instead of inline
@@ -12,17 +13,29 @@ import {
  * and switch theme with CSS alone via light-dark().
  */
 
-const THEMES = { light: 'vitesse-light', dark: 'vitesse-dark' } as const;
+const THEMES = { light: LIGHT_THEME, dark: DARK_THEME } as const;
 
-/** Code block backgrounds (must match --color-code in global.css). */
-const CODE_BG = { light: '#f3f8f5', dark: '#0b100d' } as const;
+/**
+ * The lowest-contrast code backgrounds in global.css (--color-code and the
+ * in-tile variant): tokens that pass on these pass on all of them.
+ */
+const CODE_BG = { light: '#ebebe9', dark: '#1a1b1e' } as const;
 const MIN_CONTRAST = 4.6;
+/** Upper bound on nudges, so a hopeless color cannot loop forever. */
+const MAX_CONTRAST_STEPS = 40;
+/** Fraction of the remaining distance to black/white covered per nudge. */
+const CONTRAST_STEP = 0.08;
+
+const HEX_RADIX = 16;
 
 type Rgb = [number, number, number];
 const hexToRgb = (hex: string): Rgb => {
   const value = hex.replace('#', '');
   const full = value.length === 3 ? [...value].map((c) => c + c).join('') : value.slice(0, 6);
-  return [0, 2, 4].map((i) => Number.parseInt(full.slice(i, i + 2), 16)) as Rgb;
+  const channels = [0, 2, 4].map((i) => Number.parseInt(full.slice(i, i + 2), HEX_RADIX));
+  if (!channels.every(Number.isFinite)) throw new RangeError(`Invalid hex color: "${hex}"`);
+
+  return channels as Rgb;
 };
 const rgbToHex = (rgb: Rgb) =>
   `#${rgb.map((c) => Math.round(c).toString(16).padStart(2, '0')).join('')}`;
@@ -47,8 +60,8 @@ function ensureContrast(hex: string, background: string, towards: 'black' | 'whi
   const bg = hexToRgb(background);
   let rgb = hexToRgb(hex);
   const target: Rgb = towards === 'black' ? [0, 0, 0] : [255, 255, 255];
-  for (let step = 0; step < 40 && contrast(rgb, bg) < MIN_CONTRAST; step += 1) {
-    rgb = rgb.map((c, i) => c + ((target[i] ?? 0) - c) * 0.08) as Rgb;
+  for (let step = 0; step < MAX_CONTRAST_STEPS && contrast(rgb, bg) < MIN_CONTRAST; step += 1) {
+    rgb = rgb.map((c, i) => c + ((target[i] ?? 0) - c) * CONTRAST_STEP) as Rgb;
   }
   return rgbToHex(rgb);
 }
@@ -57,15 +70,40 @@ const LANGS = [
   'rust',
   'shellscript',
   'toml',
+  'sql',
+  'http',
+  'json',
 ] as const satisfies readonly BundledLanguage[];
 export type CodeLang = (typeof LANGS)[number];
+
+/** Shiki FontStyle bit flags. */
+const FONT_STYLE_ITALIC = 1;
+const FONT_STYLE_BOLD = 2;
+/** Base for short generated class names (tk0, tk1, ... tkz, tk10). */
+const CLASS_RADIX = 36;
+
+/** `cat > file <<'SQL'` … `SQL`: the shell lines around it and the SQL inside, split on line boundaries. */
+const SQL_HEREDOC = /^([\s\S]*?<<'SQL')\n([\s\S]*?)\n(SQL(?:\n[\s\S]*)?)$/;
+
+export function splitSqlHeredoc(
+  code: string,
+): { before: string; body: string; after: string } | null {
+  const match = SQL_HEREDOC.exec(code);
+  if (match == null) return null;
+
+  const [, before, body, after] = match;
+  if (before == null || body == null || after == null) return null;
+
+  return { before, body, after };
+}
 
 type Highlighter = HighlighterGeneric<BundledLanguage, BundledTheme>;
 let highlighterPromise: Promise<Highlighter> | undefined;
 
 function getHighlighter(): Promise<Highlighter> {
   const promise =
-    highlighterPromise ?? createHighlighter({ themes: Object.values(THEMES), langs: [...LANGS] });
+    highlighterPromise ??
+    createHighlighter({ themes: [LIGHT_THEME, DARK_THEME], langs: [...LANGS] });
   highlighterPromise = promise;
   return promise;
 }
@@ -89,8 +127,22 @@ export class HighlightRegistry {
   readonly #classes = new Map<string, { name: string; style: TokenStyle }>();
 
   async render(code: string, lang: CodeLang): Promise<string> {
+    const heredoc = lang === 'shellscript' ? splitSqlHeredoc(code.trimEnd()) : null;
+    if (heredoc == null) return this.#renderLines(code.trimEnd(), lang);
+
+    // A shell heredoc of SQL would otherwise be one long string: color its body as SQL.
+    const parts = await Promise.all([
+      this.#renderLines(heredoc.before, 'shellscript'),
+      this.#renderLines(heredoc.body, 'sql'),
+      this.#renderLines(heredoc.after, 'shellscript'),
+    ]);
+
+    return parts.join('\n');
+  }
+
+  async #renderLines(code: string, lang: CodeLang): Promise<string> {
     const highlighter = await getHighlighter();
-    const tokens = highlighter.codeToTokensWithThemes(code.trimEnd(), { lang, themes: THEMES });
+    const tokens = highlighter.codeToTokensWithThemes(code, { lang, themes: THEMES });
     const lines = tokens.map(
       (line) => `<span class="ln">${line.map((token) => this.#span(token)).join('')}</span>`,
     );
@@ -101,20 +153,23 @@ export class HighlightRegistry {
     const text = escapeHtml(token.content);
     const light = token.variants.light?.color;
     const dark = token.variants.dark?.color;
-    if (!light || !dark || token.content.trim() === '') return text;
+    if (light == null || dark == null) return text;
+    if (light.length === 0 || dark.length === 0) return text;
+    if (token.content.trim().length === 0) return text;
+
     const fontStyle = token.variants.light?.fontStyle ?? 0;
     const style: TokenStyle = {
       light: ensureContrast(light.toLowerCase(), CODE_BG.light, 'black'),
       dark: ensureContrast(dark.toLowerCase(), CODE_BG.dark, 'white'),
-      italic: (fontStyle & 1) !== 0,
-      bold: (fontStyle & 2) !== 0,
+      italic: (fontStyle & FONT_STYLE_ITALIC) !== 0,
+      bold: (fontStyle & FONT_STYLE_BOLD) !== 0,
     };
     const key = `${style.light}|${style.dark}|${style.italic}|${style.bold}`;
-    let entry = this.#classes.get(key);
-    if (!entry) {
-      entry = { name: `tk${this.#classes.size.toString(36)}`, style };
-      this.#classes.set(key, entry);
-    }
+    const existing = this.#classes.get(key);
+    if (existing != null) return `<span class="${existing.name}">${text}</span>`;
+
+    const entry = { name: `tk${this.#classes.size.toString(CLASS_RADIX)}`, style };
+    this.#classes.set(key, entry);
     return `<span class="${entry.name}">${text}</span>`;
   }
 

@@ -26,33 +26,11 @@ export function otherLocale(locale: Locale): Locale {
   return locale === 'en' ? 'pt-br' : 'en';
 }
 
-const UNITS: ReadonlyArray<[Intl.RelativeTimeFormatUnit, number]> = [
-  ['year', 365 * 24 * 60 * 60],
-  ['month', 30 * 24 * 60 * 60],
-  ['week', 7 * 24 * 60 * 60],
-  ['day', 24 * 60 * 60],
-  ['hour', 60 * 60],
-  ['minute', 60],
-];
-
-/** "3 days ago" / "há 3 dias", computed once at build time. */
-export function formatRelative(iso: string, locale: Locale, now: Date = new Date()): string {
-  const seconds = Math.round((new Date(iso).getTime() - now.getTime()) / 1000);
-  const rtf = new Intl.RelativeTimeFormat(bcp47[locale], { numeric: 'auto' });
-  for (const [unit, size] of UNITS) {
-    if (Math.abs(seconds) >= size) {
-      return rtf.format(Math.round(seconds / size), unit);
-    }
-  }
-  return rtf.format(0, 'second');
-}
-
 export function formatDate(iso: string, locale: Locale): string {
-  return new Intl.DateTimeFormat(bcp47[locale], { dateStyle: 'long', timeZone: 'UTC' }).format(
-    new Date(iso),
-  );
-}
+  const date = new Date(iso);
+  if (!Number.isFinite(date.getTime())) throw new RangeError(`Invalid ISO date: "${iso}"`);
 
-export function formatNumber(value: number, locale: Locale): string {
-  return new Intl.NumberFormat(bcp47[locale]).format(value);
+  return new Intl.DateTimeFormat(bcp47[locale], { dateStyle: 'long', timeZone: 'UTC' }).format(
+    date,
+  );
 }

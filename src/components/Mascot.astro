@@ -1,38 +1,27 @@
 ---
 /**
- * Simplified vector mascot used for the header logo and the favicon:
- * a mint dome with two leaf tufts, two eyes and a smile.
+ * The official mascot from the admin panel (crates/admin/ui/src/assets/mascot.png),
+ * at logo size, for the header brand.
+ * Drawn as a CSS background from a 64 px WebP that Vite inlines once into the
+ * stylesheet (under its 4 KB limit): no request competing with the fonts, and no
+ * repeated data URI in the HTML. Decorative: it always sits next to the name.
  */
 interface Props {
-  class?: string;
   size?: number;
-  title?: string;
+  class?: string;
 }
-const { class: className, size = 28, title } = Astro.props;
+const { size = 28, class: className } = Astro.props;
+const SIZE_CLASS: Readonly<Record<number, string>> = { 20: 'size-5', 28: 'size-7', 32: 'size-8' };
+const sizeClass = SIZE_CLASS[size] ?? 'size-7';
 ---
 
-{/* biome-ignore lint/a11y/noSvgWithoutTitle: decorative unless a title is passed (then role="img" + <title>) */}
-<svg
-  viewBox="0 0 64 64"
-  width={size}
-  height={size}
-  class={className}
-  aria-hidden={title ? undefined : 'true'}
-  role={title ? 'img' : undefined}
-  focusable="false"
->
-  {title && <title>{title}</title>}
-  <ellipse cx="25" cy="13" rx="7.5" ry="6.5" transform="rotate(-24 25 13)" fill="#87dba6" />
-  <ellipse cx="39" cy="13" rx="7.5" ry="6.5" transform="rotate(24 39 13)" fill="#87dba6" />
-  <path
-    d="M32 15C17 15 9 30 10 45c.6 8.5 9 14 22 14s21.4-5.5 22-14C55 30 47 15 32 15Z"
-    fill="#87dba6"
-  />
-  <path d="M14 46c-3 1-5 .3-6-1.5 1.5-1 3.5-1 6 .5Zm36 0c3 1 5 .3 6-1.5-1.5-1-3.5-1-6 .5Z" fill="#59af7a" />
-  <ellipse cx="25.5" cy="35" rx="4.2" ry="5" fill="#241d14" />
-  <ellipse cx="38.5" cy="35" rx="4.2" ry="5" fill="#241d14" />
-  <circle cx="24" cy="33" r="1.4" fill="#fff8ea" />
-  <circle cx="37" cy="33" r="1.4" fill="#fff8ea" />
-  <path d="M28.5 43.5q3.5 3.5 7 0" stroke="#241d14" stroke-width="2" stroke-linecap="round" fill="none" />
-  <path d="M21 27q3-2.5 6 0M37 27q3-2.5 6 0" stroke="#241d14" stroke-width="1.8" stroke-linecap="round" fill="none" />
-</svg>
+<span class:list={['mascot-mark inline-block shrink-0', sizeClass, className]} aria-hidden="true"></span>
+
+<style>
+  .mascot-mark {
+    background-image: url('../assets/mascot/mark-64.webp');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+</style>

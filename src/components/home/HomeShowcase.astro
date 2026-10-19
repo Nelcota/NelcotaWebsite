@@ -1,0 +1,148 @@
+---
+import { type Locale, t } from '../../i18n/utils.ts';
+import { docHref } from '../../lib/docs/links.ts';
+import Icon from '../Icon.astro';
+import Words from '../story/Words.astro';
+import Eyebrow from './Eyebrow.astro';
+
+/**
+ * "Write SQL, & ship an API the same day": copy on the left; on the right the
+ * same note travelling through the stack as five overlapping cards on a
+ * diagonal (the table, the request, the signed-in user's answer, the SDK call and the signed
+ * webhook), with chat bubbles. The cards slide in one after the other on
+ * scroll (data-cascade). Snippets match docs/quickstart.md and docs/api.md.
+ */
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const dict = t(locale);
+const showcase = dict.landing.showcase;
+const [lineOne, lineTwo, lineThree] = showcase.title;
+
+/** One card per stop of the request, in order; `tone` picks a fixed palette. */
+const CARDS = [
+  {
+    label: 'migrations/V1__notes.sql',
+    tone: 'c-ink',
+    code: 'CREATE TABLE notes (\n  id    bigint PRIMARY KEY,\n  owner uuid DEFAULT auth.uid(),\n  body  text\n);\nENABLE ROW LEVEL SECURITY;',
+  },
+  { label: 'REST', tone: 'c-paper', code: 'GET /rest/v1/notes\n    ?select=id,body\n    &order=id.desc' },
+  { label: '200 · @HanielCota', tone: 'c-lilac', code: '[\n  { "id": 2, "body": "Ship the webhook" },\n  { "id": 1, "body": "My first note" }\n]' },
+  { label: 'TypeScript', tone: 'c-sand', code: "await nelcota\n  .from('notes')\n  .select('id,body')" },
+  { label: 'Webhook', tone: 'c-forest', code: 'POST https://api.example.com/hooks\nx-nelcota-signature: v1=5f2b…\n← 200 delivered' },
+] as const;
+---
+
+<section id="api" class="scroll-mt-24 overflow-x-clip py-12 md:py-20" aria-labelledby="showcase-title">
+  <div class="mx-auto grid max-w-[90rem] items-center gap-16 px-5 sm:px-8 lg:grid-cols-[0.9fr_1.1fr]">
+    <div>
+      <Eyebrow parts={showcase.eyebrow} />
+      <h2 id="showcase-title" class="mt-5 text-[clamp(2.25rem,5vw,4rem)] leading-[1.03] font-semibold tracking-[-0.045em] text-ink" data-words>
+        <span class="block"><Words text={lineOne} /></span>
+        <span class="block text-mint-ink"><Words text={lineTwo} /></span>
+        <span class="block"><Words text={lineThree} /></span>
+      </h2>
+      <p class="mt-6 max-w-md leading-relaxed text-pretty text-muted" data-fade>{showcase.body}</p>
+      <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3" data-fade>
+        <a href={docHref('api', locale)} class="btn btn-primary">
+          {showcase.primary}
+          <Icon name="arrow" size={16} />
+        </a>
+        <a href={docHref('quickstart', locale)} class="link-more text-[0.9375rem] text-ink">
+          {dict.landing.steps.all}
+          <Icon name="chevronRight" size={15} />
+        </a>
+      </div>
+    </div>
+
+    <div class="stack relative" aria-hidden="true">
+      <ul class="stack-list" data-cascade>
+        {
+          CARDS.map((card, index) => (
+            <li class:list={['stack-card', card.tone, `s${index + 1}`]}>
+              <p class="stack-label">{card.label}</p>
+              <pre class="stack-code">{card.code}</pre>
+            </li>
+          ))
+        }
+      </ul>
+      <span class="bubble stack-b1 bg-pop-pink">{showcase.bubbles[0]}</span>
+      <span class="bubble stack-b2 bg-pop-forest">{showcase.bubbles[1]}</span>
+    </div>
+  </div>
+</section>
+
+<style>
+  /*
+   * Two columns of printed cards in normal flow (so a long snippet never covers
+   * the next one), slightly tilted, the right column a step lower, the last card
+   * centered under both: the reference's diagonal without hiding any code.
+   */
+  .stack-list {
+    display: grid;
+    gap: 1rem;
+  }
+  .stack-card {
+    padding: 1.1rem 1.25rem 1.25rem;
+    border: 1px solid #0b0d0c12;
+    border-radius: 1.25rem;
+    box-shadow: 0 24px 48px -24px #0b0d0c66;
+  }
+  .s1 { rotate: -3deg; }
+  .s2 { rotate: 2deg; }
+  .s3 { rotate: -1deg; }
+  .s4 { rotate: 2deg; }
+  .s5 { rotate: -2deg; }
+  @media (width >= 40rem) {
+    .stack-list {
+      grid-template-columns: 1fr 1fr;
+      padding-bottom: 2rem;
+    }
+    .s2,
+    .s4 {
+      translate: 0 2.5rem;
+    }
+    .s5 {
+      grid-column: 1 / -1;
+      justify-self: center;
+      width: 70%;
+      margin-top: 1rem;
+    }
+  }
+
+  .stack-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .stack-code {
+    margin-top: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  /* Fixed palettes, like printed cards: the same in both themes. */
+  .c-ink { background-color: var(--color-night); color: #e8f5ec; }
+  .c-paper { background-color: #ffffff; color: #111213; }
+  .c-lilac { background-color: #cdbdff; color: #1c1440; }
+  .c-sand { background-color: #f1dfb8; color: #2a2112; }
+  .c-forest { background-color: #1b7640; color: #f3f8f4; }
+
+  .stack-b1 {
+    position: absolute;
+    z-index: 1;
+    top: -1rem;
+    right: 1rem;
+  }
+  .stack-b2 {
+    position: absolute;
+    z-index: 1;
+    bottom: 0.5rem;
+    left: 0;
+  }
+
+</style>

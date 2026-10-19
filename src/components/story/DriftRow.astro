@@ -1,0 +1,107 @@
+---
+import { Picture } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Icon, { type IconName } from '../Icon.astro';
+
+/**
+ * A row of tiles drifting sideways forever (CSS only), as a frame around the
+ * closing call to action. The list is rendered twice so the loop is seamless;
+ * the whole row is decorative and hidden from assistive tech. It stops with
+ * reduced motion, and a button in the closing section pauses it (WCAG 2.2.2).
+ */
+export type Tile =
+  | { readonly kind: 'image'; readonly src: ImageMetadata }
+  | { readonly kind: 'icon'; readonly icon: IconName; readonly tone: string }
+  | { readonly kind: 'code'; readonly text: string; readonly tone: string };
+
+interface Props {
+  tiles: readonly Tile[];
+  direction: 'left' | 'right';
+}
+const { tiles, direction } = Astro.props;
+const copies = [0, 1] as const;
+---
+
+<div class:list={['drift', `drift-${direction}`]} aria-hidden="true">
+  <div class="drift-track">
+    {
+      copies.map(() =>
+        tiles.map((tile) => (
+          <div class:list={['drift-tile', tile.kind !== 'image' && tile.tone, `drift-${tile.kind}`]}>
+            {tile.kind === 'image' && (
+              <Picture src={tile.src} formats={['avif', 'webp']} widths={[72, 144]} sizes="72px" alt="" loading="lazy" class="h-auto w-[4.5rem]" />
+            )}
+            {tile.kind === 'icon' && <Icon name={tile.icon} size={28} />}
+            {tile.kind === 'code' && <code class="font-mono text-sm whitespace-nowrap">{tile.text}</code>}
+          </div>
+        )),
+      )
+    }
+  </div>
+</div>
+
+<style>
+  .drift {
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  }
+  /* Margins, not gap: with gap, -50% lands half a gap off and the loop jumps. */
+  .drift-track {
+    display: flex;
+    width: max-content;
+    padding-block: 0.75rem;
+  }
+  /* The pause button in the closing section (drift-pause.ts) stops every row. */
+  :global([data-motion-paused]) .drift-track {
+    animation-play-state: paused;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .drift-left .drift-track {
+      animation: drift 60s linear infinite;
+    }
+    .drift-right .drift-track {
+      animation: drift 60s linear infinite reverse;
+    }
+  }
+  @keyframes drift {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .drift-tile {
+    display: flex;
+    margin-right: 1rem;
+    height: 5.5rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1.5rem;
+    box-shadow: 0 16px 32px -20px #0b0d0c66;
+  }
+  .drift-icon {
+    width: 5.5rem;
+  }
+  .drift-code {
+    padding-inline: 1.5rem;
+  }
+  .drift-image {
+    width: 5.5rem;
+    box-shadow: none;
+  }
+  .drift-left .drift-tile:nth-child(odd),
+  .drift-right .drift-tile:nth-child(even) {
+    transform: rotate(-4deg) translateY(0.25rem);
+  }
+  .drift-left .drift-tile:nth-child(even),
+  .drift-right .drift-tile:nth-child(odd) {
+    transform: rotate(3deg);
+  }
+
+  .t-ink { background-color: var(--color-night); color: #87dba6; }
+  .t-mint { background-color: #87dba6; color: #07130c; }
+  .t-sand { background-color: #f1dfb8; color: #2a2112; }
+  .t-forest { background-color: #1b7640; color: #f3f8f4; }
+  .t-lilac { background-color: #d9cffd; color: #1c1440; }
+  .t-paper { background-color: #fbfcfa; color: #0b0d0c; border: 1px solid #0b0d0c14; }
+</style>

@@ -1,25 +1,33 @@
 import { getImage } from 'astro:assets';
 import type { APIRoute } from 'astro';
 import mascot from '../assets/mascot.png';
+import { SITE_NAME } from '../lib/site.ts';
+
+/** Light canvas color (--color-canvas in global.css), shown while the app loads. */
+const CANVAS_LIGHT = '#f5f5f4';
+/** Brand accent. */
+const ACCENT = '#87dba6';
+const ICON_SIZES = [192, 512] as const;
 
 /** Web app manifest with icons derived from the mascot at build time. */
 export const GET: APIRoute = async () => {
+  const [small, large] = ICON_SIZES;
   const [icon192, icon512] = await Promise.all([
-    getImage({ src: mascot, width: 192, height: 192, format: 'png' }),
-    getImage({ src: mascot, width: 512, height: 512, format: 'png' }),
+    getImage({ src: mascot, width: small, height: small, format: 'png' }),
+    getImage({ src: mascot, width: large, height: large, format: 'png' }),
   ]);
 
   const manifest = {
-    name: 'Nelcota',
-    short_name: 'Nelcota',
-    description: 'Self-hosted, open-source tools for small teams.',
+    name: SITE_NAME,
+    short_name: SITE_NAME,
+    description: 'Open-source backend-as-a-service on plain PostgreSQL: one Rust binary.',
     start_url: import.meta.env.BASE_URL,
     display: 'browser',
-    background_color: '#f6faf7',
-    theme_color: '#87dba6',
+    background_color: CANVAS_LIGHT,
+    theme_color: ACCENT,
     icons: [
-      { src: icon192.src, sizes: '192x192', type: 'image/png' },
-      { src: icon512.src, sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+      { src: icon192.src, sizes: `${small}x${small}`, type: 'image/png' },
+      { src: icon512.src, sizes: `${large}x${large}`, type: 'image/png', purpose: 'any maskable' },
     ],
   };
 

@@ -1,0 +1,51 @@
+---
+import mascotStanding from '../../assets/mascot/standing.png';
+import mascotWave from '../../assets/mascot/wave.webp';
+import { type Locale, t } from '../../i18n/utils.ts';
+import DriftRow, { type Tile } from '../story/DriftRow.astro';
+import Title from './Title.astro';
+
+/**
+ * "Made for people who own their backend": the title in the middle of two
+ * rows of tiles drifting in opposite directions (the reference's "You will
+ * find yourself among us" wall), mascots, icons and real snippets. The rows
+ * are decorative; the page-level pause button stops them.
+ */
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const community = t(locale).landing.community;
+
+const TOP: readonly Tile[] = [
+  { kind: 'image', src: mascotWave },
+  { kind: 'icon', icon: 'key', tone: 't-mint' },
+  { kind: 'code', text: 'nelcota dev', tone: 't-ink' },
+  { kind: 'icon', icon: 'folder', tone: 't-sand' },
+  { kind: 'code', text: 'auth.uid()', tone: 't-lilac' },
+  { kind: 'icon', icon: 'zap', tone: 't-forest' },
+  { kind: 'image', src: mascotStanding },
+  { kind: 'code', text: 'GET /rest/v1/notes', tone: 't-paper' },
+  { kind: 'icon', icon: 'shield', tone: 't-ink' },
+];
+const BOTTOM: readonly Tile[] = [
+  { kind: 'code', text: 'nelcota pitr restore', tone: 't-sand' },
+  { kind: 'icon', icon: 'layout', tone: 't-lilac' },
+  { kind: 'image', src: mascotStanding },
+  { kind: 'code', text: 'ENABLE ROW LEVEL SECURITY', tone: 't-ink' },
+  { kind: 'icon', icon: 'server', tone: 't-mint' },
+  { kind: 'code', text: '200 OK', tone: 't-forest' },
+  { kind: 'image', src: mascotWave },
+  { kind: 'icon', icon: 'lock', tone: 't-paper' },
+  { kind: 'code', text: 'x-nelcota-signature', tone: 't-sand' },
+];
+---
+
+<section class="overflow-x-clip py-12 md:py-20" aria-labelledby="community-title">
+  <DriftRow tiles={TOP} direction="left" />
+  <div class="mx-auto max-w-3xl px-5 py-12 text-center md:py-16">
+    <Title id="community-title" parts={community.title} tone="soft" />
+    <p class="mx-auto mt-5 max-w-md leading-relaxed text-pretty text-muted" data-fade>{community.body}</p>
+  </div>
+  <DriftRow tiles={BOTTOM} direction="right" />
+</section>

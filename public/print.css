@@ -1,0 +1,52 @@
+/*
+ * Print: content only, black on white, no chrome or controls, nothing split
+ * mid-card. Linked with media="print" from src/layouts/Base.astro.
+ */
+:root {
+  color-scheme: light;
+}
+body {
+  background: #fff;
+  color: #000;
+}
+header,
+footer,
+[data-copy],
+[data-theme-toggle],
+[data-mobile-menu],
+[role="tablist"],
+.btn {
+  display: none;
+}
+main {
+  padding-top: 0;
+}
+/* Every step of every explanatory sequence is visible on paper. */
+.is-armed .reveal,
+.is-armed .term-line {
+  opacity: 1;
+}
+[role="tabpanel"][hidden] {
+  display: block;
+}
+.frame,
+figure,
+pre,
+table,
+li {
+  break-inside: avoid;
+}
+h2,
+h3 {
+  break-after: avoid;
+}
+.code-block {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+/* Show where external links in running text lead. */
+main p a[href^="http"]::after {
+  content: " (" attr(href) ")";
+  font-size: 0.85em;
+  color: #444;
+}

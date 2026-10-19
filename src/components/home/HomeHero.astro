@@ -1,0 +1,333 @@
+---
+import { type Locale, t } from '../../i18n/utils.ts';
+import { docHref } from '../../lib/docs/links.ts';
+import Icon from '../Icon.astro';
+import Mark, { brand, icon, type MarkSpec } from '../Mark.astro';
+
+/**
+ * Gallery hero: a very large title whose words rise in, a stack of six cards
+ * (one per part of the binary) dealt out into a fan with @mention bubbles over
+ * it, one sentence and two actions. Everything animates with CSS only, so
+ * nothing runs before the first paint, and stays still with reduced motion.
+ */
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const dict = t(locale);
+const hero = dict.landing.hero;
+const story = dict.story;
+
+/** The stagger has delay classes for this many words (hw-1…hw-8 in the styles below). */
+const MAX_HERO_WORDS = 8;
+
+/** Title words, line by line, numbered across both lines for the staggered rise. */
+function numberWords(lines: readonly string[]): readonly (readonly { word: string; order: number }[])[] {
+  let order = 0;
+
+  return lines.map((line) =>
+    line.split(' ').map((word) => {
+      order += 1;
+      if (order > MAX_HERO_WORDS) {
+        throw new RangeError(`HomeHero: ${order} title words, the stagger has classes for ${MAX_HERO_WORDS}`);
+      }
+
+      return { word, order };
+    }),
+  );
+}
+
+const words = numberWords(hero.title);
+
+/** Same order as story.cards: API, sign-in, files, webhooks, panel, PostgreSQL. */
+const CARD_STYLE: ReadonlyArray<{ mark: MarkSpec; tone: string }> = [
+  { mark: icon('code'), tone: 't-ink' },
+  { mark: icon('key'), tone: 't-mint' },
+  { mark: icon('folder'), tone: 't-sand' },
+  { mark: icon('zap'), tone: 't-forest' },
+  { mark: icon('layout'), tone: 't-lilac' },
+  { mark: brand('postgresql'), tone: 't-paper' },
+];
+---
+
+<section class="relative overflow-x-clip" aria-labelledby="hero-title" data-hides-sticky-cta>
+  <div class="mx-auto flex max-w-[90rem] flex-col items-center px-5 pt-14 pb-20 text-center sm:px-8 md:pt-20 md:pb-28">
+    <h1 id="hero-title" class="max-w-5xl text-[clamp(2.75rem,7.6vw,6.25rem)] leading-[0.98] font-semibold tracking-[-0.05em] text-balance text-ink">
+      {
+        words.map((line) => (
+          <span class="block">
+            {line.map((item, index) => (
+              <>
+                <span class:list={['hero-word', `hw-${item.order}`]}>{item.word}</span>
+                {index < line.length - 1 && ' '}
+              </>
+            ))}
+          </span>
+        ))
+      }
+    </h1>
+
+    <div class="fan">
+      <ul class="fan-list" aria-label={dict.nav.product}>
+        {
+          story.cards.map((card, index) => {
+            const style = CARD_STYLE[index];
+
+            return (
+              <li class:list={['fan-slot', `c${index + 1}`]}>
+                <div class:list={['fan-card', style?.tone]}>
+                  <span class="fan-icon">{style && <Mark mark={style.mark} size={18} />}</span>
+                  <p class="mt-auto text-lg font-semibold tracking-[-0.02em]">{card.title}</p>
+                  <code class="fan-code">{card.code}</code>
+                  <p class="fan-body">{card.body}</p>
+                </div>
+              </li>
+            );
+          })
+        }
+      </ul>
+      <div class="bubble b1" aria-hidden="true">{story.bubbles[0]}</div>
+      <div class="bubble b2" aria-hidden="true">{story.bubbles[1]}</div>
+    </div>
+
+    <p class="mt-10 max-w-xl text-base leading-relaxed text-pretty text-muted sm:text-lg">{hero.body}</p>
+    <div class="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
+      <a href="#start" class="btn btn-primary">
+        {hero.primary}
+        <Icon name="arrow" size={16} />
+      </a>
+      <a href={docHref('index', locale)} class="link-more text-[0.9375rem] text-ink">
+        {hero.secondary}
+        <Icon name="chevronRight" size={15} />
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* ---- Hero words: rise in one by one (CSS only, before any script). ---- */
+  .hero-word {
+    display: inline-block;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-word {
+      animation: word-rise 0.8s cubic-bezier(0.2, 0.7, 0.1, 1) both;
+    }
+    .hw-1 { animation-delay: 0.05s; }
+    .hw-2 { animation-delay: 0.15s; }
+    .hw-3 { animation-delay: 0.27s; }
+    .hw-4 { animation-delay: 0.37s; }
+    .hw-5 { animation-delay: 0.47s; }
+    .hw-6 { animation-delay: 0.57s; }
+    .hw-7 { animation-delay: 0.67s; }
+    .hw-8 { animation-delay: 0.77s; }
+  }
+  @keyframes word-rise {
+    from {
+      opacity: 0;
+      transform: translateY(0.4em);
+      filter: blur(10px);
+    }
+  }
+
+  /* ---- The card fan: six cards dealt out from one stack. ---- */
+  .fan {
+    position: relative;
+    width: 100%;
+    height: 21rem;
+    margin-top: 3.5rem;
+    --spread: 1;
+  }
+
+  .fan-slot {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 13.5rem;
+    height: 17rem;
+    margin-left: -6.75rem;
+    /* --open grows on scroll (motion/index.ts); --spread follows the breakpoints. */
+    transform: translate(calc(var(--x) * var(--spread) * var(--open, 1)), var(--y)) rotate(var(--r));
+  }
+  .c1 { --x: -29rem; --y: 3.5rem; --r: -12deg; z-index: 1; }
+  .c2 { --x: -17.5rem; --y: 1.4rem; --r: -7deg; z-index: 2; }
+  .c3 { --x: -6rem; --y: 0.25rem; --r: -2deg; z-index: 3; }
+  .c4 { --x: 6rem; --y: 0.25rem; --r: 2deg; z-index: 4; }
+  .c5 { --x: 17.5rem; --y: 1.4rem; --r: 7deg; z-index: 5; }
+  .c6 { --x: 29rem; --y: 3.5rem; --r: 12deg; z-index: 6; }
+  /* Below 72rem the full fan does not fit and a tighter one hides the text, so the cards become a row to swipe. */
+  @media (width < 72rem) {
+    .fan {
+      height: auto;
+      margin-top: 2.5rem;
+    }
+    .fan-list {
+      display: flex;
+      gap: 0.75rem;
+      margin-inline: -1.25rem;
+      padding: 1rem 1.25rem 1.75rem;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+    .fan-slot {
+      position: static;
+      flex: 0 0 10.5rem;
+      height: 13rem;
+      margin-left: 0;
+      scroll-snap-align: center;
+      transform: rotate(calc(var(--r) * 0.25));
+    }
+    .bubble {
+      display: none;
+    }
+  }
+
+  .fan-card {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1.25rem;
+    border: 1px solid #0b0d0c14;
+    border-radius: 1.5rem;
+    text-align: left;
+    box-shadow:
+      0 1px 0 #ffffff40 inset,
+      0 24px 48px -20px #0b0d0c59;
+    transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.1, 1);
+  }
+  @media (hover: hover) {
+    .fan-slot:hover .fan-card {
+      transform: translateY(-1.25rem) rotate(calc(var(--r) * -1));
+    }
+  }
+  @media (width < 72rem) {
+    .fan-card {
+      padding: 0.85rem;
+      border-radius: 1.1rem;
+    }
+    .fan-card p:first-of-type {
+      font-size: 0.9375rem;
+    }
+    .fan-body {
+      display: none;
+    }
+  }
+  /* A solid chip in the card's ink, so the icon reads on every color. */
+  .fan-icon {
+    display: inline-flex;
+    width: 2.5rem;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.8rem;
+    background-color: var(--chip-bg);
+    color: var(--chip-fg);
+  }
+  .fan-icon :global(svg) {
+    color: inherit;
+  }
+  /* One line of real code in a pill; long values end with an ellipsis instead of wrapping. */
+  .fan-code {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    margin-top: 0.15rem;
+    padding: 0.3rem 0.55rem;
+    border-radius: 0.5rem;
+    background-color: var(--code-bg);
+    font-family: var(--font-mono);
+    font-size: 0.71875rem;
+    line-height: 1.4;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: fit-content;
+  }
+  .fan-body {
+    font-size: 0.8125rem;
+    line-height: 1.4;
+  }
+  /* Each card but the last is partly covered by its right neighbor: keep the text clear of it. */
+  @media (width >= 72rem) {
+    .c1 .fan-card,
+    .c2 .fan-card,
+    .c3 .fan-card,
+    .c4 .fan-card,
+    .c5 .fan-card {
+      padding-right: 2.25rem;
+    }
+  }
+
+  /* Fixed palettes: the cards look the same in both themes, like printed cards. */
+  .t-ink { background-color: var(--color-night); color: #f3f5f4; --chip-bg: #87dba6; --chip-fg: #07130c; --code-bg: #ffffff14; }
+  .t-mint { background-color: #87dba6; color: #07130c; --chip-bg: #07130c; --chip-fg: #87dba6; --code-bg: #07130c14; }
+  .t-sand { background-color: #f1dfb8; color: #2a2112; --chip-bg: #2a2112; --chip-fg: #f1dfb8; --code-bg: #2a211214; }
+  .t-forest { background-color: #1b7640; color: #ffffff; --chip-bg: #ffffff; --chip-fg: #1b7640; --code-bg: #0000002e; }
+  .t-lilac { background-color: #d9cffd; color: #1c1440; --chip-bg: #1c1440; --chip-fg: #d9cffd; --code-bg: #1c144014; }
+  .t-paper { background-color: #fbfcfa; color: #0b0d0c; --chip-bg: #0b0d0c; --chip-fg: #ffffff; --code-bg: #0b0d0c0d; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .fan-slot {
+      animation: deal 1s cubic-bezier(0.2, 0.7, 0.1, 1) both;
+    }
+    .c3, .c4 { animation-delay: 0.35s; }
+    .c2, .c5 { animation-delay: 0.45s; }
+    .c1, .c6 { animation-delay: 0.55s; }
+  }
+  @keyframes deal {
+    from {
+      opacity: 0;
+      transform: translate(0, 4rem) rotate(0deg) scale(0.9);
+    }
+  }
+
+  /* ---- @mention bubbles over the fan. ---- */
+  .bubble {
+    position: absolute;
+    z-index: 10;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px 999px 999px 0.3rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 10px 24px -12px #0b0d0c80;
+  }
+  /* Both sit above the top edge of the cards they point at, never over an icon. */
+  .b1 {
+    top: -1.75rem;
+    left: max(0.5rem, calc(50% - 15rem * var(--spread) * var(--open, 1) - 6rem));
+    background-color: #6e3fc9;
+    color: #ffffff;
+  }
+  .b2 {
+    top: -1.25rem;
+    right: max(0.5rem, calc(50% - 14rem * var(--spread) * var(--open, 1) - 8rem));
+    border-radius: 999px 999px 0.3rem 999px;
+    background-color: #2563eb;
+    color: #ffffff;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .bubble {
+      /* Two slow bobs, then still: under the 5 s limit for motion nobody asked for. */
+      animation:
+        pop 0.5s cubic-bezier(0.2, 0.7, 0.1, 1) 1.1s both,
+        bob 2s ease-in-out 1.6s 2 alternate;
+    }
+    .b2 {
+      animation-delay: 1.3s, 1.8s;
+    }
+  }
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: scale(0.6) translateY(0.5rem);
+    }
+  }
+  @keyframes bob {
+    to {
+      transform: translateY(-0.5rem);
+    }
+  }
+</style>

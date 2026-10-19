@@ -3,60 +3,100 @@ import { getImage } from 'astro:assets';
 import mascot from '../assets/mascot.png';
 import { type Locale, t } from '../i18n/utils.ts';
 import Base from '../layouts/Base.astro';
-import { loadProjects } from '../lib/projects.ts';
-import { ORG_URL, SITE_NAME, spdxUrl, withBase } from '../lib/site.ts';
+import { loadRepo } from '../lib/repo.ts';
+import { LICENSE, REPO_URL, SITE_NAME, spdxUrl, withBase } from '../lib/site.ts';
 import { buildSnippets } from '../lib/snippets.ts';
-import CodeTabs from './CodeTabs.astro';
-import Contribute from './Contribute.astro';
-import Hero from './Hero.astro';
-import Projects from './Projects.astro';
-import Why from './Why.astro';
+import HomeBand from './home/HomeBand.astro';
+import HomeBento from './home/HomeBento.astro';
+import HomeBuiltOn from './home/HomeBuiltOn.astro';
+import HomeCommunity from './home/HomeCommunity.astro';
+import HomeDock from './home/HomeDock.astro';
+import HomeDuo from './home/HomeDuo.astro';
+import HomeFree from './home/HomeFree.astro';
+import HomeHero from './home/HomeHero.astro';
+import HomeManifesto from './home/HomeManifesto.astro';
+import HomePanel from './home/HomePanel.astro';
+import HomeSecurity from './home/HomeSecurity.astro';
+import HomeShowcase from './home/HomeShowcase.astro';
+import HomeSpeed from './home/HomeSpeed.astro';
+import HomeSteps from './home/HomeSteps.astro';
+import Icon from './Icon.astro';
 
 interface Props {
   locale: Locale;
 }
 const { locale } = Astro.props;
 const dict = t(locale);
-const projects = await loadProjects();
+const repo = await loadRepo();
+const latest = repo.releases[0] ?? null;
+const license = spdxUrl(repo.license ?? LICENSE);
 
 // Highlighted snippets are rendered before <Base> so their stylesheet hash lands in the CSP <meta>.
 const snippets = await buildSnippets(dict);
 Astro.csp?.insertStyleHash(snippets.cssHash);
 const site = Astro.site ?? new URL('http://localhost:4321/');
+const pageUrl = new URL(withBase(locale === 'en' ? '/' : `/${locale}/`), site).href;
 const logo = await getImage({ src: mascot, width: 512, height: 512, format: 'png' });
 
 const jsonLd = {
   '@context': 'https://schema.org',
   '@graph': [
     {
-      '@type': 'Organization',
-      '@id': `${ORG_URL}#organization`,
+      '@type': 'SoftwareApplication',
+      '@id': `${REPO_URL}#software`,
       name: SITE_NAME,
-      url: new URL(withBase('/'), site).href,
-      logo: new URL(logo.src, site).href,
-      sameAs: [ORG_URL, 'https://nelcota.com'],
       description: dict.meta.description,
+      url: pageUrl,
+      image: new URL(logo.src, site).href,
+      applicationCategory: 'DeveloperApplication',
+      operatingSystem: 'Linux',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      license,
+      sameAs: [REPO_URL],
+      ...(latest ? { softwareVersion: latest.tag.replace(/^v/, '') } : {}),
     },
-    ...projects.all.map((project) => ({
+    {
       '@type': 'SoftwareSourceCode',
-      name: project.data.name,
-      description: project.data.description[locale],
-      codeRepository: project.data.url,
-      url: project.data.url,
-      programmingLanguage: project.github?.language ?? project.data.language,
-      license: spdxUrl(project.github?.license ?? project.data.license),
-      ...(project.github?.latestRelease ? { version: project.github.latestRelease.tag } : {}),
-      ...(project.github ? { dateModified: project.github.pushedAt } : {}),
-      author: { '@id': `${ORG_URL}#organization` },
-    })),
+      name: SITE_NAME,
+      codeRepository: REPO_URL,
+      programmingLanguage: repo.language ?? 'Rust',
+      license,
+      dateModified: repo.pushedAt,
+      targetProduct: { '@id': `${REPO_URL}#software` },
+    },
   ],
 };
 ---
 
-<Base locale={locale} jsonLd={jsonLd} fetchedAt={projects.fetchedAt} source={projects.source}>
-  <Hero locale={locale} />
-  <Projects locale={locale} projects={projects} />
-  <CodeTabs locale={locale} snippets={snippets} />
-  <Why locale={locale} />
-  <Contribute locale={locale} />
+<Base locale={locale} jsonLd={jsonLd} fetchedAt={repo.fetchedAt}>
+  <HomeHero locale={locale} />
+  <HomeShowcase locale={locale} />
+  <HomePanel locale={locale} />
+  <HomeBuiltOn locale={locale} />
+  <HomeManifesto locale={locale} />
+  <HomeSecurity locale={locale} />
+  <HomeSpeed locale={locale} />
+  <HomeCommunity locale={locale} />
+  <HomeBento locale={locale} />
+  <HomeSteps locale={locale} snippets={snippets} />
+  <HomeDock locale={locale} />
+  <HomeFree locale={locale} />
+  <HomeBand locale={locale} />
+  <HomeDuo locale={locale} />
+
+  {/* Phones: "Get started" stays reachable once the hero scrolls away (sticky-cta.ts). */}
+  <a href="#start" class="sticky-cta btn btn-primary shadow-xl shadow-black/20 sm:hidden" data-sticky-cta inert>
+    {dict.nav.getStarted}
+    <Icon name="arrow" size={16} />
+  </a>
+  <style is:inline set:html={snippets.css}></style>
 </Base>
+
+<script>
+  // Imported once here so Astro inlines them: the phone "Get started" pill, the
+  // panel and step carousels, the band's pause button and the on-demand scroll animations.
+  import '../scripts/sticky-cta.ts';
+  import '../scripts/carousel.ts';
+  import '../scripts/drift-pause.ts';
+  import '../scripts/motion/loader.ts';
+</script>

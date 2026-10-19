@@ -1,76 +1,60 @@
 {
-  "org": "Nelcota",
-  "fetchedAt": "2026-10-18T12:23:39.768Z",
-  "repos": [
-    {
-      "name": ".github",
-      "url": "https://github.com/Nelcota/.github",
-      "description": "Nelcota organization profile and community guidelines",
-      "homepage": "https://nelcota.com",
-      "stars": 0,
-      "forks": 0,
-      "openIssues": 0,
-      "language": null,
-      "license": "Apache-2.0",
-      "pushedAt": "2026-10-12T22:42:14Z",
-      "defaultBranch": "main",
-      "archived": false,
-      "latestRelease": null
-    },
-    {
-      "name": "Nelcota",
-      "url": "https://github.com/Nelcota/Nelcota",
-      "description": "Open source BaaS: plain Postgres + one Rust binary. REST API, auth, RLS, file storage and an admin panel, deployed to a VPS in minutes.",
-      "homepage": "https://nelcota.com",
-      "stars": 2,
-      "forks": 0,
-      "openIssues": 5,
-      "language": "Rust",
-      "license": "Apache-2.0",
-      "pushedAt": "2026-10-18T12:16:36Z",
-      "defaultBranch": "main",
-      "archived": false,
-      "latestRelease": {
+  "fetchedAt": "2026-10-18T14:21:05.621Z",
+  "repo": {
+    "fullName": "Nelcota/Nelcota",
+    "url": "https://github.com/Nelcota/Nelcota",
+    "description": "Open source BaaS: plain Postgres + one Rust binary. REST API, auth, RLS, file storage and an admin panel, deployed to a VPS in minutes.",
+    "homepage": "https://nelcota.com",
+    "stars": 2,
+    "forks": 0,
+    "openIssues": 5,
+    "language": "Rust",
+    "license": "Apache-2.0",
+    "pushedAt": "2026-10-18T12:45:14Z",
+    "defaultBranch": "main",
+    "topics": [
+      "authentication",
+      "baas",
+      "file-storage",
+      "postgres",
+      "rest-api",
+      "row-level-security",
+      "rust",
+      "self-hosted",
+      "supabase-alternative",
+      "svelte"
+    ],
+    "releases": [
+      {
         "tag": "v0.4.0",
         "name": "Nelcota v0.4.0 — transactional webhooks and security fixes",
         "url": "https://github.com/Nelcota/Nelcota/releases/tag/v0.4.0",
         "publishedAt": "2026-10-11T23:00:02Z"
-      }
-    },
-    {
-      "name": "NelcotaPrompts",
-      "url": "https://github.com/Nelcota/NelcotaPrompts",
-      "description": "Nelcota Prompts: a private, invite-only prompt library for developers. Bun · React Router 7 · PostgreSQL.",
-      "homepage": null,
-      "stars": 0,
-      "forks": 0,
-      "openIssues": 0,
-      "language": "TypeScript",
-      "license": "MIT",
-      "pushedAt": "2026-10-16T23:48:59Z",
-      "defaultBranch": "main",
-      "archived": false,
-      "latestRelease": null
-    },
-    {
-      "name": "NelcotaScreenShare",
-      "url": "https://github.com/Nelcota/NelcotaScreenShare",
-      "description": "Self-hosted screen sharing for small teams, built with LiveKit and React Router",
-      "homepage": null,
-      "stars": 0,
-      "forks": 0,
-      "openIssues": 0,
-      "language": "TypeScript",
-      "license": "Apache-2.0",
-      "pushedAt": "2026-10-18T12:22:48Z",
-      "defaultBranch": "main",
-      "archived": false,
-      "latestRelease": {
+      },
+      {
+        "tag": "v0.3.1",
+        "name": "v0.3.1",
+        "url": "https://github.com/Nelcota/Nelcota/releases/tag/v0.3.1",
+        "publishedAt": "2026-10-11T17:08:19Z"
+      },
+      {
+        "tag": "v0.3.0",
+        "name": "v0.3.0",
+        "url": "https://github.com/Nelcota/Nelcota/releases/tag/v0.3.0",
+        "publishedAt": "2026-10-10T22:01:40Z"
+      },
+      {
+        "tag": "v0.2.0",
+        "name": "v0.2.0",
+        "url": "https://github.com/Nelcota/Nelcota/releases/tag/v0.2.0",
+        "publishedAt": "2026-10-08T22:39:33Z"
+      },
+      {
         "tag": "v0.1.0",
         "name": "v0.1.0",
-        "url": "https://github.com/Nelcota/NelcotaScreenShare/releases/tag/v0.1.0",
-        "publishedAt": "2026-10-12T22:55:32Z"
+        "url": "https://github.com/Nelcota/Nelcota/releases/tag/v0.1.0",
+        "publishedAt": "2026-10-07T21:22:03Z"
       }
-    }
-  ]
+    ]
+  }
 }

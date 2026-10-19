@@ -1,6 +1,11 @@
 (() => {
+  let theme = null;
   try {
-    const t = localStorage.getItem('nelcota-theme');
-    if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
-  } catch {}
+    theme = localStorage.getItem('nelcota-theme');
+  } catch {
+    // Storage can be blocked (privacy mode, disabled cookies): no saved choice, follow the system theme.
+    theme = null;
+  }
+  if (theme !== 'light' && theme !== 'dark') return;
+  document.documentElement.dataset.theme = theme;
 })();

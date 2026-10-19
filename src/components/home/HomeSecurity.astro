@@ -1,0 +1,102 @@
+---
+import { type Locale, t } from '../../i18n/utils.ts';
+import { docHref } from '../../lib/docs/links.ts';
+import Icon, { type IconName } from '../Icon.astro';
+import Eyebrow from './Eyebrow.astro';
+import Title from './Title.astro';
+
+/**
+ * "Secure by default": an info card on the left (the reference's "Where Art
+ * Meets Market" card) and the six defaults as cards stepping down a diagonal,
+ * each one sliding in after the last (data-cascade). Every line comes from the
+ * server code and docs/security/README.md, which also lists what is missing.
+ */
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const dict = t(locale);
+const security = dict.landing.security;
+const safety = dict.why.safety;
+
+/** Same order as why.safety.items; tones alternate like printed cards. */
+const CARDS: ReadonlyArray<{ icon: IconName; tone: string }> = [
+  { icon: 'lock', tone: 'k-paper' },
+  { icon: 'key', tone: 'k-forest' },
+  { icon: 'shield', tone: 'k-lilac' },
+  { icon: 'zap', tone: 'k-ink' },
+  { icon: 'folder', tone: 'k-sand' },
+  { icon: 'code', tone: 'k-blue' },
+];
+---
+
+<section id="security" class="scroll-mt-24 overflow-x-clip py-12 md:py-20" aria-labelledby="security-title">
+  <div class="mx-auto grid max-w-[90rem] items-start gap-12 px-5 sm:px-8 lg:grid-cols-[22rem_1fr]">
+    <div class="card p-7 lg:sticky lg:top-28" data-fade>
+      <Eyebrow parts={security.eyebrow} />
+      <Title id="security-title" parts={security.title} size="card" class="mt-4" />
+      <p class="mt-4 text-[0.9375rem] leading-relaxed text-pretty text-muted">{dict.story.securityIntro}</p>
+      <p class="mt-6 text-sm text-faint">{safety.note}</p>
+      <a href={docHref('security', locale)} class="btn btn-primary btn-sm mt-4">
+        {safety.notes}
+        <Icon name="arrow" size={14} />
+      </a>
+    </div>
+
+    <ul class="steps-diag grid gap-4 sm:grid-cols-2 xl:grid-cols-3" data-cascade>
+      {
+        safety.items.map((item, index) => {
+          const card = CARDS[index];
+
+          return (
+            <li class:list={['diag-card', card?.tone, `d${index + 1}`]}>
+              <span class="diag-icon">{card && <Icon name={card.icon} size={20} />}</span>
+              <p class="mt-10 text-xl font-semibold tracking-[-0.02em]">{item.title}</p>
+              <p class="mt-2 text-[0.9375rem] leading-relaxed">{item.body}</p>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .diag-card {
+    padding: 1.5rem;
+    border: 1px solid #0b0d0c10;
+    border-radius: 1.5rem;
+    box-shadow: 0 20px 40px -26px #0b0d0c59;
+  }
+  /*
+   * The reference's diagonal: each column a step lower than the one before.
+   * Whole columns move together (translate leaves the grid rows alone), so
+   * cards never overlap; the padding keeps the lowest column clear of the next section.
+   */
+  @media (width >= 80rem) {
+    .steps-diag {
+      padding-bottom: 5rem;
+    }
+    .d2, .d5 { translate: 0 2.5rem; }
+    .d3, .d6 { translate: 0 5rem; }
+  }
+  .diag-icon {
+    display: inline-flex;
+    width: 2.5rem;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.9rem;
+    background-color: #ffffff2e;
+  }
+  .k-paper { background-color: #ffffff; color: #111213; }
+  .k-paper .diag-icon { background-color: #0b0d0c0a; color: #0f7a3d; }
+  .k-forest { background-color: #1b7640; color: #f3f8f4; }
+  .k-lilac { background-color: #cdbdff; color: #1c1440; }
+  .k-lilac .diag-icon { background-color: #1c14400f; }
+  .k-ink { background-color: var(--color-night); color: #eef3f0; }
+  .k-ink .diag-icon { color: #87dba6; }
+  .k-sand { background-color: #f1dfb8; color: #2a2112; }
+  .k-sand .diag-icon { background-color: #2a21120f; }
+  .k-blue { background-color: #2f54ff; color: #ffffff; }
+</style>

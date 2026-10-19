@@ -1,0 +1,126 @@
+---
+import type { ManifestoPart } from '../../i18n/types.ts';
+import { type Locale, t } from '../../i18n/utils.ts';
+import Icon from '../Icon.astro';
+import Mark, { brand, icon, type MarkSpec } from '../Mark.astro';
+
+/**
+ * The pitch in one centered paragraph, very large, with a small fanned stack
+ * of cards and two @mention bubbles above it. Words start faint and turn ink
+ * as the visitor scrolls through (data-manifesto); the icon pills between the
+ * phrases are decorative. Without the script it is plain ink text.
+ */
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const dict = t(locale);
+const parts: readonly ManifestoPart[] = dict.landing.manifesto;
+
+const MARKS: Readonly<Record<Extract<ManifestoPart, { mark: string }>['mark'], MarkSpec>> = {
+  table: icon('table'),
+  postgresql: brand('postgresql'),
+  zap: icon('zap'),
+  rust: brand('rust'),
+  lock: icon('lock'),
+  server: icon('server'),
+};
+---
+
+<section id="how-it-works" class="scroll-mt-24 overflow-x-clip py-16 md:py-28" aria-labelledby="manifesto-title">
+  <div class="mx-auto max-w-[90rem] px-5 text-center sm:px-8">
+    <h2 id="manifesto-title" class="sr-only">{dict.nav.howItWorks}</h2>
+
+    <div class="mini-stack" aria-hidden="true">
+      <span class="mini m1"><Icon name="table" size={22} /></span>
+      <span class="mini m2"><Icon name="key" size={22} /></span>
+      <span class="mini m3"><Icon name="zap" size={22} /></span>
+      <span class="bubble mini-b1 bg-ink text-canvas">@GuiSatierf</span>
+      <span class="bubble mini-b2 bg-pop-pink">@Magalhaesz</span>
+    </div>
+
+    <p class="mx-auto mt-10 max-w-5xl text-[clamp(1.875rem,4.4vw,3.5rem)] leading-[1.14] font-semibold tracking-[-0.035em] text-ink" data-manifesto>
+      {
+        parts.map((part) =>
+          'text' in part ? (
+            part.text.split(' ').map((word) => (
+              <>
+                <span class="mw">{word}</span>{' '}
+              </>
+            ))
+          ) : (
+            <>
+              <span class="mark-pill mw" aria-hidden="true">
+                <Mark mark={MARKS[part.mark]} size={26} />
+              </span>{' '}
+            </>
+          ),
+        )
+      }
+    </p>
+  </div>
+</section>
+
+<style>
+  .mini-stack {
+    position: relative;
+    height: 8.5rem;
+    margin-inline: auto;
+    width: 16rem;
+  }
+  .mini {
+    position: absolute;
+    top: 1rem;
+    left: 50%;
+    display: inline-flex;
+    width: 6rem;
+    height: 7rem;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 0.85rem;
+    margin-left: -3rem;
+    border-radius: 1.1rem;
+    box-shadow: 0 18px 36px -18px #0b0d0c66;
+  }
+  .m1 { background-color: #1b7640; color: #f3f8f4; transform: translateX(-3.5rem) rotate(-10deg); }
+  .m2 { background-color: #f1dfb8; color: #2a2112; transform: rotate(-2deg); z-index: 1; }
+  .m3 { background-color: #2f54ff; color: #ffffff; transform: translateX(3.5rem) rotate(9deg); z-index: 2; }
+  /* Above the cards, and pushed out far enough for the longer GitHub handles. */
+  .mini-b1 {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: -4.5rem;
+  }
+  .mini-b2 {
+    position: absolute;
+    z-index: 1;
+    top: 3.5rem;
+    right: -5.5rem;
+    border-radius: 999px 999px 0.3rem 999px;
+  }
+  /* Phones: the bubbles overlap the cards' corners instead of sticking out past the screen. */
+  @media (width < 40rem) {
+    .mini-b1 {
+      top: -1.75rem;
+      left: -1rem;
+    }
+    .mini-b2 {
+      top: auto;
+      right: -1.5rem;
+      bottom: -1rem;
+    }
+  }
+  .mark-pill {
+    display: inline-flex;
+    width: 1.5em;
+    height: 0.9em;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background-color: var(--color-surface);
+    color: var(--color-mint-ink);
+    vertical-align: -0.05em;
+    box-shadow: 0 4px 12px -6px #0b0d0c40;
+  }
+</style>
