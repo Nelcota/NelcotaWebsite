@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig, fontProviders } from 'astro/config';
@@ -9,18 +9,31 @@ import { defineConfig, fontProviders } from 'astro/config';
  * (actions/configure-pages) so the same build works on a user site,
  * a project site or a custom domain. Defaults match a user/org site.
  */
-const siteUrl = process.env.SITE_URL ?? 'https://nelcota.github.io';
-const basePath = process.env.BASE_PATH ?? '/';
+const DEFAULT_SITE_URL = 'https://nelcota.github.io';
+
+/** An env var, with blank values treated as unset. */
+function env(name: string): string | undefined {
+  const value = process.env[name]?.trim();
+  if (value == null || value.length === 0) return undefined;
+
+  return value;
+}
+
+const siteUrl = env('SITE_URL') ?? DEFAULT_SITE_URL;
+// Canonical, hreflang, sitemap and OG URLs all come from this: a VPS build without it would point at GitHub Pages.
+if (env('SITE_URL') == null) console.warn(`[nelcota] SITE_URL is not set; canonical URLs use ${DEFAULT_SITE_URL}`);
+new URL(siteUrl); // throws on a malformed SITE_URL instead of shipping broken links
+const basePath = env('BASE_PATH') ?? '/';
 
 /**
  * The theme bootstrap script is inlined in <head> before first paint.
  * Its SHA-256 is added to the CSP so the page can keep a strict policy
- * (no 'unsafe-inline'). `pnpm csp-hash` prints the same value for the Caddyfile.
+ * (no 'unsafe-inline').
  */
-const themeInit = readFileSync(new URL('./src/scripts/theme-init.js', import.meta.url), 'utf8');
+const themeInit = await readFile(new URL('./src/scripts/theme-init.js', import.meta.url), 'utf8');
 const themeInitHash = `sha256-${createHash('sha256').update(themeInit).digest('base64')}` as const;
 
-// Latin subset shipped with the fonts (same range Fontsource uses).
+// Latin subset shipped with the fonts (Fontsource's range plus the marks in scripts/subset-fonts.ts).
 const latin = [
   'U+0000-00FF',
   'U+0131',
@@ -35,8 +48,18 @@ const latin = [
   'U+2000-206F',
   'U+20AC',
   'U+2122',
-  'U+2191',
-  'U+2193',
+  'U+2190-2193',
+  'U+21BA',
+  'U+2248',
+  'U+2264-2265',
+  'U+2318',
+  'U+2500',
+  'U+2502',
+  'U+2514',
+  'U+251C',
+  'U+25B6',
+  'U+25CF',
+  'U+276F',
   'U+2212',
   'U+2215',
   'U+FEFF',
@@ -61,8 +84,8 @@ export default defineConfig({
   fonts: [
     {
       provider: fontProviders.local(),
-      name: 'Inter',
-      cssVariable: '--font-inter',
+      name: 'Manrope',
+      cssVariable: '--font-manrope',
       fallbacks: ['sans-serif'],
       options: {
         variants: [
@@ -70,7 +93,7 @@ export default defineConfig({
             // Variable font trimmed to the 400–700 range (see scripts/subset-fonts.ts).
             weight: '400 700',
             style: 'normal',
-            src: ['./src/assets/fonts/inter-latin-wght-normal.woff2'],
+            src: ['./src/assets/fonts/manrope-latin-wght-normal.woff2'],
             display: 'swap',
             unicodeRange: [...latin],
           },
