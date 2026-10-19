@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   schedule:
-    # Daily rebuild so stars, releases and "updated X ago" stay fresh.
+    # Daily rebuild so the release list stays fresh.
     - cron: '17 5 * * *'
   workflow_dispatch:
   repository_dispatch:
@@ -37,6 +37,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Docs copy matches its recorded commit
+        run: pnpm docs:check
 
       - name: Configure Pages
         id: pages

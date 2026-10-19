@@ -34,8 +34,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Docs copy matches its recorded commit
+        run: pnpm docs:check
+
       - name: Biome (lint + format)
         run: pnpm lint
+
+      - name: Unit tests (docs renderer and translations)
+        run: pnpm test:unit
 
       - name: astro check (types)
         run: pnpm check

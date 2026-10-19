@@ -4,6 +4,8 @@ const PORT = 4321;
 
 export default defineConfig({
   testDir: './tests',
+  // tests/unit/ runs under node:test (pnpm test:unit), not Playwright.
+  testIgnore: 'unit/**',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
