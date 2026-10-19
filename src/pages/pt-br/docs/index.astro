@@ -1,0 +1,8 @@
+---
+import DocsIndex from '../../../components/docs/DocsIndex.astro';
+import { loadDocs } from '../../../lib/docs/content.ts';
+
+const bundle = await loadDocs('pt-br');
+---
+
+<DocsIndex locale="pt-br" bundle={bundle} />

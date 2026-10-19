@@ -1,0 +1,25 @@
+---
+import type { DocHeading } from '../../lib/docs/render.ts';
+
+/**
+ * "On this page" links. The entry for the section being read gets
+ * aria-current="true" (src/scripts/docs-toc.ts).
+ */
+interface Props {
+  headings: readonly DocHeading[];
+  lang: string;
+}
+const { headings, lang } = Astro.props;
+---
+
+<ul class="docs-toc-list" lang={lang} data-toc>
+  {
+    headings.map((heading) => (
+      <li>
+        <a href={`#${heading.id}`} class:list={['docs-toc-link', heading.level === 3 && 'docs-toc-sub']}>
+          {heading.text}
+        </a>
+      </li>
+    ))
+  }
+</ul>

@@ -1,0 +1,154 @@
+---
+import { formatDate, type Locale, t } from '../../i18n/utils.ts';
+import { type DocStatus, type DocsBundle, docsIndexUrl, editUrl, findDoc } from '../../lib/docs/content.ts';
+import { loadRepo } from '../../lib/repo.ts';
+import { REPO_URL } from '../../lib/site.ts';
+import Icon from '../Icon.astro';
+import DocsShell from './DocsShell.astro';
+import DocsToc from './DocsToc.astro';
+
+/** One documentation page rendered from the repository's Markdown. */
+interface Props {
+  locale: Locale;
+  bundle: DocsBundle;
+  id: string;
+}
+const { locale, bundle, id } = Astro.props;
+const dict = t(locale).docsSite;
+const page = findDoc(bundle, id);
+const index = bundle.pages.indexOf(page);
+const previous = bundle.pages[index - 1];
+const next = bundle.pages[index + 1];
+
+const NOTES: Readonly<Record<DocStatus, string | null>> = {
+  source: null,
+  translated: null,
+  partial: dict.status.partial,
+  english: dict.status.english,
+  portuguese: dict.status.portugueseOnly,
+};
+const note = NOTES[page.status];
+const MIN_TOC_HEADINGS = 3;
+const toc = page.headings.filter((heading) => heading.level <= 3);
+const hasToc = toc.length >= MIN_TOC_HEADINGS;
+const MAX_DESCRIPTION = 160;
+const description = page.lead.length > 0 ? page.lead.slice(0, MAX_DESCRIPTION) : page.summary;
+const latest = (await loadRepo()).releases[0];
+const versionNote = latest == null ? null : dict.versionNote.replace('{version}', latest.tag);
+const synced = dict.syncedFrom
+  .replace('{commit}', bundle.lock.commit.slice(0, 7))
+  .replace('{date}', formatDate(bundle.lock.committedAt, locale));
+const readingTime = dict.readingTime.replace('{minutes}', String(page.readingMinutes));
+---
+
+<DocsShell
+  locale={locale}
+  bundle={bundle}
+  current={page.id}
+  title={`${page.title} · ${dict.title} · Nelcota`}
+  description={description}
+  path={`docs/${page.id}/`}
+>
+  {
+    hasToc && (
+      <details slot="mobile-toc" class="docs-sheet docs-sheet-toc" data-mobile-menu>
+        <summary>
+          <Icon name="list" size={16} class="docs-sheet-icon" />
+          <span class="docs-sheet-label">{dict.onThisPage}</span>
+          <Icon name="chevron" size={14} class="docs-sheet-chevron" />
+        </summary>
+        <nav aria-label={dict.onThisPage} class="docs-sheet-panel">
+          <DocsToc headings={toc} lang={page.lang} />
+        </nav>
+      </details>
+    )
+  }
+
+  <article class="docs-article">
+    <div class="docs-paper">
+      <header>
+        <nav aria-label={dict.breadcrumb} class="docs-breadcrumb">
+          <ol>
+            <li><a href={docsIndexUrl(locale)}>{dict.title}</a></li>
+            <li aria-hidden="true"><Icon name="chevron" size={12} class="docs-breadcrumb-sep" /></li>
+            <li class="docs-breadcrumb-group">{dict.groups[page.group]}</li>
+          </ol>
+        </nav>
+        <h1 lang={page.lang} class="docs-title">{page.title}</h1>
+        <div class="docs-meta">
+          <span class="docs-chip">
+            <Icon name="clock" size={14} />
+            {readingTime}
+          </span>
+          <a href={editUrl(page.source)} rel="noopener" class="docs-chip docs-chip-link">
+            <Icon name="github" size={14} />
+            {dict.edit}
+          </a>
+        </div>
+      </header>
+
+      {
+        note && (
+          <p class="docs-note">
+            <span class="docs-bubble docs-note-badge" data-tone={page.lang === 'en' ? 'blue' : 'forest'} aria-hidden="true">
+              {page.lang === 'en' ? 'EN' : 'PT'}
+            </span>
+            <span>{note}</span>
+          </p>
+        )
+      }
+
+      <div lang={page.lang} class="doc-body" set:html={page.html} />
+
+      <footer class="docs-source">
+        <p>
+          {dict.source}: <a href={editUrl(page.source)} rel="noopener" class="docs-source-path">{page.source}</a>
+        </p>
+        {versionNote && <p>{versionNote}</p>}
+        <p>
+          <a href={`${REPO_URL}/tree/${bundle.lock.commit}`} rel="noopener">{synced}</a>
+        </p>
+      </footer>
+    </div>
+
+    <nav aria-label={`${dict.previous} / ${dict.next}`} class="docs-pager">
+      {
+        previous && (
+          <a href={previous.url} class="docs-pager-card docs-pager-prev">
+            <span class="docs-pager-hint">{dict.previous}</span>
+            <span class="docs-pager-title">{previous.label}</span>
+            <span class="docs-round-arrow" aria-hidden="true">
+              <Icon name="arrow" size={16} />
+            </span>
+          </a>
+        )
+      }
+      {
+        next && (
+          <a href={next.url} class="docs-pager-card docs-pager-next">
+            <span class="docs-pager-hint">{dict.next}</span>
+            <span class="docs-pager-title">{next.label}</span>
+            <span class="docs-round-arrow" aria-hidden="true">
+              <Icon name="arrow" size={16} />
+            </span>
+          </a>
+        )
+      }
+    </nav>
+  </article>
+
+  {
+    hasToc && (
+      <aside slot="aside" class="docs-toc">
+        <nav aria-label={dict.onThisPage} class="docs-scroll docs-toc-nav">
+          <p class="docs-toc-title">{dict.onThisPage}</p>
+          <DocsToc headings={toc} lang={page.lang} />
+          <a href="#main" class="docs-toc-top">
+            <Icon name="chevron" size={14} />
+            {dict.backToTop}
+          </a>
+        </nav>
+      </aside>
+    )
+  }
+</DocsShell>

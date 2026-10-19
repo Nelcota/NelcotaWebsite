@@ -1,0 +1,51 @@
+---
+import { type Locale, t } from '../../i18n/utils.ts';
+import type { DocsPage } from '../../lib/docs/content.ts';
+import { docsIndexUrl } from '../../lib/docs/content.ts';
+import { GROUP_ICONS } from '../../lib/docs/group-icons.ts';
+import { DOC_GROUPS } from '../../lib/docs/manifest.ts';
+import Icon from '../Icon.astro';
+
+/**
+ * Sidebar list of every docs page, grouped as in src/lib/docs/manifest.ts.
+ * The page being read is a raised white pill with a mint dot.
+ */
+interface Props {
+  locale: Locale;
+  pages: readonly DocsPage[];
+  /** id of the page being read; null on the docs index. */
+  current: string | null;
+}
+const { locale, pages, current } = Astro.props;
+const dict = t(locale).docsSite;
+
+const groups = DOC_GROUPS.map((group) => ({
+  group,
+  title: dict.groups[group],
+  pages: pages.filter((page) => page.group === group),
+}));
+---
+
+<a href={docsIndexUrl(locale)} aria-current={current == null ? 'page' : undefined} class="docs-nav-link docs-nav-overview">
+  <Icon name="layout" size={15} class="docs-nav-overview-icon" />
+  {dict.overview}
+</a>
+{
+  groups.map((entry) => (
+    <div class="docs-nav-group">
+      <p class="docs-nav-title">
+        <Icon name={GROUP_ICONS[entry.group]} size={13} />
+        {entry.title}
+      </p>
+      <ul>
+        {entry.pages.map((page) => (
+          <li>
+            <a href={page.url} aria-current={page.id === current ? 'page' : undefined} class="docs-nav-link">
+              {page.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  ))
+}

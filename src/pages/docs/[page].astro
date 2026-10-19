@@ -1,0 +1,13 @@
+---
+import type { GetStaticPaths } from 'astro';
+import DocsArticle from '../../components/docs/DocsArticle.astro';
+import { loadDocs } from '../../lib/docs/content.ts';
+import { DOC_PAGES } from '../../lib/docs/manifest.ts';
+
+export const getStaticPaths = (() =>
+  DOC_PAGES.map((page) => ({ params: { page: page.id } }))) satisfies GetStaticPaths;
+
+const bundle = await loadDocs('en');
+---
+
+<DocsArticle locale="en" bundle={bundle} id={Astro.params.page} />

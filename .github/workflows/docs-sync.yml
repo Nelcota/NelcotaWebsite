@@ -1,0 +1,73 @@
+name: Sync docs from Nelcota/Nelcota
+
+# Copies the Markdown guides and Portuguese catalogs listed in
+# src/lib/docs/manifest.ts from the Nelcota repository (pnpm docs:sync) and
+# opens a pull request when they changed. CI then builds and tests the result;
+# merging deploys it. Nothing is published without review.
+on:
+  schedule:
+    - cron: '40 4 * * *'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch, tag or commit of Nelcota/Nelcota
+        default: main
+  repository_dispatch:
+    # From the Nelcota repository after docs change:
+    #   gh api repos/Nelcota/<this-repo>/dispatches -f event_type=docs-updated
+    types: [docs-updated]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: docs-sync
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Sync
+        id: sync
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REF: ${{ inputs.ref || 'main' }}
+        run: |
+          pnpm docs:sync --ref "$REF" | tee sync.log
+          echo "commit=$(jq -r .commit vendor/nelcota-docs/source.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Open or update the pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMIT: ${{ steps.sync.outputs.commit }}
+        run: |
+          if git diff --quiet -- vendor/nelcota-docs; then
+            echo "Docs already match Nelcota/Nelcota@${COMMIT}."
+            exit 0
+          fi
+          branch=docs-sync
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git switch -C "$branch"
+          git add vendor/nelcota-docs
+          git commit -m "docs: sync guides from Nelcota/Nelcota@${COMMIT:0:12}"
+          git push --force origin "$branch"
+          body=$(printf 'Synced with `pnpm docs:sync` from Nelcota/Nelcota@%s.\n\n```\n%s\n```\n' "$COMMIT" "$(cat sync.log)")
+          gh pr view "$branch" >/dev/null 2>&1 \
+            && gh pr edit "$branch" --body "$body" \
+            || gh pr create --head "$branch" --title "docs: sync guides from Nelcota/Nelcota" --body "$body"

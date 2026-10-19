@@ -1,0 +1,55 @@
+---
+import { type Locale, t } from '../../i18n/utils.ts';
+import { docsIndexUrl } from '../../lib/docs/links.ts';
+import Icon from '../Icon.astro';
+import { docsText } from './strings.ts';
+
+/**
+ * Search box for the docs (src/scripts/docs-search.ts). The index is a static
+ * JSON file per locale (src/pages/docs/search.json.ts), fetched on first focus.
+ * "large" is the big pill on the docs index; "compact" sits in the sidebar.
+ */
+interface Props {
+  locale: Locale;
+  id: string;
+  size?: 'large' | 'compact';
+}
+const { locale, id, size = 'compact' } = Astro.props;
+const search = t(locale).docsSite.search;
+// Built from the docs index URL: getRelativeLocaleUrl would add a trailing slash to the file name.
+const indexUrl = `${docsIndexUrl(locale)}search.json`;
+const isLarge = size === 'large';
+const placeholder = isLarge ? docsText('searchPlaceholder', locale) : search.placeholder;
+---
+
+<div
+  class:list={['docs-search', isLarge && 'docs-search-large']}
+  data-docs-search
+  data-index={indexUrl}
+  data-loading={search.loading}
+  data-empty={search.empty}
+  data-failed={search.failed}
+  data-results={search.results}
+  data-result-one={search.resultOne}
+  data-results-shown={search.resultsShown}
+>
+  <label for={id} class="sr-only">{search.label}</label>
+  <Icon name="search" size={isLarge ? 20 : 16} class="docs-search-icon" />
+  <input
+    id={id}
+    type="search"
+    role="combobox"
+    aria-autocomplete="list"
+    aria-expanded="false"
+    aria-controls={`${id}-results`}
+    autocomplete="off"
+    spellcheck="false"
+    placeholder={placeholder}
+    class="docs-search-input"
+  />
+  <kbd aria-hidden="true" class="docs-search-kbd">/</kbd>
+  <div data-search-panel hidden class="docs-search-panel">
+    <p data-search-status role="status" aria-live="polite" class="docs-search-status"></p>
+    <div id={`${id}-results`} role="listbox" aria-label={search.label}></div>
+  </div>
+</div>

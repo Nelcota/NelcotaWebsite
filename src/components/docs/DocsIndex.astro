@@ -1,0 +1,146 @@
+---
+import { type Locale, t } from '../../i18n/utils.ts';
+import type { DocsBundle, DocsPage } from '../../lib/docs/content.ts';
+import { findDoc } from '../../lib/docs/content.ts';
+import { GROUP_ICONS } from '../../lib/docs/group-icons.ts';
+import { DOC_GROUPS, type DocGroup } from '../../lib/docs/manifest.ts';
+import type { IconName } from '../../lib/icons.ts';
+import { loadRepo } from '../../lib/repo.ts';
+import Icon from '../Icon.astro';
+import DocsSearch from './DocsSearch.astro';
+import DocsShell from './DocsShell.astro';
+import { docsText, guideCount } from './strings.ts';
+
+/**
+ * /docs, gallery style: a centered two-tone title with the big search pill,
+ * three "start here" cards, then every guide grouped in white cards.
+ */
+interface Props {
+  locale: Locale;
+  bundle: DocsBundle;
+}
+const { locale, bundle } = Astro.props;
+const dict = t(locale).docsSite;
+
+/** Pop color of an icon tile (docs.css: .docs-tile[data-tone]). */
+type Tone = 'forest' | 'blue' | 'coral' | 'lilac' | 'lime';
+
+/** The usual path: run it locally, build against the API, put it on a server. */
+const FEATURED: ReadonlyArray<{ id: string; icon: IconName; tone: Tone }> = [
+  { id: 'quickstart', icon: 'terminal', tone: 'forest' },
+  { id: 'api', icon: 'code', tone: 'blue' },
+  { id: 'deploy', icon: 'server', tone: 'coral' },
+];
+const GROUP_TONES: Readonly<Record<DocGroup, Tone>> = {
+  start: 'forest',
+  build: 'blue',
+  operate: 'coral',
+  reference: 'lilac',
+  design: 'lime',
+};
+const featured = FEATURED.map((entry, index) => ({
+  ...entry,
+  number: String(index + 1).padStart(2, '0'),
+  page: findDoc(bundle, entry.id),
+}));
+const groups = DOC_GROUPS.map((group) => ({
+  group,
+  title: dict.groups[group],
+  pages: bundle.pages.filter((page: DocsPage) => page.group === group),
+}));
+const latest = (await loadRepo()).releases[0];
+const versionNote = latest == null ? null : dict.versionNote.replace('{version}', latest.tag);
+---
+
+<DocsShell
+  locale={locale}
+  bundle={bundle}
+  current={null}
+  title={`${dict.title} · Nelcota`}
+  description={dict.description}
+  path="docs/"
+  layout="landing"
+>
+  <header class="docs-hero">
+    <p class="docs-eyebrow">
+      {docsText('eyebrowLead', locale)}<span class="docs-eyebrow-accent">{docsText('eyebrowAccent', locale)}</span>
+    </p>
+    <div class="docs-hero-heading">
+      <span class="docs-bubble docs-bubble-left" data-tone="blue" aria-hidden="true">@api</span>
+      <span class="docs-bubble docs-bubble-right" data-tone="forest" aria-hidden="true">@deploy</span>
+      <h1 class="docs-hero-title">{dict.title}</h1>
+      <p class="docs-hero-tail">{docsText('titleTail', locale)}</p>
+    </div>
+    <p class="docs-hero-lead">{dict.description}</p>
+    <div class="docs-hero-search">
+      <DocsSearch locale={locale} id="docs-search" size="large" />
+    </div>
+    {
+      versionNote && (
+        <p class="docs-hero-note">
+          <Icon name="package" size={15} />
+          <span>{versionNote}</span>
+        </p>
+      )
+    }
+  </header>
+
+  <section aria-labelledby="docs-start-here" class="docs-index-section">
+    <h2 id="docs-start-here" class="docs-section-title">{dict.startHere}</h2>
+    <ul class="docs-featured">
+      {
+        featured.map(({ page, icon, tone, number }) => (
+          <li>
+            <a href={page.url} class="docs-featured-card">
+              <span class="docs-featured-top">
+                <span class="docs-tile docs-tile-lg" data-tone={tone}>
+                  <Icon name={icon} size={22} />
+                </span>
+                <span class="docs-featured-number" aria-hidden="true">{number}</span>
+              </span>
+              <span class="docs-featured-title">{page.label}</span>
+              <span class="docs-featured-summary">{page.summary}</span>
+              <span class="docs-round-arrow" aria-hidden="true">
+                <Icon name="arrow" size={16} />
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section aria-labelledby="docs-all" class="docs-index-section">
+    <h2 id="docs-all" class="docs-section-title">{dict.allGuides}</h2>
+    <div class="docs-groups">
+      {
+        groups.map((entry) => (
+          <section class="docs-group" aria-labelledby={`group-${entry.group}`}>
+            <div class="docs-group-head">
+              <span class="docs-tile" data-tone={GROUP_TONES[entry.group]}>
+                <Icon name={GROUP_ICONS[entry.group]} size={17} />
+              </span>
+              <h3 id={`group-${entry.group}`} class="docs-group-title">
+                {entry.title}
+              </h3>
+              <span class="docs-group-count">{guideCount(entry.pages.length, locale)}</span>
+            </div>
+            <ul class="docs-group-list">
+              {entry.pages.map((page) => (
+                <li>
+                  <a href={page.url} class="docs-group-link">
+                    <span class="docs-group-text">
+                      <span class="docs-group-label">{page.label}</span>
+                      <span class="docs-group-summary">{page.summary}</span>
+                    </span>
+                    <Icon name="chevron" size={14} class="docs-group-chevron" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+  </section>
+</DocsShell>

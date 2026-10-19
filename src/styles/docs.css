@@ -1,0 +1,1353 @@
+/*
+ * Docs-only styles, loaded by src/components/docs/DocsShell.astro. global.css
+ * does not scan src/components/docs/, so every class used there is written
+ * here by name, and the home page never carries it.
+ *
+ * Gallery style, like the rest of the site: near-white canvas, white cards
+ * with soft shadows and 24 px corners, very tight headings, pill controls,
+ * small caps eyebrows and vivid @mention bubbles.
+ */
+
+/* ---------- Shared pieces ---------- */
+
+.docs-container {
+  width: 100%;
+  max-width: 90rem;
+  margin-inline: auto;
+  /* Same gutters as the header, so the logo and the sidebar line up. */
+  padding-inline: max(1.25rem, env(safe-area-inset-left), env(safe-area-inset-right));
+  @media (width >= 40rem) {
+    padding-inline: max(2rem, env(safe-area-inset-left), env(safe-area-inset-right));
+  }
+}
+
+/* The white gallery card (same recipe as the global `card` utility). */
+.docs-paper,
+.docs-featured-card,
+.docs-group,
+.docs-pager-card,
+.docs-search-panel {
+  border: 1px solid light-dark(#0000000a, #ffffff10);
+  border-radius: var(--radius-frame);
+  background-color: var(--color-surface);
+  box-shadow:
+    0 1px 2px light-dark(#0000000a, #00000066),
+    0 18px 40px -24px light-dark(#00000040, #000000cc);
+}
+
+.docs-eyebrow,
+.docs-toc-title,
+.docs-nav-title,
+.docs-pager-hint,
+.docs-breadcrumb {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.docs-eyebrow {
+  color: var(--color-ink);
+}
+.docs-eyebrow-accent {
+  color: var(--color-mint-ink);
+}
+
+/* An @mention chat bubble: pop color, one squared corner. */
+.docs-bubble {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px 999px 999px 0.3rem;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: 0 10px 24px -12px #0b0d0c80;
+}
+.docs-bubble[data-tone="blue"] {
+  background-color: var(--color-pop-blue);
+}
+.docs-bubble[data-tone="forest"] {
+  background-color: var(--color-pop-forest);
+}
+
+/* A rounded icon tile in one of the pop colors. */
+.docs-tile {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.75rem;
+}
+.docs-tile-lg {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 1rem;
+}
+.docs-tile[data-tone="forest"] {
+  background-color: var(--color-pop-forest);
+  color: #ffffff;
+}
+.docs-tile[data-tone="blue"] {
+  background-color: var(--color-pop-blue);
+  color: #ffffff;
+}
+.docs-tile[data-tone="coral"] {
+  background-color: var(--color-pop-coral);
+  color: var(--color-pop-ink);
+}
+.docs-tile[data-tone="lilac"] {
+  background-color: var(--color-pop-lilac);
+  color: var(--color-pop-ink);
+}
+.docs-tile[data-tone="lime"] {
+  background-color: var(--color-pop-lime);
+  color: var(--color-pop-ink);
+}
+
+/* The dark round arrow at the foot of a clickable card. */
+.docs-round-arrow {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-brand-bg);
+  color: var(--color-on-brand);
+  transition: translate 200ms var(--ease-soft);
+}
+
+.docs-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+
+/* ---------- Docs index: hero ---------- */
+
+.docs-landing {
+  padding-bottom: 6rem;
+}
+.docs-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 3.5rem;
+  text-align: center;
+  @media (width >= 48rem) {
+    padding-top: 6rem;
+  }
+}
+.docs-hero-heading {
+  position: relative;
+  margin-top: 1.25rem;
+}
+.docs-hero-title,
+.docs-hero-tail {
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 1.6rem + 5vw, 5.5rem);
+  line-height: 0.98;
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+.docs-hero-title {
+  color: var(--color-ink);
+}
+/* The gray half of the two-tone title (dark enough for 4.5:1 on the canvas). */
+.docs-hero-tail {
+  color: light-dark(#6a6d72, #8f9398);
+}
+.docs-bubble-left,
+.docs-bubble-right {
+  position: absolute;
+  display: none;
+  animation-name: docs-bob;
+  animation-duration: 6s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  @media (width >= 56rem) {
+    display: inline-flex;
+  }
+}
+.docs-bubble-left {
+  top: 58%;
+  left: -4.5rem;
+  rotate: -6deg;
+}
+.docs-bubble-right {
+  top: -1.5rem;
+  right: -3.5rem;
+  rotate: 5deg;
+  animation-delay: -3s;
+}
+@keyframes docs-bob {
+  50% {
+    translate: 0 -6px;
+  }
+}
+.docs-hero-lead {
+  max-width: 38rem;
+  margin-top: 1.75rem;
+  color: var(--color-muted);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  @media (width >= 40rem) {
+    font-size: 1.1875rem;
+  }
+}
+.docs-hero-search {
+  width: 100%;
+  max-width: 42rem;
+  margin-top: 2.5rem;
+  text-align: left;
+}
+.docs-hero-note {
+  display: flex;
+  gap: 0.5rem;
+  max-width: 38rem;
+  margin-top: 1.25rem;
+  color: var(--color-faint);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  text-align: left;
+}
+.docs-hero-note svg {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+/* ---------- Docs index: start here and all guides ---------- */
+
+.docs-index-section {
+  margin-top: 5rem;
+  @media (width >= 48rem) {
+    margin-top: 7rem;
+  }
+}
+.docs-section-title {
+  color: var(--color-ink);
+  font-size: clamp(1.75rem, 1.3rem + 1.6vw, 2.5rem);
+  line-height: 1.05;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+.docs-featured {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.75rem;
+  @media (width >= 48rem) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.docs-featured > li {
+  display: flex;
+}
+.docs-featured-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 15rem;
+  padding: 1.5rem;
+  transition:
+    translate 200ms var(--ease-soft),
+    box-shadow 200ms;
+  @media (width >= 64rem) {
+    padding: 1.75rem;
+  }
+}
+.docs-featured-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.docs-featured-number {
+  color: var(--color-faint);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+.docs-featured-title {
+  margin-top: 2.5rem;
+  color: var(--color-ink);
+  font-size: 1.5rem;
+  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+.docs-featured-summary {
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding-right: 2.5rem;
+  color: var(--color-muted);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+.docs-featured-card .docs-round-arrow {
+  position: absolute;
+  right: 1.25rem;
+  bottom: 1.25rem;
+}
+@media (hover: hover) {
+  .docs-featured-card:hover,
+  .docs-pager-card:hover {
+    translate: 0 -2px;
+    box-shadow:
+      0 1px 2px light-dark(#0000000a, #00000066),
+      0 24px 48px -24px light-dark(#00000059, #000000e6);
+  }
+  .docs-featured-card:hover .docs-round-arrow,
+  .docs-pager-next:hover .docs-round-arrow {
+    translate: 3px 0;
+  }
+  .docs-pager-prev:hover .docs-round-arrow {
+    translate: -3px 0;
+  }
+}
+
+/* One row card per group: the group on the left, its guides in a grid on the right. */
+.docs-groups {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.75rem;
+}
+.docs-group {
+  padding: 0.625rem;
+  @media (width >= 64rem) {
+    display: grid;
+    grid-template-columns: 15rem minmax(0, 1fr);
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+}
+.docs-group-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.625rem 0.875rem;
+  @media (width >= 64rem) {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.25rem;
+    border-radius: 1.125rem;
+    background-color: var(--color-well);
+  }
+}
+.docs-group-list {
+  @media (width >= 48rem) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.25rem;
+    align-content: start;
+  }
+  @media (width >= 80rem) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.docs-group-title {
+  color: var(--color-ink);
+  font-size: 1.125rem;
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  @media (width >= 64rem) {
+    margin-top: 1.5rem;
+    font-size: 1.5rem;
+    letter-spacing: -0.035em;
+  }
+}
+.docs-group-count {
+  margin-left: auto;
+  @media (width >= 64rem) {
+    margin-left: 0;
+    background-color: var(--color-surface);
+  }
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-well);
+  color: var(--color-faint);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.docs-group-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.75rem 0.75rem 0.875rem;
+  border-radius: 1rem;
+  transition: background-color 150ms;
+}
+.docs-group-text {
+  flex: 1;
+  min-width: 0;
+}
+.docs-group-label {
+  display: block;
+  color: var(--color-ink);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+.docs-group-summary {
+  display: block;
+  margin-top: 0.125rem;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+.docs-group-chevron {
+  flex-shrink: 0;
+  rotate: -90deg;
+  color: var(--color-faint);
+  transition:
+    translate 150ms var(--ease-soft),
+    color 150ms;
+}
+@media (hover: hover) {
+  .docs-group-link:hover {
+    background-color: var(--color-well);
+  }
+  .docs-group-link:hover .docs-group-chevron {
+    translate: 2px 0;
+    color: var(--color-ink);
+  }
+}
+
+/* ---------- Article page frame ---------- */
+
+.docs-layout {
+  @media (width >= 64rem) {
+    display: grid;
+    grid-template-columns: 15rem minmax(0, 1fr);
+    column-gap: 2.5rem;
+  }
+  @media (width >= 80rem) {
+    grid-template-columns: 15rem minmax(0, 1fr) 13.5rem;
+    column-gap: 3rem;
+  }
+}
+/* Pages without an "on this page" column use its width too. */
+.docs-main:last-child {
+  @media (width >= 80rem) {
+    grid-column: span 2;
+  }
+}
+.docs-main {
+  min-width: 0;
+  padding-top: 1rem;
+  padding-bottom: 5rem;
+  @media (width >= 64rem) {
+    padding-top: 2rem;
+  }
+}
+.docs-article {
+  max-width: 54rem;
+}
+.docs-sidebar {
+  display: none;
+  @media (width >= 64rem) {
+    display: block;
+  }
+}
+.docs-sidebar-inner {
+  position: sticky;
+  top: calc(4rem + env(safe-area-inset-top));
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 4rem - env(safe-area-inset-top));
+  padding-top: 2rem;
+}
+.docs-sidebar-nav {
+  flex: 1;
+  margin-top: 1.25rem;
+  margin-inline: -0.5rem;
+  padding: 0.25rem 0.5rem 3rem;
+  overflow-y: auto;
+}
+
+/* ---------- Sidebar navigation ---------- */
+
+.docs-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-height: 2.25rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: var(--radius-pill);
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.35;
+  transition:
+    background-color 150ms,
+    color 150ms;
+  @media (width < 64rem) {
+    min-height: 2.75rem;
+  }
+}
+.docs-nav-overview-icon {
+  flex-shrink: 0;
+  color: var(--color-faint);
+}
+@media (hover: hover) {
+  .docs-nav-link:hover {
+    background-color: light-dark(#0000000a, #ffffff0d);
+    color: var(--color-ink);
+  }
+}
+/* The page being read: a raised white pill with a mint dot. */
+.docs-nav-link[aria-current="page"] {
+  background-color: var(--color-surface);
+  box-shadow:
+    0 1px 2px light-dark(#0000000f, #00000066),
+    0 8px 18px -12px light-dark(#00000040, #000000cc);
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.docs-nav-link[aria-current="page"]::after {
+  content: "";
+  flex-shrink: 0;
+  width: 0.375rem;
+  height: 0.375rem;
+  margin-left: auto;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-mint-deep);
+}
+.docs-nav-group {
+  margin-top: 1.5rem;
+}
+.docs-nav-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.875rem 0.5rem;
+  color: var(--color-faint);
+}
+.docs-nav-title svg {
+  color: var(--color-mint-ink);
+}
+
+/* ---------- Phone bar: page menu and "on this page", pinned under the header ---------- */
+
+.docs-mobile-bar {
+  position: sticky;
+  top: calc(4rem + env(safe-area-inset-top));
+  z-index: 20;
+  background-color: light-dark(#f5f5f4eb, #101113eb);
+  backdrop-filter: blur(12px);
+  @media (width >= 64rem) {
+    display: none;
+  }
+}
+.docs-mobile-bar-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 4rem;
+}
+.docs-sheet {
+  min-width: 0;
+}
+.docs-sheet-pages {
+  flex: 1;
+}
+.docs-sheet > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.75rem;
+  padding-inline: 1rem;
+  border: 1px solid light-dark(#0000000f, #ffffff14);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface);
+  box-shadow: 0 1px 2px light-dark(#0000000f, #00000066);
+  color: var(--color-ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.docs-sheet[open] > summary {
+  border-color: var(--color-mint-deep);
+}
+.docs-sheet-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.docs-sheet-icon {
+  flex-shrink: 0;
+  color: var(--color-faint);
+}
+.docs-sheet-chevron {
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--color-faint);
+  transition: rotate 150ms;
+}
+.docs-sheet[open] .docs-sheet-chevron {
+  rotate: 180deg;
+}
+/* On narrow phones the page name gets the room; the contents button keeps its icon. */
+@media (width < 30rem) {
+  .docs-sheet-toc > summary {
+    justify-content: center;
+    width: 2.75rem;
+    padding-inline: 0;
+  }
+  .docs-sheet-toc .docs-sheet-label,
+  .docs-sheet-toc .docs-sheet-chevron {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+/* The dropdown sheet: a white card under the bar (the bar is its containing block). */
+.docs-sheet-panel {
+  position: absolute;
+  top: calc(100% - 0.25rem);
+  left: max(0.75rem, env(safe-area-inset-left));
+  right: max(0.75rem, env(safe-area-inset-right));
+  max-height: calc(100dvh - 9rem - env(safe-area-inset-top));
+  padding: 1rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid light-dark(#0000000a, #ffffff10);
+  border-radius: var(--radius-frame);
+  background-color: var(--color-surface);
+  box-shadow: 0 30px 60px -20px light-dark(#00000059, #000000e6);
+}
+.docs-sheet-panel > nav {
+  margin-top: 1rem;
+}
+/* Inside the white sheet the current page needs a tint, not a white pill. */
+.docs-sheet-panel .docs-nav-link[aria-current="page"] {
+  background-color: var(--color-well);
+  box-shadow: none;
+}
+
+/* ---------- Article header ---------- */
+
+.docs-paper {
+  padding: 1.75rem 1.25rem 2rem;
+  @media (width >= 40rem) {
+    padding: 2.75rem 2.75rem 2.5rem;
+  }
+  @media (width >= 80rem) {
+    padding: 3.5rem 3.75rem 3rem;
+  }
+}
+.docs-breadcrumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.docs-breadcrumb a {
+  display: inline-block;
+  padding-block: 0.75rem;
+  margin-block: -0.75rem;
+  color: var(--color-ink);
+}
+@media (hover: hover) {
+  .docs-breadcrumb a:hover {
+    color: var(--color-mint-ink);
+  }
+}
+.docs-breadcrumb-sep {
+  display: block;
+  rotate: -90deg;
+  color: var(--color-faint);
+}
+.docs-breadcrumb-group {
+  color: var(--color-mint-ink);
+}
+.docs-title {
+  margin-top: 1rem;
+  color: var(--color-ink);
+  font-size: clamp(2.25rem, 1.5rem + 2.6vw, 3.5rem);
+  line-height: 1.02;
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+.docs-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+.docs-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2rem;
+  padding-inline: 0.75rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-well);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition:
+    background-color 150ms,
+    color 150ms;
+}
+.docs-chip-link {
+  @media (width < 64rem) {
+    height: 2.75rem;
+    padding-inline: 1rem;
+  }
+}
+@media (hover: hover) {
+  .docs-chip-link:hover {
+    background-color: var(--color-brand-bg);
+    color: var(--color-on-brand);
+  }
+}
+
+/* "Not translated yet" / "Portuguese only": a soft note with a language bubble. */
+.docs-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+  margin-top: 1.75rem;
+  padding: 1rem 1.125rem;
+  border-radius: 1.125rem;
+  background-color: var(--color-well);
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.docs-note-badge {
+  flex-shrink: 0;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+}
+
+/* ---------- Article body: Markdown from the repository (src/lib/docs/render.ts) ---------- */
+
+.doc-body {
+  margin-top: 2.25rem;
+  color: light-dark(#26282b, #e2e3e6);
+  font-size: 1rem;
+  line-height: 1.75;
+  overflow-wrap: break-word;
+  @media (width >= 40rem) {
+    font-size: 1.0625rem;
+  }
+}
+.doc-body > * + *,
+.doc-body li > * + * {
+  margin-top: 1.125rem;
+}
+/* The guide's first paragraph says what the page is for. */
+.doc-body > p:first-child {
+  color: var(--color-muted);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  @media (width >= 40rem) {
+    font-size: 1.25rem;
+  }
+}
+.doc-body h2,
+.doc-body h3,
+.doc-body h4,
+.doc-body h5,
+.doc-body h6 {
+  color: var(--color-ink);
+}
+.doc-body h2 {
+  margin-top: 3.5rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--color-line);
+  font-size: clamp(1.5rem, 1.25rem + 0.8vw, 1.875rem);
+  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+.doc-body h3 {
+  margin-top: 2.5rem;
+  font-size: 1.25rem;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.doc-body h4,
+.doc-body h5,
+.doc-body h6 {
+  margin-top: 2rem;
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+.doc-body h2 + *,
+.doc-body h3 + *,
+.doc-body h4 + * {
+  margin-top: 0.875rem;
+}
+.doc-body h2 code,
+.doc-body h3 code {
+  font-size: 0.85em;
+}
+/* html already reserves 6rem for the header; phones also have the docs bar. */
+.doc-heading {
+  @media (width < 64rem) {
+    scroll-margin-top: 4rem;
+  }
+}
+.doc-anchor {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.5rem;
+  padding: 0 0.45em;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-well);
+  color: var(--color-faint);
+  font-size: 0.7em;
+  font-weight: 600;
+  line-height: 1.6;
+  text-decoration: none;
+  vertical-align: middle;
+  opacity: 0;
+  transition:
+    opacity 150ms,
+    color 150ms;
+}
+.doc-heading:hover .doc-anchor,
+.doc-anchor:focus-visible,
+.doc-heading:target .doc-anchor {
+  opacity: 1;
+}
+.doc-anchor:hover {
+  color: var(--color-mint-ink);
+}
+@media (hover: none) {
+  .doc-anchor {
+    display: none;
+  }
+}
+.doc-body a:not(.doc-anchor) {
+  color: var(--color-mint-ink);
+  font-weight: 500;
+  text-decoration-line: underline;
+  text-decoration-color: color-mix(in srgb, var(--color-mint-ink) 35%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 150ms;
+}
+.doc-body a:not(.doc-anchor):hover {
+  text-decoration-color: currentColor;
+}
+.doc-body strong {
+  color: var(--color-ink);
+  font-weight: 650;
+}
+.doc-body :not(pre) > code {
+  padding: 0.1em 0.4em;
+  border: 1px solid var(--color-line);
+  border-radius: 0.4rem;
+  background-color: var(--color-well);
+  font-family: var(--font-mono);
+  font-size: 0.8125em;
+  overflow-wrap: anywhere;
+  hyphens: none;
+}
+.doc-body ul,
+.doc-body ol {
+  padding-left: 1.375rem;
+}
+.doc-body ul {
+  list-style: disc;
+}
+.doc-body ol {
+  list-style: decimal;
+}
+.doc-body li + li {
+  margin-top: 0.5rem;
+}
+.doc-body ul > li::marker {
+  color: var(--color-mint-deep);
+}
+.doc-body ol > li::marker {
+  color: var(--color-faint);
+  font-size: 0.875em;
+  font-weight: 700;
+}
+/* Repository notes are blockquotes: a mint-tinted callout with an "i" badge. */
+.doc-body blockquote {
+  position: relative;
+  padding: 1.125rem 1.25rem 1.125rem 3.25rem;
+  border: 1px solid color-mix(in srgb, var(--color-mint) 40%, transparent);
+  border-radius: 1.125rem;
+  background-color: color-mix(in srgb, var(--color-mint) 12%, var(--color-surface));
+  font-size: 0.9375rem;
+}
+.doc-body blockquote::before {
+  content: "i";
+  position: absolute;
+  top: 1.3rem;
+  left: 1.125rem;
+  display: grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-mint-deep);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-style: normal;
+  line-height: 1;
+}
+.doc-body blockquote > * + * {
+  margin-top: 0.75rem;
+}
+.doc-body hr {
+  margin-block: 2.5rem;
+  border-color: var(--color-line);
+}
+.doc-subtitle {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.doc-table {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  border: 1px solid var(--color-line);
+  border-radius: 1rem;
+  background-color: var(--color-surface);
+  scrollbar-width: thin;
+}
+.doc-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+.doc-table th,
+.doc-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-line);
+  text-align: left;
+  vertical-align: top;
+}
+.doc-table th {
+  background-color: var(--color-well);
+  color: var(--color-ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.doc-table tr:last-child td {
+  border-bottom: 0;
+}
+/* Names, flags and values stay on one line; the table scrolls instead. */
+.doc-body .doc-table code {
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
+/* Code: the same look as the site's CodeBlock (caption bar, copy pill, --color-code well). */
+.doc-code {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  border-radius: 1rem;
+  background-color: var(--color-code);
+}
+.doc-code figcaption {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.75rem;
+  padding-inline: 1.125rem 6.5rem;
+  border-bottom: 1px solid var(--color-line);
+  color: var(--color-ink);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.doc-code figcaption::before {
+  content: "";
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-mint-deep);
+}
+.doc-code pre {
+  padding: 1rem 1.25rem 1.125rem;
+  color: var(--color-ink);
+}
+.doc-copy {
+  position: absolute;
+  top: 0.4375rem;
+  right: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  height: 1.875rem;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface);
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition:
+    background-color 150ms,
+    color 150ms;
+}
+/* A 44 px touch target around the small pill. */
+.doc-copy::after {
+  content: "";
+  position: absolute;
+  inset: -0.4375rem;
+}
+.doc-copy:hover {
+  color: var(--color-ink);
+}
+.doc-copy .copy-icon-done,
+.doc-copy[data-state="done"] .copy-icon-idle {
+  display: none;
+}
+.doc-copy[data-state="done"] .copy-icon-done {
+  display: block;
+}
+.doc-copy[data-state="done"] {
+  color: var(--color-mint-ink);
+}
+
+/* Code inside a callout sits on white, not on the mint tint. */
+.doc-body blockquote .doc-code {
+  background-color: var(--color-surface);
+}
+
+/* ---------- Article end: source, previous / next ---------- */
+
+.docs-source {
+  margin-top: 3.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-line);
+  color: var(--color-faint);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+.docs-source p + p {
+  margin-top: 0.25rem;
+}
+.docs-source a {
+  color: var(--color-muted);
+  text-decoration-line: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 150ms;
+}
+.docs-source a:hover {
+  text-decoration-color: currentColor;
+}
+.docs-source-path {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+.docs-pager {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+  @media (width >= 40rem) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.docs-pager-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 10rem;
+  padding: 1.5rem 1.75rem;
+  transition:
+    translate 200ms var(--ease-soft),
+    box-shadow 200ms;
+}
+.docs-pager-hint {
+  color: var(--color-faint);
+}
+.docs-pager-title {
+  margin-top: 0.5rem;
+  margin-bottom: 1.25rem;
+  color: var(--color-ink);
+  font-size: 1.5rem;
+  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+.docs-pager-card .docs-round-arrow {
+  margin-top: auto;
+}
+.docs-pager-prev .docs-round-arrow {
+  rotate: 180deg;
+  background-color: var(--color-well);
+  color: var(--color-ink);
+}
+/* "Next" is the dark card: the way forward reads first. */
+.docs-pager-next {
+  align-items: flex-end;
+  border-color: transparent;
+  background-color: var(--color-brand-bg);
+  text-align: right;
+  @media (width >= 40rem) {
+    grid-column-start: 2;
+  }
+}
+.docs-pager-next .docs-pager-hint {
+  color: color-mix(in srgb, var(--color-on-brand) 72%, transparent);
+}
+.docs-pager-next .docs-pager-title {
+  color: var(--color-on-brand);
+}
+.docs-pager-next .docs-round-arrow {
+  background-color: var(--color-on-brand);
+  color: var(--color-brand-bg);
+}
+
+/* ---------- On this page ---------- */
+
+.docs-toc {
+  display: none;
+  @media (width >= 80rem) {
+    display: block;
+  }
+}
+.docs-toc-nav {
+  position: sticky;
+  top: calc(4rem + env(safe-area-inset-top));
+  max-height: calc(100dvh - 4rem - env(safe-area-inset-top));
+  padding-top: 2rem;
+  padding-bottom: 2.5rem;
+  overflow-y: auto;
+}
+.docs-toc-title {
+  padding-inline: 0.75rem;
+  color: var(--color-faint);
+}
+.docs-toc-list {
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+.docs-toc-link {
+  position: relative;
+  display: block;
+  padding: 0.4375rem 0.75rem;
+  border-radius: 0.75rem;
+  color: var(--color-muted);
+  transition:
+    background-color 150ms,
+    color 150ms;
+}
+.docs-toc-link:hover {
+  color: var(--color-ink);
+}
+.docs-toc-link[aria-current="true"] {
+  background-color: var(--color-surface);
+  box-shadow: 0 1px 2px light-dark(#0000000f, #00000066);
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.docs-toc-link[aria-current="true"]::before {
+  content: "";
+  position: absolute;
+  top: 0.75rem;
+  left: 0;
+  width: 0.1875rem;
+  height: calc(100% - 1.5rem);
+  min-height: 0.5rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-mint-deep);
+}
+.docs-toc-sub {
+  padding-left: 1.5rem;
+}
+.docs-sheet-panel .docs-toc-list {
+  margin-top: 0;
+  font-size: 0.875rem;
+}
+.docs-sheet-panel .docs-toc-link {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+}
+.docs-sheet-panel .docs-toc-link[aria-current="true"] {
+  background-color: var(--color-well);
+  box-shadow: none;
+}
+.docs-toc-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  height: 2rem;
+  margin-top: 1.25rem;
+  margin-left: 0.5rem;
+  padding-inline: 0.75rem;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-well);
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: color 150ms;
+}
+.docs-toc-top:hover {
+  color: var(--color-ink);
+}
+.docs-toc-top svg {
+  rotate: 180deg;
+}
+
+/* ---------- Search ---------- */
+
+.docs-search {
+  position: relative;
+}
+.docs-search-icon {
+  position: absolute;
+  top: 50%;
+  left: 0.875rem;
+  translate: 0 -50%;
+  color: var(--color-faint);
+  pointer-events: none;
+}
+.docs-search-input {
+  width: 100%;
+  height: 2.5rem;
+  padding-inline: 2.375rem 2.5rem;
+  border: 1px solid light-dark(#0000000f, #ffffff14);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-surface);
+  box-shadow: 0 1px 2px light-dark(#0000000f, #00000066);
+  color: var(--color-ink);
+  font-size: 0.875rem;
+  transition: border-color 150ms;
+  @media (width < 64rem) {
+    height: 2.75rem;
+    font-size: 1rem;
+  }
+}
+.docs-search-input:hover {
+  border-color: var(--color-line-strong);
+}
+.docs-search-input:focus-visible {
+  border-color: var(--color-mint-deep);
+  border-radius: var(--radius-pill);
+}
+.docs-search-input::placeholder {
+  color: var(--color-faint);
+}
+.docs-search-input::-webkit-search-cancel-button {
+  display: none;
+}
+.docs-search-kbd {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  display: none;
+  min-width: 1.375rem;
+  padding-inline: 0.375rem;
+  border: 1px solid var(--color-line);
+  border-radius: 0.375rem;
+  translate: 0 -50%;
+  color: var(--color-faint);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  text-align: center;
+  pointer-events: none;
+  @media (width >= 64rem) {
+    display: block;
+  }
+}
+
+/* The big pill on the docs index. */
+.docs-search-large .docs-search-icon {
+  left: 1.375rem;
+}
+.docs-search-large .docs-search-input {
+  height: 3.5rem;
+  padding-inline: 3.5rem 3.5rem;
+  font-size: 1rem;
+  box-shadow:
+    0 1px 2px light-dark(#0000000a, #00000066),
+    0 18px 40px -24px light-dark(#00000040, #000000cc);
+  @media (width >= 40rem) {
+    height: 4rem;
+    font-size: 1.0625rem;
+  }
+}
+.docs-search-large .docs-search-kbd {
+  right: 1.25rem;
+  font-size: 0.75rem;
+}
+
+.docs-search-panel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  z-index: 30;
+  width: 100%;
+  max-height: min(28rem, 70dvh);
+  padding: 0.5rem;
+  overflow-y: auto;
+  border-radius: 1.25rem;
+  box-shadow: 0 30px 60px -20px light-dark(#00000059, #000000e6);
+  @media (width >= 64rem) {
+    width: 30rem;
+  }
+}
+.docs-search-large .docs-search-panel {
+  width: 100%;
+}
+.docs-search-status {
+  padding: 0.5rem 0.75rem;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+.docs-search-result {
+  display: block;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.875rem;
+}
+[aria-selected="true"] > .docs-search-result,
+.docs-search-result:hover {
+  background-color: var(--color-well);
+}
+.docs-search-where {
+  display: block;
+  color: var(--color-ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.docs-search-excerpt {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+.docs-search-excerpt mark {
+  background-color: var(--color-mint-wash);
+  color: var(--color-mint-ink);
+  font-weight: 700;
+}
+/* In the phone sheet the results flow under the box instead of floating. */
+.docs-sheet-panel .docs-search-panel {
+  position: static;
+  width: auto;
+  margin-top: 0.5rem;
+  box-shadow: none;
+}

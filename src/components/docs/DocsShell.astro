@@ -1,0 +1,95 @@
+---
+import { type Locale, t } from '../../i18n/utils.ts';
+import Base from '../../layouts/Base.astro';
+import type { DocsBundle } from '../../lib/docs/content.ts';
+import CopyScript from '../CopyScript.astro';
+import Icon from '../Icon.astro';
+import DocsNav from './DocsNav.astro';
+import DocsSearch from './DocsSearch.astro';
+// Docs-only styles: kept out of global.css so the home page does not carry them.
+import '../../styles/docs.css';
+
+/**
+ * Frame of every /docs page.
+ * - "landing" (the index): one wide column; the page brings its own big search.
+ * - "article": sidebar (search + pages), the page card and an "on this page"
+ *   column on wide screens; on phones a bar pinned under the header holds the
+ *   page menu (search included) and, when the page has one, its contents.
+ */
+interface Props {
+  locale: Locale;
+  bundle: DocsBundle;
+  current: string | null;
+  title: string;
+  description: string;
+  path: string;
+  layout?: 'landing' | 'article';
+}
+const { locale, bundle, current, title, description, path, layout = 'article' } = Astro.props;
+const dict = t(locale).docsSite;
+const currentLabel = bundle.pages.find((page) => page.id === current)?.label ?? dict.overview;
+const isLanding = layout === 'landing';
+
+// Highlight classes are emitted before <Base> renders so their hash lands in the CSP <meta>.
+Astro.csp?.insertStyleHash(bundle.cssHash);
+---
+
+<Base locale={locale} title={title} description={description} path={path}>
+  {
+    isLanding && (
+      <div class="docs-container docs-landing">
+        <slot />
+      </div>
+    )
+  }
+  {
+    !isLanding && (
+      <>
+        <div class="docs-mobile-bar">
+          <div class="docs-container docs-mobile-bar-inner">
+            <details class="docs-sheet docs-sheet-pages" data-mobile-menu>
+              <summary aria-label={`${dict.menu}: ${currentLabel}`}>
+                <Icon name="menu" size={16} class="docs-sheet-icon" />
+                <span class="docs-sheet-label">{currentLabel}</span>
+                <Icon name="chevron" size={14} class="docs-sheet-chevron" />
+              </summary>
+              <div class="docs-sheet-panel">
+                <DocsSearch locale={locale} id="docs-search-mobile" />
+                <nav aria-label={dict.nav}>
+                  <DocsNav locale={locale} pages={bundle.pages} current={current} />
+                </nav>
+              </div>
+            </details>
+            <slot name="mobile-toc" />
+          </div>
+        </div>
+
+        <div class="docs-container docs-layout">
+          <aside class="docs-sidebar">
+            <div class="docs-sidebar-inner">
+              <DocsSearch locale={locale} id="docs-search" />
+              <nav aria-label={dict.nav} class="docs-scroll docs-sidebar-nav">
+                <DocsNav locale={locale} pages={bundle.pages} current={current} />
+              </nav>
+            </div>
+          </aside>
+
+          <div class="docs-main">
+            <slot />
+          </div>
+
+          <slot name="aside" />
+        </div>
+      </>
+    )
+  }
+  <style is:inline set:html={bundle.css}></style>
+</Base>
+
+<CopyScript />
+
+<script>
+  // Imported once per page so Astro inlines them (see the README on client scripts).
+  import '../../scripts/docs-search.ts';
+  import '../../scripts/docs-toc.ts';
+</script>
