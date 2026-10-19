@@ -4,6 +4,11 @@
  * crosses the middle of the screen. Pages without those sections do nothing.
  */
 const READING_BAND = '-45% 0px -50% 0px';
+/** Without scrollend: quiet time after the last scroll event before the spy takes over again. */
+const SCROLL_SETTLE_MS = 150;
+/** Safety net: the longest a click keeps the dot on its target without the scroll ending. */
+const CLICK_LOCK_MAX_MS = 2000;
+const SUPPORTS_SCROLL_END = 'onscrollend' in window;
 
 function sectionIdOf(link: HTMLAnchorElement): string | null {
   const hash = new URL(link.href).hash;
@@ -53,14 +58,69 @@ function setupScrollSpy(): void {
   };
 
   const visible = new Set<string>();
+  // The first section in page order that is in the band wins.
+  const readingSectionId = (): string | null =>
+    sectionsInOrder.find((id) => visible.has(id)) ?? null;
+  const markReading = (): void => mark(readingSectionId());
+
+  // After a click the dot goes straight to the target; the sections the smooth
+  // scroll passes over must not take it on the way.
+  let isFollowingClick = false;
+  let releaseTimer: number | undefined;
+  const releaseClickLock = (): void => {
+    window.clearTimeout(releaseTimer);
+    isFollowingClick = false;
+    markReading();
+  };
+  const releaseAfter = (delayMs: number): void => {
+    window.clearTimeout(releaseTimer);
+    releaseTimer = window.setTimeout(releaseClickLock, delayMs);
+  };
+
+  const releaseOnEvent = (): void => {
+    if (!isFollowingClick) return;
+
+    releaseClickLock();
+  };
+
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (!isFollowingClick) return;
+
+      // Without scrollend, the scroll is over once its events stop.
+      releaseAfter(SUPPORTS_SCROLL_END ? CLICK_LOCK_MAX_MS : SCROLL_SETTLE_MS);
+    },
+    { passive: true },
+  );
+  window.addEventListener('scrollend', releaseOnEvent);
+  // The reader takes over the scroll: the spy follows them again.
+  for (const type of ['wheel', 'touchstart', 'keydown']) {
+    window.addEventListener(type, releaseOnEvent, { passive: true });
+  }
+
+  for (const link of links) {
+    link.addEventListener('click', () => {
+      const id = sectionIdOf(link);
+      // Only sections on this page: a link to another page must not lock the dot.
+      if (id == null || !sectionsInOrder.includes(id)) return;
+      if (readingSectionId() === id) return;
+
+      isFollowingClick = true;
+      mark(id);
+      releaseAfter(CLICK_LOCK_MAX_MS);
+    });
+  }
+
   const observer = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
         if (entry.isIntersecting) visible.add(entry.target.id);
         if (!entry.isIntersecting) visible.delete(entry.target.id);
       }
-      // The first section in page order that is in the band wins.
-      mark(sectionsInOrder.find((id) => visible.has(id)) ?? null);
+      if (isFollowingClick) return;
+
+      markReading();
     },
     { rootMargin: READING_BAND },
   );

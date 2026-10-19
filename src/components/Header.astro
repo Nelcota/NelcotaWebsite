@@ -30,8 +30,8 @@ const isDocs = path.startsWith('docs');
 // In page order; the last two leave the home page.
 const links = [
   { href: `${home}#how-it-works`, label: nav.howItWorks },
-  { href: `${home}#speed`, label: nav.speed },
   { href: `${home}#security`, label: nav.security },
+  { href: `${home}#speed`, label: nav.speed },
   { href: `${home}#start`, label: nav.getStarted, isHighlight: true },
   { href: getRelativeLocaleUrl(locale, 'compare/'), label: nav.compare, isCurrent: path.startsWith('compare') },
   { href: docsIndexUrl(locale), label: nav.docs, isCurrent: isDocs },
