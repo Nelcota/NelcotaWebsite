@@ -818,7 +818,8 @@ export const ptBr = {
     },
     sources: {
       title: 'Fontes',
-      intro: 'Cada célula vem destas páginas. Versões mudam; a data no topo diz quando conferimos.',
+      intro:
+        'Cada célula vem destas páginas. A coluna do Nelcota registra a 0.4.0; os guias atuais de instalação usam a 0.5.0. A data no topo identifica esta base do comparativo.',
     },
     cta: { primary: 'Testar o Nelcota localmente', secondary: 'Voltar para o' },
     winsTitle: 'Onde o Nelcota sai na frente',

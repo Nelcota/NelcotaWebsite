@@ -821,7 +821,7 @@ export const en = {
     sources: {
       title: 'Sources',
       intro:
-        'Every cell comes from these pages. Versions change; the date at the top says when we checked.',
+        'Every cell comes from these pages. The Nelcota column records 0.4.0; current install guides target 0.5.0. The date at the top identifies this comparison baseline.',
     },
     cta: { primary: 'Try Nelcota locally', secondary: 'Back to' },
     winsTitle: 'Where Nelcota comes out ahead',
