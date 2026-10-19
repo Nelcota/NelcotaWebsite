@@ -1,12 +1,14 @@
-# Example Caddyfile for self-hosting the static site on a VPS.
+# Serves the static site. Used two ways:
 #
-#   pnpm build && rsync -a --delete dist/ user@vps:/srv/nelcota-site/
-#   caddy run --config deploy/Caddyfile
-#
-# Replace the hostname; Caddy obtains and renews the TLS certificate automatically.
+# - Docker / Coolify (see Dockerfile): SITE_ADDRESS=:80, plain HTTP behind the
+#   platform's proxy, which terminates TLS.
+# - A VPS on its own:
+#     pnpm build && rsync -a --delete dist/ user@vps:/srv/nelcota-site/
+#     SITE_ADDRESS=nelcota.com caddy run --config deploy/Caddyfile
+#   With a hostname, Caddy obtains and renews the TLS certificate automatically.
 
-nelcota.example.com {
-	root * /srv/nelcota-site
+{$SITE_ADDRESS::80} {
+	root * {$SITE_ROOT:/srv/nelcota-site}
 
 	# zstd first, gzip fallback (Brotli is not built into Caddy).
 	encode zstd gzip
