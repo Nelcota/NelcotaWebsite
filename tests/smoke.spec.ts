@@ -179,11 +179,11 @@ test.describe('interactive sections', () => {
     await expect.poll(() => track.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
     await expect(prev).toBeEnabled();
 
-    for (let step = 0; step < 4; step += 1) {
-      if (await next.isDisabled()) break;
-      await next.click();
-    }
+    // Jump to the end instead of clicking through: a click racing the smooth scroll
+    // can land just as the button turns itself off.
+    await track.evaluate((element) => element.scrollTo({ left: element.scrollWidth }));
     await expect(next).toBeDisabled();
+    await expect(prev).toBeEnabled();
   });
 
   test('the panel carousel shows both real screenshots', async ({ page }) => {
