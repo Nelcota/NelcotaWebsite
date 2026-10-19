@@ -95,13 +95,13 @@ const copies = [0, 1, 2, 3] as const;
   /* Each set moves by its own width, so the loop is seamless with any number of copies. */
   @media (prefers-reduced-motion: no-preference) {
     .logos-set {
-      animation: logos 40s linear infinite;
+      animation: logos-drift 40s linear infinite;
     }
   }
   :global([data-motion-paused]) .logos-set {
     animation-play-state: paused;
   }
-  @keyframes logos {
+  @keyframes logos-drift {
     to {
       transform: translateX(-100%);
     }

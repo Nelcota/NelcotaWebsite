@@ -64,13 +64,13 @@ const copies = [0, 1, 2, 3] as const;
   }
   @media (prefers-reduced-motion: no-preference) {
     .drift-left .drift-set {
-      animation: drift 60s linear infinite;
+      animation: drift-row 60s linear infinite;
     }
     .drift-right .drift-set {
-      animation: drift 60s linear infinite reverse;
+      animation: drift-row 60s linear infinite reverse;
     }
   }
-  @keyframes drift {
+  @keyframes drift-row {
     to {
       transform: translateX(-100%);
     }
