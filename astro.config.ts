@@ -112,7 +112,9 @@ export default defineConfig({
             weight: 400,
             style: 'normal',
             src: ['./src/assets/fonts/jetbrains-mono-latin-400-normal.woff2'],
-            display: 'swap',
+            // Not preloaded: a late swap in code blocks nudged the docs layout on slow CI.
+            // "optional" keeps the system monospace for that view and uses the cached font next time.
+            display: 'optional',
             unicodeRange: [...latin],
           },
         ],
