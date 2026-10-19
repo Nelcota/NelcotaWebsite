@@ -1,0 +1,17 @@
+# Normalize line endings to LF in the repository and in working copies.
+* text=auto eol=lf
+
+# Binary assets: never diff or convert.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.avif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+
+# Generated or vendored content: collapsed in diffs and excluded from language stats.
+pnpm-lock.yaml linguist-generated=true -diff
+vendor/** linguist-vendored=true
+src/data/github-snapshot.json linguist-generated=true

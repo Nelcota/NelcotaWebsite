@@ -20,3 +20,10 @@ playwright-report/
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# logs and caches
+*.log
+pnpm-debug.log*
+*.tsbuildinfo
+.cache/
+coverage/
