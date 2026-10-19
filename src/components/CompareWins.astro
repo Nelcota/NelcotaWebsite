@@ -1,0 +1,108 @@
+---
+import { WINS } from '../data/compare.ts';
+import { type Locale, t } from '../i18n/utils.ts';
+import { COMPARE_STRINGS, splitLastWord, WIN_FIGURES } from './compare-strings.ts';
+
+/**
+ * "Where Nelcota comes out ahead": four facts from the comparison table, laid
+ * out like a fan of pricing cards (a big figure where the price would be), the
+ * second one lifted in a pop color. Used on the comparison page and the home page.
+ */
+interface Props {
+  locale: Locale;
+  /** h3 under a section's h2 on the home page, h2 under the comparison page's h1. */
+  headingLevel?: 2 | 3;
+  /** For a section that is labelled by this heading. */
+  headingId?: string;
+  class?: string;
+}
+const { locale, headingLevel = 3, headingId, class: className } = Astro.props;
+const Heading = headingLevel === 2 ? 'h2' : 'h3';
+const copy = t(locale).compare;
+const [titleLead, titleTail] = splitLastWord(copy.winsTitle);
+const eyebrow = COMPARE_STRINGS.winsEyebrow;
+
+/** The lifted card, as the "popular" plan is on a pricing fan. */
+const HIGHLIGHT_INDEX = 1;
+
+const figureFor = (index: number): (typeof WIN_FIGURES)[number] | null => WIN_FIGURES[index] ?? null;
+---
+
+<div class:list={['wins', className]}>
+  <div class="text-center">
+    <p class="eyebrow">{`${eyebrow.lead[locale]} `}<span class="eyebrow-accent">{eyebrow.accent[locale]}</span></p>
+    <Heading id={headingId} class="mt-4 text-[clamp(1.875rem,4vw,3rem)] leading-[1.02] font-semibold tracking-[-0.04em] text-ink">
+      {`${titleLead} `}<span class="text-faint">{titleTail}</span>
+    </Heading>
+  </div>
+
+  <ol class="wins-fan mt-12 grid gap-4 sm:grid-cols-2 lg:mt-16 lg:grid-cols-4 lg:gap-0">
+    {
+      WINS.map((win, index) => {
+        const figure = figureFor(index);
+        const isHighlight = index === HIGHLIGHT_INDEX;
+
+        return (
+          <li class:list={['win card flex flex-col p-6 sm:p-7', isHighlight && 'win-highlight']}>
+            {figure != null && (
+              <>
+                <p class:list={['text-sm font-semibold', isHighlight ? 'text-pop-ink' : 'text-muted']}>{figure.kicker[locale]}</p>
+                <p
+                  class:list={[
+                    'mt-2 text-[3.25rem] leading-none font-semibold tracking-[-0.05em] tabular-nums',
+                    isHighlight ? 'text-pop-ink' : 'text-ink',
+                  ]}
+                  aria-hidden="true"
+                >
+                  {figure.figure}
+                </p>
+              </>
+            )}
+            <p class:list={['mt-8 text-lg leading-snug font-semibold tracking-[-0.02em]', isHighlight ? 'text-pop-ink' : 'text-ink']}>
+              {win.title[locale]}
+            </p>
+            <p class:list={['mt-2 text-[0.9375rem] leading-relaxed', isHighlight ? 'text-pop-ink' : 'text-muted']}>{win.body[locale]}</p>
+          </li>
+        );
+      })
+    }
+  </ol>
+</div>
+
+<style>
+  .win-highlight {
+    background-color: var(--color-pop-coral);
+    border-color: transparent;
+  }
+
+  /*
+   * Wide screens: the cards overlap a little and lean, like a hand of cards;
+   * hovering (or tabbing into) one straightens it. Phones get a plain stack.
+   */
+  @media (width >= 64rem) {
+    .win {
+      position: relative;
+      margin-inline: -0.375rem;
+      transition: transform 300ms var(--ease-soft);
+    }
+    .win:nth-child(1) {
+      transform: rotate(-3deg) translateY(0.75rem);
+    }
+    .win:nth-child(2) {
+      z-index: 2;
+      transform: rotate(-1deg) translateY(-0.75rem);
+    }
+    .win:nth-child(3) {
+      z-index: 1;
+      transform: rotate(1.5deg);
+    }
+    .win:nth-child(4) {
+      transform: rotate(3deg) translateY(1rem);
+    }
+    .win:hover,
+    .win:focus-within {
+      z-index: 3;
+      transform: rotate(0deg) translateY(-1rem);
+    }
+  }
+</style>

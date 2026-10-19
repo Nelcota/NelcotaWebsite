@@ -1,0 +1,304 @@
+---
+import { getRelativeLocaleUrl } from 'astro:i18n';
+import { CHECKED_ON, COMPARE_GROUPS, PRODUCT_INFO, PRODUCTS, type Product } from '../data/compare.ts';
+import { formatDate, type Locale, t } from '../i18n/utils.ts';
+import Base from '../layouts/Base.astro';
+import { REPO_URL, SITE_NAME } from '../lib/site.ts';
+import BrandMark from './BrandMark.astro';
+import CompareTable from './CompareTable.astro';
+import CompareWins from './CompareWins.astro';
+import { COMPARE_STRINGS, PRODUCT_TONE, splitLastWord } from './compare-strings.ts';
+import Icon from './Icon.astro';
+
+/**
+ * Feature comparison with Supabase (self-hosted), PocketBase and Appwrite
+ * (self-hosted), gallery style: a giant two-tone title over a fan of product
+ * cards, the "comes out ahead" cards, the spec table, one card per product on
+ * who it fits, and the sources. Facts and sources live in src/data/compare.ts;
+ * every cell is checked against the official docs on CHECKED_ON.
+ */
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const dict = t(locale);
+const copy = dict.compare;
+const strings = COMPARE_STRINGS;
+const issuesUrl = `${REPO_URL}/issues/new`;
+const home = getRelativeLocaleUrl(locale);
+
+const [titleLead, titleTail] = splitLastWord(copy.title);
+const [tableLead, tableTail] = splitLastWord(copy.tableLabel);
+const [fitLead, fitTail] = splitLastWord(copy.fit.title);
+const [sourcesLead, sourcesTail] = splitLastWord(copy.sources.title);
+
+/** Hero fan: the handle bubble that floats over a card, as the @mentions do in the reference. */
+const HANDLE_TONE: Readonly<Record<Product, string>> = {
+  nelcota: 'bg-pop-blue text-white',
+  supabase: 'bg-pop-ink text-white',
+  pocketbase: 'bg-pop-coral text-pop-ink',
+  appwrite: 'bg-pop-forest text-white',
+};
+
+const h2Class = 'mt-4 text-[clamp(2.25rem,5vw,3.75rem)] leading-[1] font-semibold tracking-[-0.045em] text-ink';
+const introClass = 'mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-muted';
+---
+
+<Base locale={locale} title={copy.metaTitle} description={copy.metaDescription} path="compare/">
+  <section class="hero overflow-x-clip" aria-labelledby="compare-title">
+    <div class="container-page flex flex-col items-center pt-12 pb-20 text-center md:pt-16 md:pb-28">
+      <p class="eyebrow">
+        {`${strings.heroEyebrow.lead[locale]} `}<span class="eyebrow-accent">{strings.heroEyebrow.accent[locale]}</span>
+      </p>
+      <h1
+        id="compare-title"
+        class="mt-5 max-w-4xl text-[clamp(3rem,8vw,6.25rem)] leading-[0.94] font-semibold tracking-[-0.055em] text-balance text-ink"
+      >
+        {`${titleLead} `}<span class="text-faint">{titleTail}</span>
+      </h1>
+      <p class="mx-auto mt-7 max-w-xl text-lg leading-relaxed text-muted sm:text-xl">{copy.intro}</p>
+
+      <a href="#table" class="btn btn-primary mt-9">
+        {strings.seeTable[locale]}
+        <Icon name="arrow" size={16} class="rotate-90" />
+      </a>
+      <p class="mt-6 max-w-lg text-sm leading-relaxed text-faint">
+        {copy.checked} <time datetime={CHECKED_ON} class="font-semibold text-ink">{formatDate(CHECKED_ON, locale)}</time>.
+        {copy.mistake}{' '}
+        <a href={issuesUrl} rel="noopener" class="link-more">
+          {copy.report}
+          <Icon name="external" size={12} />
+        </a>
+      </p>
+
+      {/* The same four names and versions head the table; here they are only the picture. */}
+      <ul class="fan mt-16 justify-center" aria-hidden="true">
+        {
+          PRODUCTS.map((product) => (
+            <li class:list={['fan-card relative flex flex-col justify-between text-left', PRODUCT_TONE[product]]}>
+              <span class:list={['fan-handle absolute', HANDLE_TONE[product]]}>@{product}</span>
+              <span class="block">
+                <span class="block text-[1.0625rem] leading-tight font-semibold tracking-[-0.02em] sm:text-2xl">{PRODUCT_INFO[product].name}</span>
+                <span class="mt-1 block font-mono text-[0.6875rem] sm:text-xs">{PRODUCT_INFO[product].version[locale]}</span>
+              </span>
+              <span class="flex items-end justify-between gap-2">
+                {product === 'nelcota' && <BrandMark size={40} class="max-sm:hidden" />}
+                <span class="ml-auto text-[2.25rem] leading-[0.8] font-semibold tracking-[-0.06em] sm:text-[5.5rem]">
+                  {PRODUCT_INFO[product].name.charAt(0)}
+                </span>
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="container-page pb-24 md:pb-32" aria-labelledby="wins-title">
+    <CompareWins locale={locale} headingLevel={2} headingId="wins-title" />
+  </section>
+
+  <section id="table" class="container-page scroll-mt-20 pb-24 md:pb-32" aria-labelledby="table-title">
+    <div class="mb-10 text-center md:mb-14">
+      <p class="eyebrow">
+        {`${strings.tableEyebrow.lead[locale]} `}<span class="eyebrow-accent">{strings.tableEyebrow.accent[locale]}</span>
+      </p>
+      <h2 id="table-title" class={h2Class}>
+        {`${tableLead} `}<span class="text-faint">{tableTail}</span>
+      </h2>
+    </div>
+    <CompareTable locale={locale} groups={COMPARE_GROUPS} />
+  </section>
+
+  <section class="container-page pb-24 md:pb-32" aria-labelledby="fit-title">
+    <div class="text-center">
+      <p class="eyebrow">
+        {`${strings.fitEyebrow.lead[locale]} `}<span class="eyebrow-accent">{strings.fitEyebrow.accent[locale]}</span>
+      </p>
+      <h2 id="fit-title" class={h2Class}>
+        {`${fitLead} `}<span class="text-faint">{fitTail}</span>
+      </h2>
+      <p class={introClass}>{copy.fit.intro}</p>
+    </div>
+    <ul class="mt-12 grid gap-4 sm:grid-cols-2 md:mt-14 lg:grid-cols-4">
+      {
+        PRODUCTS.map((product) => {
+          const isNelcota = product === 'nelcota';
+
+          return (
+            <li class:list={['card flex flex-col p-6 sm:p-7', isNelcota && 'fit-nelcota']}>
+              <span class:list={['handle self-start', isNelcota ? 'bg-white text-pop-forest' : PRODUCT_TONE[product]]}>@{product}</span>
+              <h3 class:list={['mt-8 text-2xl font-semibold tracking-[-0.03em]', isNelcota ? 'text-white' : 'text-ink']}>
+                {PRODUCT_INFO[product].name}
+              </h3>
+              <p class:list={['mt-1 font-mono text-xs', isNelcota ? 'text-white' : 'text-faint']}>{PRODUCT_INFO[product].version[locale]}</p>
+              <p class:list={['mt-5 text-[0.9375rem] leading-relaxed', isNelcota ? 'text-white' : 'text-muted']}>
+                {PRODUCT_INFO[product].fit[locale]}
+              </p>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </section>
+
+  <section class="container-page pb-24 md:pb-32" aria-labelledby="sources-title">
+    <div class="text-center">
+      <p class="eyebrow">
+        {`${strings.sourcesEyebrow.lead[locale]} `}<span class="eyebrow-accent">{strings.sourcesEyebrow.accent[locale]}</span>
+      </p>
+      <h2 id="sources-title" class={h2Class}>
+        {`${sourcesLead} `}<span class="text-faint">{sourcesTail}</span>
+      </h2>
+      <p class={introClass}>{copy.sources.intro}</p>
+    </div>
+    <div class="mt-12 grid gap-4 sm:grid-cols-2 md:mt-14 lg:grid-cols-4">
+      {
+        PRODUCTS.map((product) => (
+          <div class="card p-6 sm:p-7">
+            <h3 class="flex items-center gap-2 font-semibold tracking-[-0.01em] text-ink">
+              <span class:list={['size-2.5 rounded-full', PRODUCT_TONE[product]]} aria-hidden="true" />
+              {PRODUCT_INFO[product].name}
+            </h3>
+            <ul class="mt-4 text-sm">
+              {PRODUCT_INFO[product].sources.map((source) => (
+                <li class="source border-t border-line">
+                  <a
+                    href={source.href}
+                    rel="noopener"
+                    class="flex min-h-11 items-center justify-between gap-3 py-2 text-muted transition-colors hover:text-ink"
+                  >
+                    {source.label[locale]}
+                    <Icon name="external" size={13} class="shrink-0 text-faint" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="mt-16 flex flex-wrap justify-center gap-3 md:mt-20">
+      <a href={`${home}#start`} class="btn btn-primary">{copy.cta.primary}</a>
+      <a href={home} class="btn btn-secondary">{copy.cta.secondary} {SITE_NAME}</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /*
+   * The hero's hand of cards: they overlap and lean outwards from the middle,
+   * the highlighted one (Nelcota) on top, like the art fan in the reference.
+   */
+  /* Phones: a two-by-two hand of landscape cards; wider screens deal them in one overlapping row. */
+  .fan {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 9.5rem));
+    gap: 0.75rem;
+  }
+  .fan-card {
+    height: 7rem;
+    padding: 0.875rem;
+    border-radius: 1.125rem;
+    box-shadow:
+      0 1px 2px #0000001a,
+      0 24px 40px -20px #00000066;
+  }
+  .fan-card:nth-child(1) {
+    z-index: 4;
+    transform: rotate(-6deg);
+  }
+  .fan-card:nth-child(2) {
+    z-index: 3;
+    transform: rotate(4deg) translateY(0.5rem);
+  }
+  .fan-card:nth-child(3) {
+    z-index: 2;
+    transform: rotate(3deg);
+  }
+  .fan-card:nth-child(4) {
+    z-index: 1;
+    transform: rotate(-5deg) translateY(0.5rem);
+  }
+
+  .fan-handle,
+  .handle {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px 999px 999px 0.3rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .fan-handle {
+    top: -1.75rem;
+    left: 0.25rem;
+    box-shadow: 0 10px 24px -12px #0b0d0c80;
+  }
+  /* Only the outer two handles float on phones: four would crowd the narrow fan. */
+  .fan-card:nth-child(2) .fan-handle,
+  .fan-card:nth-child(3) .fan-handle {
+    display: none;
+  }
+  .fan-card:nth-child(4) .fan-handle {
+    top: auto;
+    bottom: -1.25rem;
+    left: auto;
+    right: 0.5rem;
+    border-radius: 999px 0.3rem 999px 999px;
+  }
+
+  @media (width >= 40rem) {
+    .fan {
+      display: flex;
+    }
+    .fan-card {
+      width: 11rem;
+      height: 14rem;
+      padding: 1.25rem;
+      margin-inline: -1rem;
+      border-radius: var(--radius-frame);
+    }
+    .fan-card:nth-child(1) {
+      transform: rotate(-9deg) translateY(0.5rem);
+    }
+    .fan-card:nth-child(2) {
+      transform: rotate(-3deg);
+    }
+    .fan-card:nth-child(3) {
+      transform: rotate(3deg);
+    }
+    .fan-card:nth-child(4) {
+      transform: rotate(9deg) translateY(0.5rem);
+    }
+    .fan-card:nth-child(2) .fan-handle,
+    .fan-card:nth-child(3) .fan-handle {
+      display: inline-flex;
+    }
+    .fan-card:nth-child(even) .fan-handle {
+      top: auto;
+      bottom: -1.25rem;
+      left: auto;
+      right: 0.5rem;
+      border-radius: 999px 0.3rem 999px 999px;
+    }
+  }
+
+  @media (width >= 64rem) {
+    .fan-card {
+      width: 13rem;
+      height: 16.5rem;
+    }
+  }
+
+  .fit-nelcota {
+    background-color: var(--color-pop-forest);
+    border-color: transparent;
+  }
+
+  .source:first-child {
+    border-top: 0;
+  }
+</style>
