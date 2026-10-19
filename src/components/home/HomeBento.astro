@@ -27,6 +27,9 @@ const CARDS: ReadonlyArray<{ point: typeof signIn; icon: IconName; doc: DocKey; 
   { point: webhooks, icon: 'zap', doc: 'webhooks', link: dict.docs.links.webhooks, layout: 'b-hooks' },
   { point: panel, icon: 'layout', doc: 'panel', link: dict.panel.docs, layout: 'b-panel' },
 ];
+
+// Ids of the drawn table's rows; widths and avatar colors are in the CSS.
+const ROWS = ['128', '127', '126', '125', '124'];
 ---
 
 <section id="features" class="scroll-mt-24 py-12 md:py-20" aria-labelledby="bento-title">
@@ -54,12 +57,33 @@ const CARDS: ReadonlyArray<{ point: typeof signIn; icon: IconName; doc: DocKey; 
                 <pre class="hooklog">{'POST /hooks   ← 503\nretry in 30 s\nPOST /hooks   ← 200 ✓'}</pre>
               )}
               {card.layout === 'b-panel' && (
-                <span class="phone">
-                  <span class="block text-[0.6875rem]">/admin/</span>
-                  <span class="mt-1 block text-lg font-semibold">notes</span>
-                  <span class="mt-2 block h-1.5 w-3/4 rounded-full bg-white/30" />
-                  <span class="mt-1.5 block h-1.5 w-1/2 rounded-full bg-white/20" />
-                  <span class="mt-1.5 block h-1.5 w-2/3 rounded-full bg-white/20" />
+                <span class="panel-win">
+                  <span class="panel-bar">
+                    <span class="panel-dots" />
+                    <span class="panel-url">/admin/tables/notes</span>
+                  </span>
+                  <span class="panel-tabs">
+                    {bento.panelTabs.map((tab, i) => (
+                      <span class:list={['panel-tab', i === 0 && 'is-on']}>{tab}</span>
+                    ))}
+                  </span>
+                  <span class="panel-head">
+                    <span class="font-semibold">notes</span>
+                    <span class="panel-rls">RLS · 2 policies</span>
+                  </span>
+                  <span class="panel-grid">
+                    {ROWS.map((id) => (
+                      <span class="panel-row">
+                        <span class="panel-id">{id}</span>
+                        <span class="panel-bar-cell" />
+                        <span class="panel-avatar" />
+                      </span>
+                    ))}
+                  </span>
+                </span>
+                <span class="panel-sql">
+                  <span class="block opacity-70">select count(*) from notes;</span>
+                  <span class="mt-1 block font-semibold">→ 128</span>
                 </span>
               )}
             </div>
@@ -173,15 +197,120 @@ const CARDS: ReadonlyArray<{ point: typeof signIn; icon: IconName; doc: DocKey; 
     line-height: 1.7;
     transform: rotate(-3deg);
   }
-  .phone {
+  /* A small drawing of the real panel: page pills, a table with its RLS badge, a query. */
+  .panel-win {
     display: block;
-    width: 11rem;
-    height: 15rem;
-    padding: 1.25rem;
-    border: 1px solid #ffffff1f;
-    border-radius: 1.75rem;
+    width: min(100%, 22rem);
+    overflow: hidden;
+    border: 1px solid #ffffff1a;
+    border-radius: 1.25rem;
+    background-color: #131416;
+    box-shadow: 0 32px 64px -32px #000000b3;
+    font-size: 0.75rem;
+  }
+  .panel-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 0.9rem;
+    border-bottom: 1px solid #ffffff12;
+  }
+  .panel-dots {
+    width: 0.45rem;
+    height: 0.45rem;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background-color: #ffffff2e;
+    box-shadow: 0.7rem 0 0 #ffffff2e, 1.4rem 0 0 #ffffff2e;
+    margin-right: 1.4rem;
+  }
+  .panel-url {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: #eef3f099;
+  }
+  .panel-tabs {
+    display: flex;
+    gap: 0.35rem;
+    padding: 0.8rem 0.9rem 0;
+  }
+  .panel-tab {
+    padding: 0.3rem 0.65rem;
+    border-radius: 999px;
+    background-color: #ffffff0d;
+    color: #eef3f0b3;
+    font-size: 0.6875rem;
+  }
+  .panel-tab.is-on {
+    background-color: #87dba6;
+    color: #07130c;
+    font-weight: 600;
+  }
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 0.9rem 0.6rem;
+    font-size: 0.875rem;
+  }
+  .panel-rls {
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    background-color: #87dba61f;
+    color: #8ee6ae;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+  }
+  .panel-grid {
+    display: block;
+    padding: 0 0.9rem 0.9rem;
+  }
+  .panel-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.55rem 0;
+    border-top: 1px solid #ffffff0f;
+  }
+  .panel-id {
+    width: 1.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: #eef3f080;
+  }
+  .panel-bar-cell {
+    height: 0.4rem;
+    border-radius: 999px;
+    background-color: #ffffff29;
+  }
+  .panel-row:nth-child(1) .panel-bar-cell { width: 72%; }
+  .panel-row:nth-child(2) .panel-bar-cell { width: 54%; }
+  .panel-row:nth-child(3) .panel-bar-cell { width: 64%; }
+  .panel-row:nth-child(4) .panel-bar-cell { width: 46%; }
+  .panel-row:nth-child(5) .panel-bar-cell { width: 58%; }
+  .panel-row:nth-child(odd) .panel-avatar { background-color: #cdbdff; }
+  .panel-row:nth-child(2) .panel-avatar { background-color: #f1dfb8; }
+  .panel-row:nth-child(4) .panel-avatar { background-color: #ff6b3d; }
+  .panel-row:nth-child(3) .panel-avatar { background-color: #87dba6; }
+  .panel-avatar {
+    background-color: #cdbdff;
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    margin-left: auto;
+    border-radius: 999px;
+  }
+  .panel-sql {
+    position: absolute;
+    right: 8%;
+    bottom: 12%;
+    padding: 0.75rem 1rem;
+    border-radius: 0.9rem;
     background-color: #1b7640;
     color: #ffffff;
-    transform: rotate(4deg);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    box-shadow: 0 20px 40px -20px #000000b3;
+    transform: rotate(-3deg);
   }
 </style>

@@ -90,6 +90,7 @@ export const ptBr = {
           body: 'Tabelas, usuários, arquivos, policies e SQL em /admin/, sem outro serviço para subir.',
         },
       ],
+      panelTabs: ['Tabelas', 'SQL', 'Usuários', 'Arquivos'],
     },
     steps: {
       eyebrow: ['COMECE', 'AGORA'],

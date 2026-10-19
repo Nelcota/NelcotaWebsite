@@ -93,6 +93,7 @@ export const en = {
           body: 'Tables, users, files, policies and SQL at /admin/, with no extra service to run.',
         },
       ],
+      panelTabs: ['Tables', 'SQL', 'Users', 'Files'],
     },
     steps: {
       eyebrow: ['GET', 'STARTED'],

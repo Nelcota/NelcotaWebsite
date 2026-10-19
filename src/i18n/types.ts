@@ -151,6 +151,8 @@ export interface Landing {
     readonly eyebrow: TwoTone;
     readonly title: TwoTone;
     readonly cards: readonly [Point, Point, Point, Point];
+    /** Page pills in the panel card's drawing. */
+    readonly panelTabs: readonly [string, string, string, string];
   };
   readonly steps: {
     readonly eyebrow: TwoTone;
