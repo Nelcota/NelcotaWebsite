@@ -62,7 +62,7 @@ export const ptBr = {
         'App limitado a 1 CPU e 128 MiB',
         'PostgreSQL limitado a 1 CPU e 384 MiB',
         'Um teste de 30 minutos a 600 requisições por segundo',
-        'Versão candidata no main, depois da 0.4.0',
+        'Medição histórica de uma candidata anterior à 0.5.0',
       ],
     },
     community: {
@@ -227,7 +227,7 @@ export const ptBr = {
         { value: '4,4', unit: 'ms', label: 'latência mediana a 600 req/s' },
       ],
       engine: 'Rust · tokio · axum · rustls',
-      note: 'Medido na próxima versão (main), que ainda não está na 0.4.0 publicada, com o PostgreSQL em 1 CPU / 384 MiB e um teste de 30 minutos. O seu hardware e a sua carga vão dar outros números.',
+      note: 'Medição histórica de uma versão candidata anterior à 0.5.0, com o PostgreSQL em 1 CPU / 384 MiB e um teste de 30 minutos. O seu hardware e a sua carga vão dar outros números.',
       method: 'Como foi medido',
     },
     safety: {
@@ -498,7 +498,7 @@ export const ptBr = {
       macos: 'macOS',
       windows: 'Windows',
       sourceNote:
-        'Compila a release 0.4.0 a partir do código, com Rust 1.99+. O nelcota dev continua precisando do Docker, e os passos 2 e 3 precisam de um shell POSIX com jq (o Terminal do macOS, ou WSL no Windows).',
+        'Compila a release 0.5.0 a partir do código, com Rust 1.99+. O nelcota dev continua precisando do Docker, e os passos 2 e 3 precisam de um shell POSIX com jq (o Terminal do macOS, ou WSL no Windows).',
     },
     done: 'Feito',
     progress: 'passos feitos',
@@ -556,7 +556,7 @@ export const ptBr = {
       install: 'Instala a CLI do nelcota',
       newFolder: 'Cria uma pasta vazia para o app',
       startDev: 'Sobe o PostgreSQL e a API; deixe rodando',
-      buildSource: 'Compila a versão 0.4.0 a partir do código (precisa de Rust)',
+      buildSource: 'Compila a versão 0.5.0 a partir do código (precisa de Rust)',
       writeMigration: 'Escreve a migration: a tabela notes e as regras de acesso',
       table: 'A tabela: cada nota pertence ao usuário que a escreveu',
       rls: 'Liga a row-level security na tabela',
@@ -619,6 +619,11 @@ export const ptBr = {
   },
   docsSite: {
     pages: {
+      versions: {
+        label: 'Versões e atualizações',
+        summary: 'Versões do servidor e dos SDKs, compatibilidade e atualização dos aplicativos.',
+      },
+
       quickstart: {
         label: 'Quickstart local',
         summary: 'Instale, escreva uma migration e faça uma requisição autenticada.',
@@ -746,10 +751,16 @@ export const ptBr = {
     sectionLink: 'Link para esta seção',
     table: 'Tabela',
     source: 'Fonte',
-    edit: 'Editar no GitHub',
+    edit: 'Ver fonte no GitHub',
     syncedFrom: 'Do commit {commit} do repositório, {date}.',
-    versionNote:
-      'Estes guias acompanham a branch main. A última versão publicada é a {version}; recursos que os guias marcam como não publicados exigem uma versão mais nova.',
+    versions: {
+      label: 'Versão da documentação',
+      current: 'Guias atuais',
+      snapshot: 'Snapshot da release',
+      documented: 'Versões na fonte: servidor {server} · TypeScript {typescript} · Rust {rust}',
+      archive:
+        'Snapshot histórico da release. As informações refletem a fonte naquela tag; consulte os guias atuais para correções e atualizações posteriores dos SDKs.',
+    },
     status: {
       english:
         'Esta página ainda não tem tradução no repositório. O texto abaixo é o original em inglês.',

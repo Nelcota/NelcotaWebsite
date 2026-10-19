@@ -1,7 +1,7 @@
 import type { Dictionary } from './types.ts';
 
 /**
- * Copy follows the repository docs at commit 2efede8c (server 0.4.0, SDKs 0.1.2).
+ * Current install copy targets server 0.5.0. Benchmarks and comparisons retain their dated baselines.
  * Anything only on `main` is never described as available.
  */
 export const en = {
@@ -65,7 +65,7 @@ export const en = {
         'App capped at 1 CPU and 128 MiB',
         'PostgreSQL capped at 1 CPU and 384 MiB',
         'A 30-minute soak at 600 requests per second',
-        'Release candidate on main, after 0.4.0',
+        'Historical pre-0.5.0 release-candidate measurement',
       ],
     },
     community: {
@@ -225,7 +225,7 @@ export const en = {
         { value: '4.4', unit: 'ms', label: 'median latency at 600 req/s' },
       ],
       engine: 'Rust · tokio · axum · rustls',
-      note: 'Measured on the next release (main), not yet in the published 0.4.0, with PostgreSQL on 1 CPU / 384 MiB and a 30-minute soak. Your hardware and workload will give other numbers.',
+      note: 'Historical measurement on a release candidate before 0.5.0, with PostgreSQL on 1 CPU / 384 MiB and a 30-minute soak. Your hardware and workload will give other numbers.',
       method: 'How it was measured',
     },
     safety: {
@@ -496,7 +496,7 @@ export const en = {
       macos: 'macOS',
       windows: 'Windows',
       sourceNote:
-        'Builds the 0.4.0 release from source with Rust 1.99+. nelcota dev still needs Docker, and steps 2 and 3 need a POSIX shell with jq (the macOS Terminal, or WSL on Windows).',
+        'Builds the 0.5.0 release from source with Rust 1.99+. nelcota dev still needs Docker, and steps 2 and 3 need a POSIX shell with jq (the macOS Terminal, or WSL on Windows).',
     },
     done: 'Done',
     progress: 'steps done',
@@ -554,7 +554,7 @@ export const en = {
       install: 'Install the nelcota CLI',
       newFolder: 'Create an empty folder for your app',
       startDev: 'Start PostgreSQL and the API, and leave it running',
-      buildSource: 'Build the 0.4.0 release from source (needs Rust)',
+      buildSource: 'Build the 0.5.0 release from source (needs Rust)',
       writeMigration: 'Write the migration: the notes table and its access rules',
       table: 'The table: each note belongs to the user who wrote it',
       rls: 'Turn on row-level security for the table',
@@ -617,6 +617,11 @@ export const en = {
   },
   docsSite: {
     pages: {
+      versions: {
+        label: 'Versions and upgrades',
+        summary: 'Server and SDK versions, compatibility and application upgrades.',
+      },
+
       quickstart: {
         label: 'Local quickstart',
         summary: 'Install, write a migration and make an authenticated request.',
@@ -750,10 +755,16 @@ export const en = {
     sectionLink: 'Link to this section',
     table: 'Table',
     source: 'Source',
-    edit: 'Edit on GitHub',
+    edit: 'View source on GitHub',
     syncedFrom: 'From commit {commit} of the repository, {date}.',
-    versionNote:
-      'These guides follow the main branch. The latest published release is {version}; features the guides mark as unreleased need a newer version.',
+    versions: {
+      label: 'Documentation version',
+      current: 'Current guides',
+      snapshot: 'Release snapshot',
+      documented: 'Source versions: server {server} · TypeScript {typescript} · Rust {rust}',
+      archive:
+        'Historical release snapshot. Statements reflect the source at that tag; use the current guides for subsequent fixes and SDK updates.',
+    },
     status: {
       english: '',
       partial: '',

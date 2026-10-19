@@ -51,7 +51,9 @@ test.describe('docs', () => {
       '/docs/',
     );
     await expect(breadcrumb).toContainText('Build an application');
-    await expect(page.locator('.docs-meta a[href*="github.com"]')).toContainText('Edit on GitHub');
+    await expect(page.locator('.docs-meta a[href*="github.com"]')).toContainText(
+      'View source on GitHub',
+    );
     await expect(page.locator('.docs-meta')).toContainText('min read');
 
     const pager = page.getByRole('navigation', { name: 'Previous / Next' });
@@ -183,5 +185,70 @@ test.describe('docs', () => {
       const pages: unknown = await response.json();
       expect(Array.isArray(pages) && pages.length).toBeGreaterThan(20);
     }
+  });
+  test('version navigation preserves locale and guide, with pinned metadata and source', async ({
+    page,
+  }) => {
+    await page.goto('/pt-br/docs/sdk/');
+    await expect(page.locator('.docs-version-metadata')).toContainText('TypeScript 0.2.1');
+    const archive = page
+      .getByRole('navigation', { name: 'Versão da documentação' })
+      .getByRole('link', { name: 'Snapshot da release v0.5.0' });
+    await expect(archive).toHaveAttribute('href', '/pt-br/docs/versions/v0.5.0/sdk/');
+    await archive.click();
+    await expect(page.locator('.docs-version-metadata')).toContainText('TypeScript 0.2.0');
+    await expect(page.locator('.docs-archive-note')).toBeVisible();
+    await expect(page.locator('.docs-meta a')).toHaveAttribute(
+      'href',
+      /\/blob\/b18412a65f4accc4d759d7f840e50420d32d7579\//,
+    );
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      /\/pt-br\/docs\/versions\/v0.5.0\/sdk\/$/,
+    );
+    await expect(page.locator('link[hreflang="en"]')).toHaveAttribute(
+      'href',
+      /\/docs\/versions\/v0.5.0\/sdk\/$/,
+    );
+    await expect(page.locator('.docs-pager a').first()).toHaveAttribute(
+      'href',
+      /\/pt-br\/docs\/versions\/v0.5.0\//,
+    );
+  });
+
+  test('a guide added after the release falls back to the archive index', async ({ page }) => {
+    await page.goto('/docs/versions/');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Versions and upgrades');
+    await expect(
+      page
+        .getByRole('navigation', { name: 'Documentation version' })
+        .getByRole('link', { name: 'Release snapshot v0.5.0' }),
+    ).toHaveAttribute('href', '/docs/versions/v0.5.0/');
+  });
+
+  test('archive search and internal links stay inside the selected snapshot', async ({
+    page,
+    request,
+  }) => {
+    await page.goto('/docs/versions/v0.5.0/quickstart/');
+    await expect(
+      page.locator('.doc-body a[href="/docs/versions/v0.5.0/deploy/"]').first(),
+    ).toBeVisible();
+    for (const locale of ['', '/pt-br']) {
+      const path = `${locale}/docs/versions/v0.5.0/search.json`;
+      const response = await request.get(path);
+      expect(response.status()).toBe(200);
+      const entries: unknown = await response.json();
+      expect(Array.isArray(entries)).toBe(true);
+      if (!Array.isArray(entries)) throw new Error('Expected search entries');
+      for (const entry of entries) {
+        expect(
+          Array.isArray(entry) &&
+            typeof entry[1] === 'string' &&
+            entry[1].startsWith(`${locale}/docs/versions/v0.5.0/`),
+        ).toBe(true);
+      }
+    }
+    expect((await request.get('/docs/versions/v9.9.9/sdk/')).status()).toBe(404);
   });
 });

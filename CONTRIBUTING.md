@@ -74,18 +74,20 @@ Optional environment variables (see `.env.example`):
 The guides are the Markdown files of the Nelcota repository, rendered into static pages at build time. Nothing is rewritten by hand on this side.
 
 - **Which files:** `src/lib/docs/manifest.ts` lists every page (repository path, sidebar group, Portuguese catalog). Page ids match the admin panel's guide ids.
-- **Sync:** `pnpm docs:sync` copies those files from one commit of `Nelcota/Nelcota` into `vendor/nelcota-docs/` and writes `vendor/nelcota-docs/source.json` (commit, commit date, SHA-256 per file). Builds read only this committed copy, so they never need the network and the same commit always gives the same pages. `pnpm docs:check` (run in CI and before deploys) fails if a file was edited locally or the manifest and the copy disagree.
+- **Sync:** `pnpm docs:sync` copies those files from one commit of `Nelcota/Nelcota` into `vendor/nelcota-docs/` and writes `vendor/nelcota-docs/source.json` (commit, commit date, page inventory, server/SDK versions and SHA-256 per file). Builds read only this committed copy, so they never need the network and the same commit always gives the same pages. `pnpm docs:check` (run in CI and before deploys) fails if a file was edited locally or the manifest and the copy disagree.
 
   ```sh
   pnpm docs:sync                     # latest main, from GitHub (GITHUB_TOKEN optional)
-  pnpm docs:sync --ref v0.5.0        # a branch, tag or commit
+  pnpm docs:sync --version v0.5.0   # immutable tagged release snapshot
   pnpm docs:sync --from ../Nelcota --ref origin/main   # from a local clone, no network
   ```
 
   `.github/workflows/docs-sync.yml` runs the sync daily, on demand or on a `docs-updated` dispatch from the Nelcota repository, and opens a pull request when anything changed. The sync also prints which pages lack Portuguese text.
+- **Release archives:** `src/lib/docs/versions.ts` registers snapshots such as `/docs/versions/v0.5.0/` (and the Portuguese equivalent). They live in `vendor/nelcota-docs-releases/`, outside the current sync directory. Each lock freezes its page inventory, source commit, package manifest versions and file hashes. A sync refuses a different tag or a moved tag; ordinary daily syncs change only current guides. Never edit archived prose.
+- **Version labels and links:** labels come from the three package manifests at the same source commit, not the live release feed. Source links are pinned to that commit. Version navigation keeps the guide and locale when available; search, pagination and internal links stay inside the selected snapshot.
 - **Portuguese:** pages use the repository's own catalogs (`docs/i18n/pt-BR/*.json`, the ones the admin panel uses) with the same contract as the panel (`src/lib/docs/translate.ts`): catalog keys are exact prose fragments, while code blocks, inline code, links and section anchors always come from the English source. Section anchors are the English slugs in both languages, so `#section` links match GitHub and the panel. A page without a catalog is shown in English with a notice and `lang="en"`; guides written only in Portuguese carry a notice on the English site.
 - **Rendering:** `src/lib/docs/render.ts` (`marked`, pinned to the panel's version) escapes raw HTML, allows only http(s)/mailto/anchor links, turns links between published files into `/docs` links and everything else into GitHub links, and highlights code at build time into CSP-safe classes with a copy button. Links to sections that do not exist are reported during the build.
-- **Search:** `src/pages/docs/search.json.ts` writes a static index per locale (about 90 KB gzip), fetched only when the search box gets focus (`src/scripts/docs-search.ts`). Press `/` or Ctrl/⌘+K.
+- **Search:** `src/pages/docs/search.json.ts` writes a static index per locale and documentation version, fetched only when the search box gets focus (`src/scripts/docs-search.ts`). Press `/` or Ctrl/⌘+K.
 - **Styles:** docs-only CSS lives in `src/styles/docs.css`, loaded by docs pages only. `global.css` does not scan `src/components/docs/`, so the home page carries none of it. Utilities used only by docs components must be written there as named classes.
 - `pnpm test:unit` covers the renderer and the translation contract; `tests/docs.spec.ts` covers pages, search, copy and the phone layout.
 

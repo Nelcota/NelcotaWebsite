@@ -404,8 +404,13 @@ export interface Dictionary {
     edit: string;
     /** "{commit}" and "{date}" are replaced. */
     syncedFrom: string;
-    /** "{version}" is the latest published release. */
-    versionNote: string;
+    versions: {
+      label: string;
+      current: string;
+      snapshot: string;
+      documented: string;
+      archive: string;
+    };
     status: {
       english: string;
       partial: string;

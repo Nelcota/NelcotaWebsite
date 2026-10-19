@@ -1,7 +1,7 @@
 ---
 import { formatDate, type Locale, t } from '../../i18n/utils.ts';
 import { type DocStatus, type DocsBundle, docsIndexUrl, editUrl, findDoc } from '../../lib/docs/content.ts';
-import { loadRepo } from '../../lib/repo.ts';
+import { docsPath } from '../../lib/docs/versions.ts';
 import { REPO_URL } from '../../lib/site.ts';
 import Icon from '../Icon.astro';
 import DocsShell from './DocsShell.astro';
@@ -35,8 +35,6 @@ const toc = page.headings.filter((heading) => heading.level <= MAX_TOC_LEVEL);
 const hasToc = toc.length >= MIN_TOC_HEADINGS;
 const MAX_DESCRIPTION = 160;
 const description = page.lead.length > 0 ? page.lead.slice(0, MAX_DESCRIPTION) : page.summary;
-const latest = (await loadRepo()).releases[0];
-const versionNote = latest == null ? null : dict.versionNote.replace('{version}', latest.tag);
 const SHORT_COMMIT_LENGTH = 7;
 const synced = dict.syncedFrom
   .replace('{commit}', bundle.lock.commit.slice(0, SHORT_COMMIT_LENGTH))
@@ -50,7 +48,7 @@ const readingTime = dict.readingTime.replace('{minutes}', String(page.readingMin
   current={page.id}
   title={`${page.title} · ${dict.title} · Nelcota`}
   description={description}
-  path={`docs/${page.id}/`}
+  path={docsPath(bundle.version, page.id)}
 >
   {
     hasToc && (
@@ -72,7 +70,7 @@ const readingTime = dict.readingTime.replace('{minutes}', String(page.readingMin
       <header>
         <nav aria-label={dict.breadcrumb} class="docs-breadcrumb">
           <ol>
-            <li><a href={docsIndexUrl(locale)}>{dict.title}</a></li>
+            <li><a href={docsIndexUrl(locale, bundle.version)}>{dict.title}</a></li>
             <li aria-hidden="true"><Icon name="chevron" size={12} class="docs-breadcrumb-sep" /></li>
             <li class="docs-breadcrumb-group">{dict.groups[page.group]}</li>
           </ol>
@@ -83,7 +81,7 @@ const readingTime = dict.readingTime.replace('{minutes}', String(page.readingMin
             <Icon name="clock" size={14} />
             {readingTime}
           </span>
-          <a href={editUrl(page.source)} rel="noopener" class="docs-chip docs-chip-link">
+          <a href={editUrl(page.source, bundle.lock.commit)} rel="noopener" class="docs-chip docs-chip-link">
             <Icon name="github" size={14} />
             {dict.edit}
           </a>
@@ -105,9 +103,8 @@ const readingTime = dict.readingTime.replace('{minutes}', String(page.readingMin
 
       <footer class="docs-source">
         <p>
-          {dict.source}: <a href={editUrl(page.source)} rel="noopener" class="docs-source-path">{page.source}</a>
+          {dict.source}: <a href={editUrl(page.source, bundle.lock.commit)} rel="noopener" class="docs-source-path">{page.source}</a>
         </p>
-        {versionNote != null && <p>{versionNote}</p>}
         <p>
           <a href={`${REPO_URL}/tree/${bundle.lock.commit}`} rel="noopener">{synced}</a>
         </p>

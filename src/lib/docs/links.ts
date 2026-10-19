@@ -7,6 +7,7 @@ import { getRelativeLocaleUrl } from 'astro:i18n';
 import type { Locale } from '../../i18n/utils.ts';
 import { DOCS, type DocKey } from '../site.ts';
 import type { DocPageId } from './manifest.ts';
+import { type DocsVersion, docsPath } from './versions.ts';
 
 const PAGE_OF_KEY: Partial<Record<DocKey, DocPageId | 'index'>> = {
   index: 'index',
@@ -30,12 +31,17 @@ const PAGE_OF_KEY: Partial<Record<DocKey, DocPageId | 'index'>> = {
   sdkRust: 'sdk-rust',
 };
 
-export function docsIndexUrl(locale: Locale): string {
-  return getRelativeLocaleUrl(locale, 'docs/');
+export function docsIndexUrl(locale: Locale, version: DocsVersion = 'current'): string {
+  return getRelativeLocaleUrl(locale, docsPath(version));
 }
 
-export function docUrl(locale: Locale, page: string, anchor = ''): string {
-  const url = getRelativeLocaleUrl(locale, `docs/${page}/`);
+export function docUrl(
+  locale: Locale,
+  page: string,
+  anchor = '',
+  version: DocsVersion = 'current',
+): string {
+  const url = getRelativeLocaleUrl(locale, docsPath(version, page));
 
   return anchor.length === 0 ? url : `${url}#${anchor}`;
 }

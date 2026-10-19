@@ -5,12 +5,16 @@
  */
 import type { Locale } from '../../i18n/utils.ts';
 import { loadDocs } from './content.ts';
+import type { DocsVersion } from './versions.ts';
 
 export type SearchSection = readonly [anchor: string, heading: string, text: string];
 export type SearchPage = readonly [title: string, url: string, sections: readonly SearchSection[]];
 
-export async function searchIndexResponse(locale: Locale): Promise<Response> {
-  const bundle = await loadDocs(locale);
+export async function searchIndexResponse(
+  locale: Locale,
+  version: DocsVersion = 'current',
+): Promise<Response> {
+  const bundle = await loadDocs(locale, version);
   const pages: SearchPage[] = bundle.pages.map((page) => [
     page.title,
     page.url,

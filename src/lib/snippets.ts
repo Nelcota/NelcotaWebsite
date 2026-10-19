@@ -101,7 +101,7 @@ function installFromSourceSource(c: Comments): Source {
     code: `# ${c.buildSource}
 cargo install --locked \\
   --git https://github.com/Nelcota/Nelcota \\
-  --tag v0.4.0 nelcota-server
+  --tag v0.5.0 nelcota-server
 
 # ${c.newFolder}
 mkdir notes-app && cd notes-app

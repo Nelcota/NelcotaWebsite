@@ -4,8 +4,8 @@ import type { DocsBundle, DocsPage } from '../../lib/docs/content.ts';
 import { findDoc } from '../../lib/docs/content.ts';
 import { GROUP_ICONS } from '../../lib/docs/group-icons.ts';
 import { DOC_GROUPS, type DocGroup } from '../../lib/docs/manifest.ts';
+import { docsPath } from '../../lib/docs/versions.ts';
 import type { IconName } from '../../lib/icons.ts';
-import { loadRepo } from '../../lib/repo.ts';
 import Icon from '../Icon.astro';
 import DocsSearch from './DocsSearch.astro';
 import DocsShell from './DocsShell.astro';
@@ -50,8 +50,6 @@ const groups = DOC_GROUPS.map((group) => ({
   title: dict.groups[group],
   pages: bundle.pages.filter((page: DocsPage) => page.group === group),
 }));
-const latest = (await loadRepo()).releases[0];
-const versionNote = latest == null ? null : dict.versionNote.replace('{version}', latest.tag);
 ---
 
 <DocsShell
@@ -60,7 +58,7 @@ const versionNote = latest == null ? null : dict.versionNote.replace('{version}'
   current={null}
   title={`${dict.title} · Nelcota`}
   description={dict.description}
-  path="docs/"
+  path={docsPath(bundle.version)}
   layout="landing"
 >
   <header class="docs-hero">
@@ -75,16 +73,8 @@ const versionNote = latest == null ? null : dict.versionNote.replace('{version}'
     </div>
     <p class="docs-hero-lead">{dict.description}</p>
     <div class="docs-hero-search">
-      <DocsSearch locale={locale} id="docs-search" size="large" />
+      <DocsSearch locale={locale} version={bundle.version} id="docs-search" size="large" />
     </div>
-    {
-      versionNote != null && (
-        <p class="docs-hero-note">
-          <Icon name="package" size={15} />
-          <span>{versionNote}</span>
-        </p>
-      )
-    }
   </header>
 
   <section aria-labelledby="docs-start-here" class="docs-index-section">

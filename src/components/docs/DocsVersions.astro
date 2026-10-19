@@ -1,0 +1,37 @@
+---
+import { type Locale, t } from '../../i18n/utils.ts';
+import { type DocsBundle, docsLock } from '../../lib/docs/content.ts';
+import { docsIndexUrl, docUrl } from '../../lib/docs/links.ts';
+import { DOC_VERSIONS } from '../../lib/docs/versions.ts';
+
+interface Props {
+  locale: Locale;
+  bundle: DocsBundle;
+  current: string | null;
+}
+const { locale, bundle, current } = Astro.props;
+const dict = t(locale).docsSite.versions;
+const choices = DOC_VERSIONS.map(({ id }) => ({
+  id,
+  label: id === 'current' ? dict.current : `${dict.snapshot} ${id}`,
+  url: current != null && docsLock(id).pages.some((page) => page.id === current)
+    ? docUrl(locale, current, '', id)
+    : docsIndexUrl(locale, id),
+}));
+const documented = dict.documented
+  .replace('{server}', bundle.lock.versions.server)
+  .replace('{typescript}', bundle.lock.versions.typescript)
+  .replace('{rust}', bundle.lock.versions.rust);
+---
+
+<section class="docs-container docs-versions" aria-label={dict.label}>
+  <nav aria-label={dict.label}>
+    {choices.map((choice) => (
+      <a href={choice.url} aria-current={choice.id === bundle.version ? 'page' : undefined}>
+        {choice.label}
+      </a>
+    ))}
+  </nav>
+  <p class="docs-version-metadata">{documented}</p>
+  {bundle.version !== 'current' && <p class="docs-archive-note">{dict.archive}</p>}
+</section>

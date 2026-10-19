@@ -1,6 +1,7 @@
 ---
 import { type Locale, t } from '../../i18n/utils.ts';
 import { docsIndexUrl } from '../../lib/docs/links.ts';
+import type { DocsVersion } from '../../lib/docs/versions.ts';
 import Icon from '../Icon.astro';
 import { docsText } from './strings.ts';
 
@@ -12,12 +13,13 @@ import { docsText } from './strings.ts';
 interface Props {
   locale: Locale;
   id: string;
+  version?: DocsVersion;
   size?: 'large' | 'compact';
 }
-const { locale, id, size = 'compact' } = Astro.props;
+const { locale, id, version = 'current', size = 'compact' } = Astro.props;
 const search = t(locale).docsSite.search;
 // Built from the docs index URL: getRelativeLocaleUrl would add a trailing slash to the file name.
-const indexUrl = `${docsIndexUrl(locale)}search.json`;
+const indexUrl = `${docsIndexUrl(locale, version)}search.json`;
 const isLarge = size === 'large';
 const placeholder = isLarge ? docsText('searchPlaceholder', locale) : search.placeholder;
 ---
