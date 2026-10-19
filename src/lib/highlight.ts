@@ -26,29 +26,50 @@ const MAX_CONTRAST_STEPS = 40;
 /** Fraction of the remaining distance to black/white covered per nudge. */
 const CONTRAST_STEP = 0.08;
 
-const HEX_RADIX = 16;
-
 type Rgb = [number, number, number];
+
+const HEX_RADIX = 16;
+const CHANNEL_MAX = 255;
+/** "#abc" is shorthand for "#aabbcc"; longer values may carry an alpha channel after the six digits. */
+const SHORT_HEX_LENGTH = 3;
+const HEX_LENGTH = 6;
+
+/** sRGB linearization and luminance weights from the WCAG 2 relative luminance formula. */
+const SRGB_LINEAR_LIMIT = 0.04045;
+const SRGB_LINEAR_SLOPE = 12.92;
+const SRGB_OFFSET = 0.055;
+const SRGB_SCALE = 1.055;
+const SRGB_GAMMA = 2.4;
+const LUMINANCE_WEIGHTS: Rgb = [0.2126, 0.7152, 0.0722];
+/** Flare term of the WCAG contrast ratio. */
+const CONTRAST_FLARE = 0.05;
+
 const hexToRgb = (hex: string): Rgb => {
   const value = hex.replace('#', '');
-  const full = value.length === 3 ? [...value].map((c) => c + c).join('') : value.slice(0, 6);
+  const full =
+    value.length === SHORT_HEX_LENGTH
+      ? [...value].map((c) => c + c).join('')
+      : value.slice(0, HEX_LENGTH);
   const channels = [0, 2, 4].map((i) => Number.parseInt(full.slice(i, i + 2), HEX_RADIX));
   if (!channels.every(Number.isFinite)) throw new RangeError(`Invalid hex color: "${hex}"`);
 
   return channels as Rgb;
 };
 const rgbToHex = (rgb: Rgb) =>
-  `#${rgb.map((c) => Math.round(c).toString(16).padStart(2, '0')).join('')}`;
+  `#${rgb.map((c) => Math.round(c).toString(HEX_RADIX).padStart(2, '0')).join('')}`;
 const luminance = ([r, g, b]: Rgb) => {
   const lin = (c: number) => {
-    const v = c / 255;
-    return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+    const v = c / CHANNEL_MAX;
+    return v <= SRGB_LINEAR_LIMIT
+      ? v / SRGB_LINEAR_SLOPE
+      : ((v + SRGB_OFFSET) / SRGB_SCALE) ** SRGB_GAMMA;
   };
-  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+  const [weightR, weightG, weightB] = LUMINANCE_WEIGHTS;
+  return weightR * lin(r) + weightG * lin(g) + weightB * lin(b);
 };
 const contrast = (a: Rgb, b: Rgb) => {
-  const [l1, l2] = [luminance(a), luminance(b)].sort((x, y) => y - x) as [number, number];
-  return (l1 + 0.05) / (l2 + 0.05);
+  const [l1, l2] = [luminance(a), luminance(b)].toSorted((x, y) => y - x) as [number, number];
+  return (l1 + CONTRAST_FLARE) / (l2 + CONTRAST_FLARE);
 };
 
 /**
@@ -59,7 +80,7 @@ const contrast = (a: Rgb, b: Rgb) => {
 function ensureContrast(hex: string, background: string, towards: 'black' | 'white'): string {
   const bg = hexToRgb(background);
   let rgb = hexToRgb(hex);
-  const target: Rgb = towards === 'black' ? [0, 0, 0] : [255, 255, 255];
+  const target: Rgb = towards === 'black' ? [0, 0, 0] : [CHANNEL_MAX, CHANNEL_MAX, CHANNEL_MAX];
   for (let step = 0; step < MAX_CONTRAST_STEPS && contrast(rgb, bg) < MIN_CONTRAST; step += 1) {
     rgb = rgb.map((c, i) => c + ((target[i] ?? 0) - c) * CONTRAST_STEP) as Rgb;
   }

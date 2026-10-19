@@ -96,6 +96,16 @@ const REPO_HOSTS = new Set(['github.com', 'www.github.com']);
 const REPO_PREFIXES = ['Nelcota/Nelcota/', 'HanielCota/Nelcota/'];
 const PLACEHOLDER_ORIGIN = 'https://repo.invalid';
 const MAX_SECTION_TEXT = 1600;
+/** h1 is the page title, so body headings start at h2. */
+const MIN_HEADING_LEVEL = 2;
+
+/** A published page must open with a "# Title" line: it names the page and its tab. */
+export class MissingTitleError extends Error {
+  constructor(message: string, options?: ErrorOptions) {
+    super(message, options);
+    this.name = 'MissingTitleError';
+  }
+}
 
 /** GitHub-style anchor, identical to the admin panel's, so section links match. */
 export function headingSlug(text: string): string {
@@ -259,6 +269,14 @@ function headingIds(tokens: readonly Token[], skip: number): Map<Tokens.Heading,
   return ids;
 }
 
+/** Code in a language without a grammar: escaped, but split into lines like highlighted code. */
+function plainLines(body: string): string {
+  return body
+    .split('\n')
+    .map((line) => `<span class="ln">${escapeHtml(line)}</span>`)
+    .join('\n');
+}
+
 async function highlightAll(
   marked: Marked,
   tokens: Token[],
@@ -273,11 +291,7 @@ async function highlightAll(
     blocks.map(async (block) => {
       const lang = LANGS[(block.lang ?? '').toLowerCase()];
       const body = block.text.trimEnd();
-      if (lang == null)
-        return body
-          .split('\n')
-          .map((line) => `<span class="ln">${escapeHtml(line)}</span>`)
-          .join('\n');
+      if (lang == null) return plainLines(body);
 
       return registry.render(body, lang);
     }),
@@ -317,15 +331,16 @@ function collectSections(tokens: readonly Token[], ids: Map<Tokens.Heading, stri
   return sections;
 }
 
-export async function renderDoc(markdown: string, options: RenderOptions): Promise<RenderedDoc> {
-  const marked = new Marked({ gfm: true });
-  const tokens = marked.lexer(markdown);
-  const titleAt = titleIndex(tokens);
-  const ids = headingIds(tokens, titleAt);
-  const untranslated = options.catalog == null ? 0 : translateTokens(tokens, options.catalog);
-  const code = await highlightAll(marked, tokens, options.registry);
-  const links: InternalLink[] = [];
-  const headings: DocHeading[] = [];
+/** Per-render state the renderer reads (ids, highlighted code) and fills (headings, links). */
+interface RenderState {
+  readonly ids: Map<Tokens.Heading, string>;
+  readonly code: Map<Tokens.Code, string>;
+  readonly headings: DocHeading[];
+  readonly links: InternalLink[];
+}
+
+function useDocRenderer(marked: Marked, state: RenderState, options: RenderOptions): void {
+  const { ids, code, headings, links } = state;
   const { labels, spriteUrl } = options;
   let codeIndex = 0;
 
@@ -336,7 +351,7 @@ export async function renderDoc(markdown: string, options: RenderOptions): Promi
         const id = ids.get(token);
         if (id == null) return `<p class="doc-subtitle">${inner}</p>`;
 
-        const level = Math.max(2, token.depth);
+        const level = Math.max(MIN_HEADING_LEVEL, token.depth);
         const text = collapse(stripInline(plainText(token)));
         headings.push({ id, text, level });
         const label = attr(`${labels.sectionLink}: ${text}`);
@@ -376,9 +391,23 @@ export async function renderDoc(markdown: string, options: RenderOptions): Promi
       },
     },
   });
+}
 
+export async function renderDoc(markdown: string, options: RenderOptions): Promise<RenderedDoc> {
+  const marked = new Marked({ gfm: true });
+  const tokens = marked.lexer(markdown);
+  const titleAt = titleIndex(tokens);
   const titleToken = tokens[titleAt];
-  if (titleToken == null) throw new Error(`${options.source} has no "# Title" line at the top`);
+  if (titleToken == null) {
+    throw new MissingTitleError(`${options.source} has no "# Title" line at the top`);
+  }
+
+  const ids = headingIds(tokens, titleAt);
+  const untranslated = options.catalog == null ? 0 : translateTokens(tokens, options.catalog);
+  const code = await highlightAll(marked, tokens, options.registry);
+  const links: InternalLink[] = [];
+  const headings: DocHeading[] = [];
+  useDocRenderer(marked, { ids, code, headings, links }, options);
 
   const title = collapse(stripInline(plainText(titleToken)));
   const body = tokens.filter((_, index) => index !== titleAt);

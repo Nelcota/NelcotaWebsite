@@ -63,7 +63,7 @@ describe('comparison data', () => {
     assert.ok(homeRows.length > 0);
     assert.ok(homeRows.length <= 10, 'the home table should stay short');
     for (const group of HOME_GROUPS) assert.ok(group.rows.length > 0, group.title.en);
-    for (const row of homeRows) assert.equal(row.onHome, true);
+    for (const row of homeRows) assert.equal(row.isOnHome, true);
   });
 
   it('states every win in both languages', () => {

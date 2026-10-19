@@ -20,7 +20,6 @@ export interface CodeTab {
 type Triple<T> = readonly [T, T, T];
 
 export interface Snippets {
-  /** The notes table behind the query builder in the flow section. */
   /** One block per quickstart step, in order. */
   readonly quickstart: Triple<CodeBlock>;
   /** Step 1 on macOS and Windows: build the release from source (docs/quickstart.md). */

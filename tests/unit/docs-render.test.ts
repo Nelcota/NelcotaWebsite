@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { Lexer } from 'marked';
-import { headingSlug, type RenderOptions, renderDoc } from '../../src/lib/docs/render.ts';
+import {
+  headingSlug,
+  MissingTitleError,
+  type RenderOptions,
+  renderDoc,
+} from '../../src/lib/docs/render.ts';
 import { checkCatalog, translateTokens } from '../../src/lib/docs/translate.ts';
 import { HighlightRegistry } from '../../src/lib/highlight.ts';
 
@@ -52,6 +57,17 @@ describe('renderDoc', () => {
 
   it('should fail loudly when the document has no title', async () => {
     await assert.rejects(renderDoc('Body without a title\n', options()), /no "# Title"/);
+  });
+
+  it('should throw a MissingTitleError naming the source when the first heading is not an H1', async () => {
+    const rendering = renderDoc('## Not a title\n\nBody\n', options({ source: 'docs/x.md' }));
+
+    await assert.rejects(rendering, (error: unknown) => {
+      assert.ok(error instanceof MissingTitleError);
+      assert.equal(error.name, 'MissingTitleError');
+      assert.match(error.message, /^docs\/x\.md /);
+      return true;
+    });
   });
 
   it('should give every repeated heading a distinct id', async () => {

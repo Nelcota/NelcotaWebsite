@@ -26,7 +26,7 @@ export interface Cell {
 export interface Row {
   readonly label: Localized;
   /** Shown in the short table on the home page too. */
-  readonly onHome?: boolean;
+  readonly isOnHome?: boolean;
   readonly cells: Readonly<Record<Product, Cell>>;
 }
 
@@ -66,7 +66,7 @@ export const COMPARE_GROUPS: readonly Group[] = [
     rows: [
       {
         label: say('What you run', 'O que você roda'),
-        onHome: true,
+        isOnHome: true,
         cells: {
           nelcota: cell(
             say(
@@ -90,7 +90,7 @@ export const COMPARE_GROUPS: readonly Group[] = [
       },
       {
         label: say('Database', 'Banco de dados'),
-        onHome: true,
+        isOnHome: true,
         cells: {
           nelcota: cell(same('PostgreSQL 17')),
           supabase: cell(same('PostgreSQL 17')),
@@ -132,7 +132,7 @@ export const COMPARE_GROUPS: readonly Group[] = [
       },
       {
         label: say('Hardware', 'Hardware'),
-        onHome: true,
+        isOnHome: true,
         cells: {
           nelcota: cell(
             say(
@@ -208,7 +208,7 @@ export const COMPARE_GROUPS: readonly Group[] = [
           'Access rules enforced by PostgreSQL (RLS)',
           'Regras de acesso aplicadas pelo PostgreSQL (RLS)',
         ),
-        onHome: true,
+        isOnHome: true,
         cells: {
           nelcota: cell(
             say(
@@ -242,7 +242,7 @@ export const COMPARE_GROUPS: readonly Group[] = [
       },
       {
         label: say('Realtime subscriptions', 'Assinaturas em tempo real'),
-        onHome: true,
+        isOnHome: true,
         cells: {
           nelcota: cell(say('Not yet', 'Ainda não'), 'no'),
           supabase: cell(
@@ -258,7 +258,7 @@ export const COMPARE_GROUPS: readonly Group[] = [
       },
       {
         label: say('Code on the server', 'Código no servidor'),
-        onHome: true,
+        isOnHome: true,
         cells: {
           nelcota: cell(
             say(
@@ -330,7 +330,7 @@ export const COMPARE_GROUPS: readonly Group[] = [
       },
       {
         label: say('Multi-factor authentication', 'Autenticação multifator'),
-        onHome: true,
+        isOnHome: true,
         cells: {
           nelcota: cell(say('Not yet', 'Ainda não'), 'no'),
           supabase: cell(say('Authenticator app or phone', 'App autenticador ou telefone'), 'yes'),
@@ -387,7 +387,7 @@ export const COMPARE_GROUPS: readonly Group[] = [
       },
       {
         label: say('Outgoing webhooks', 'Webhooks de saída'),
-        onHome: true,
+        isOnHome: true,
         cells: {
           nelcota: cell(
             say(
@@ -441,7 +441,7 @@ export const COMPARE_GROUPS: readonly Group[] = [
       },
       {
         label: say('Backups and point-in-time recovery', 'Backups e recuperação point-in-time'),
-        onHome: true,
+        isOnHome: true,
         cells: {
           nelcota: cell(
             say(
@@ -545,10 +545,10 @@ export const WINS: readonly Win[] = [
   },
 ];
 
-/** The home page's short table: the same groups, only rows marked onHome. */
+/** The home page's short table: the same groups, only rows marked isOnHome. */
 export const HOME_GROUPS: readonly Group[] = COMPARE_GROUPS.map((group) => ({
   title: group.title,
-  rows: group.rows.filter((row) => row.onHome === true),
+  rows: group.rows.filter((row) => row.isOnHome === true),
 })).filter((group) => group.rows.length > 0);
 
 export const PRODUCT_INFO: Readonly<Record<Product, ProductInfo>> = {

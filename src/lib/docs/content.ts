@@ -5,6 +5,7 @@
  */
 import { createHash } from 'node:crypto';
 import lockJson from '../../../vendor/nelcota-docs/source.json';
+import type { Dictionary } from '../../i18n/types.ts';
 import { bcp47, type Locale, t } from '../../i18n/utils.ts';
 import { HighlightRegistry } from '../highlight.ts';
 import { REPO_URL } from '../site.ts';
@@ -135,46 +136,55 @@ function reportBrokenAnchors(pages: readonly DocsPage[]): void {
   console.warn(`[nelcota] docs links to missing sections:\n  ${[...broken].join('\n  ')}`);
 }
 
+/** What every page of one locale's build shares. */
+interface BuildContext {
+  readonly locale: Locale;
+  readonly dict: Dictionary;
+  readonly registry: HighlightRegistry;
+  readonly titles: ReadonlyMap<string, string>;
+}
+
+async function buildPage(page: DocPage, context: BuildContext): Promise<DocsPage> {
+  const { locale, dict, registry, titles } = context;
+  const rendered = await renderDoc(readVendored(page.source), {
+    source: page.source,
+    catalog: catalogFor(page, locale),
+    registry,
+    pageForSource: (path) => bySource.get(path),
+    pageUrl: (id, anchor) => docUrl(locale, id, anchor),
+    pageTitle: (id) => titles.get(id),
+    repoFileUrl,
+    spriteUrl: SPRITE_URL,
+    labels: {
+      copy: dict.code.copy,
+      copied: dict.code.copied,
+      copyFailed: dict.code.copyFailed,
+      sectionLink: dict.docsSite.sectionLink,
+      table: dict.docsSite.table,
+    },
+  });
+  const status = statusOf(page, locale, rendered.untranslated);
+  const text = dict.docsSite.pages[page.id as DocPageId];
+
+  return {
+    ...rendered,
+    id: page.id,
+    group: page.group,
+    source: page.source,
+    url: docUrl(locale, page.id),
+    status,
+    lang: LANG_OF_STATUS[status] ?? bcp47[locale],
+    label: text.label,
+    summary: text.summary,
+    readingMinutes: readingMinutes(rendered.html),
+  };
+}
+
 async function buildDocs(locale: Locale): Promise<DocsBundle> {
-  const dict = t(locale);
   const registry = new HighlightRegistry();
-  const titles = pageTitles(locale);
+  const context: BuildContext = { locale, dict: t(locale), registry, titles: pageTitles(locale) };
 
-  const pages = await Promise.all(
-    PAGES.map(async (page): Promise<DocsPage> => {
-      const rendered = await renderDoc(readVendored(page.source), {
-        source: page.source,
-        catalog: catalogFor(page, locale),
-        registry,
-        pageForSource: (path) => bySource.get(path),
-        pageUrl: (id, anchor) => docUrl(locale, id, anchor),
-        pageTitle: (id) => titles.get(id),
-        repoFileUrl,
-        spriteUrl: SPRITE_URL,
-        labels: {
-          copy: dict.code.copy,
-          copied: dict.code.copied,
-          copyFailed: dict.code.copyFailed,
-          sectionLink: dict.docsSite.sectionLink,
-          table: dict.docsSite.table,
-        },
-      });
-      const status = statusOf(page, locale, rendered.untranslated);
-
-      return {
-        ...rendered,
-        id: page.id,
-        group: page.group,
-        source: page.source,
-        url: docUrl(locale, page.id),
-        status,
-        lang: LANG_OF_STATUS[status] ?? bcp47[locale],
-        label: dict.docsSite.pages[page.id as DocPageId].label,
-        summary: dict.docsSite.pages[page.id as DocPageId].summary,
-        readingMinutes: readingMinutes(rendered.html),
-      };
-    }),
-  );
+  const pages = await Promise.all(PAGES.map((page) => buildPage(page, context)));
   if (locale === 'en') reportBrokenAnchors(pages);
 
   const css = registry.css();
@@ -184,6 +194,8 @@ async function buildDocs(locale: Locale): Promise<DocsBundle> {
 }
 
 const WORDS_PER_MINUTE = 220;
+/** A short page still reads as "1 min", never "0 min". */
+const MIN_READING_MINUTES = 1;
 
 /** Prose only: code blocks (with their caption and copy button) and heading anchors are not read. */
 function readingMinutes(html: string): number {
@@ -195,7 +207,7 @@ function readingMinutes(html: string): number {
     .split(/\s+/)
     .filter((word) => word.length > 0);
 
-  return Math.max(1, Math.round(words.length / WORDS_PER_MINUTE));
+  return Math.max(MIN_READING_MINUTES, Math.round(words.length / WORDS_PER_MINUTE));
 }
 
 const cache = new Map<Locale, Promise<DocsBundle>>();
