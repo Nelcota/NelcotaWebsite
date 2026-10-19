@@ -21,7 +21,8 @@ function env(name: string): string | undefined {
 
 const siteUrl = env('SITE_URL') ?? DEFAULT_SITE_URL;
 // Canonical, hreflang, sitemap and OG URLs all come from this: a VPS build without it would point at GitHub Pages.
-if (env('SITE_URL') == null) console.warn(`[nelcota] SITE_URL is not set; canonical URLs use ${DEFAULT_SITE_URL}`);
+if (env('SITE_URL') == null)
+  console.warn(`[nelcota] SITE_URL is not set; canonical URLs use ${DEFAULT_SITE_URL}`);
 new URL(siteUrl); // throws on a malformed SITE_URL instead of shipping broken links
 const basePath = env('BASE_PATH') ?? '/';
 
