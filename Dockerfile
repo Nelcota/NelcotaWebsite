@@ -3,8 +3,9 @@
 
 FROM node:26.11.1-bookworm-slim AS build
 WORKDIR /app
-# pnpm comes from the "packageManager" field in package.json.
-RUN corepack enable
+# Node 25+ no longer bundles corepack: install pnpm directly, at the version
+# pinned in package.json ("packageManager").
+RUN npm install --global pnpm@12.14.0
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY . .
