@@ -26,7 +26,7 @@ const [docs, code] = t(locale).landing.duo;
       <Picture src={mascotWave} formats={['avif', 'webp']} widths={[220, 440]} sizes="220px" alt="" loading="lazy" class="duo-art h-auto w-[8.5rem] sm:w-[13.75rem]" />
       <div class="relative">
         <Eyebrow parts={docs.eyebrow} class="duo-eyebrow" />
-        <Title parts={docs.title} as="h2" size="card" tone="ink" class="duo-title mt-3" />
+        <Title parts={docs.title} size="card" tone="ink" class="duo-title mt-3" />
         <p class="mt-3 max-w-sm text-[0.9375rem] leading-relaxed">{docs.body}</p>
         <a href={docHref('index', locale)} class="mt-6 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-white px-5 text-sm font-semibold text-[#111213]">
           {docs.cta}
@@ -39,7 +39,7 @@ const [docs, code] = t(locale).landing.duo;
       <span class="duo-motif" aria-hidden="true"></span>
       <div class="relative">
         <Eyebrow parts={code.eyebrow} />
-        <Title parts={code.title} as="h2" size="card" tone="soft" class="mt-3" />
+        <Title parts={code.title} size="card" tone="soft" class="mt-3" />
         <p class="mt-3 max-w-sm text-[0.9375rem] leading-relaxed text-muted">{code.body}</p>
         <a href={REPO_URL} rel="noopener" class="btn btn-primary mt-6">
           <Icon name="github" size={16} />

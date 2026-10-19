@@ -16,9 +16,9 @@ interface Props {
 }
 const { locale, title, description, ogAlt, noindex = false, jsonLd, path = '' } = Astro.props;
 
-const site = Astro.site ?? new URL('http://localhost:4321/');
 const canonical = new URL(getAbsoluteLocaleUrl(locale, path));
-const ogImage = new URL(withBase(`og/${locale}.png`), site);
+// Resolved against the canonical URL, so a missing `site` fails the build instead of pointing at localhost.
+const ogImage = new URL(withBase(`og/${locale}.png`), canonical);
 const alternates = locales.map((alt) => ({ locale: alt, href: getAbsoluteLocaleUrl(alt, path) }));
 const serialized = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : null;
 ---
@@ -48,4 +48,4 @@ const serialized = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : nu
 <meta name="twitter:image" content={ogImage.href} />
 <meta name="twitter:image:alt" content={ogAlt} />
 
-{serialized && <script type="application/ld+json" is:inline set:html={serialized} />}
+{serialized != null && <script type="application/ld+json" is:inline set:html={serialized} />}

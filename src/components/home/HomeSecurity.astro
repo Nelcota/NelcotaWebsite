@@ -28,6 +28,13 @@ const CARDS: ReadonlyArray<{ icon: IconName; tone: string }> = [
   { icon: 'folder', tone: 'k-sand' },
   { icon: 'code', tone: 'k-blue' },
 ];
+
+const items = safety.items.map((item, index) => {
+  const card = CARDS[index];
+  if (card == null) throw new RangeError(`HomeSecurity: safety item ${index + 1} has no entry in CARDS`);
+
+  return { ...item, ...card };
+});
 ---
 
 <section id="security" class="scroll-mt-24 overflow-x-clip py-12 md:py-20" aria-labelledby="security-title">
@@ -45,17 +52,13 @@ const CARDS: ReadonlyArray<{ icon: IconName; tone: string }> = [
 
     <ul class="steps-diag grid gap-4 sm:grid-cols-2 xl:grid-cols-3" data-cascade>
       {
-        safety.items.map((item, index) => {
-          const card = CARDS[index];
-
-          return (
-            <li class:list={['diag-card', card?.tone, `d${index + 1}`]}>
-              <span class="diag-icon">{card && <Icon name={card.icon} size={20} />}</span>
-              <p class="mt-10 text-xl font-semibold tracking-[-0.02em]">{item.title}</p>
-              <p class="mt-2 text-[0.9375rem] leading-relaxed">{item.body}</p>
-            </li>
-          );
-        })
+        items.map((item, index) => (
+          <li class:list={['diag-card', item.tone, `d${index + 1}`]}>
+            <span class="diag-icon"><Icon name={item.icon} size={20} /></span>
+            <p class="mt-10 text-xl font-semibold tracking-[-0.02em]">{item.title}</p>
+            <p class="mt-2 text-[0.9375rem] leading-relaxed">{item.body}</p>
+          </li>
+        ))
       }
     </ul>
   </div>

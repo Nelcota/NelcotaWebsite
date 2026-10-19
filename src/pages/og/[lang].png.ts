@@ -11,6 +11,9 @@ import { SITE_NAME } from '../../lib/site.ts';
 
 const WIDTH = 1200;
 const HEIGHT = 630;
+/** The mascot keeps its 280 × 318 drawing ratio, pinned right of the copy. */
+const MASCOT_WIDTH = 280;
+const MASCOT_HEIGHT = 318;
 
 export function getStaticPaths(): { params: { lang: Locale } }[] {
   return locales.map((lang) => ({ params: { lang } }));
@@ -98,9 +101,15 @@ export const GET: APIRoute = async ({ params }) => {
     ),
     el('img', {
       src: mascot,
-      width: 280,
-      height: 318,
-      style: { position: 'absolute', right: '90px', top: '156px', width: '280px', height: '318px' },
+      width: MASCOT_WIDTH,
+      height: MASCOT_HEIGHT,
+      style: {
+        position: 'absolute',
+        right: '90px',
+        top: '156px',
+        width: `${MASCOT_WIDTH}px`,
+        height: `${MASCOT_HEIGHT}px`,
+      },
     }),
   );
 

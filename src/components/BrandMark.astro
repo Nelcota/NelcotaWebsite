@@ -1,18 +1,20 @@
 ---
-import Mascot from './Mascot.astro';
+import Mascot, { type MascotSize } from './Mascot.astro';
 
 /**
  * The Nelcota app icon: the mascot on a rounded forest-green square, the same
  * lockup as tela.nelcota.com. Decorative: it always sits next to the name.
  */
+type SquareSize = 32 | 40;
+
 interface Props {
   /** Square side in px (the mascot inside is about 70% of it). */
-  size?: 32 | 40;
+  size?: SquareSize;
   class?: string;
 }
 const { size = 32, class: className } = Astro.props;
-const SQUARE: Readonly<Record<32 | 40, string>> = { 32: 'size-8 rounded-[0.625rem]', 40: 'size-10 rounded-xl' };
-const INNER: Readonly<Record<32 | 40, 20 | 28>> = { 32: 20, 40: 28 };
+const SQUARE: Readonly<Record<SquareSize, string>> = { 32: 'size-8 rounded-[0.625rem]', 40: 'size-10 rounded-xl' };
+const INNER: Readonly<Record<SquareSize, MascotSize>> = { 32: 20, 40: 28 };
 ---
 
 <span

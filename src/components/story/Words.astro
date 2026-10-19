@@ -7,16 +7,15 @@
  */
 interface Props {
   text: string;
-  class?: string;
 }
-const { text, class: className } = Astro.props;
+const { text } = Astro.props;
 const words = text.split(/\s+/).filter((word) => word.length > 0);
 ---
 
 {
   words.map((word, index) => (
     <>
-      <span class:list={['word', className]}>{word}</span>
+      <span class="word">{word}</span>
       {index < words.length - 1 && ' '}
     </>
   ))

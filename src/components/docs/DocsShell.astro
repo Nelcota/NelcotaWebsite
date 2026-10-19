@@ -1,7 +1,7 @@
 ---
 import { type Locale, t } from '../../i18n/utils.ts';
 import Base from '../../layouts/Base.astro';
-import type { DocsBundle } from '../../lib/docs/content.ts';
+import { type DocsBundle, findDoc } from '../../lib/docs/content.ts';
 import CopyScript from '../CopyScript.astro';
 import Icon from '../Icon.astro';
 import DocsNav from './DocsNav.astro';
@@ -27,7 +27,7 @@ interface Props {
 }
 const { locale, bundle, current, title, description, path, layout = 'article' } = Astro.props;
 const dict = t(locale).docsSite;
-const currentLabel = bundle.pages.find((page) => page.id === current)?.label ?? dict.overview;
+const currentLabel = current == null ? dict.overview : findDoc(bundle, current).label;
 const isLanding = layout === 'landing';
 
 // Highlight classes are emitted before <Base> renders so their hash lands in the CSP <meta>.

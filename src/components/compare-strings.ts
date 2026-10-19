@@ -42,12 +42,35 @@ export const COMPARE_STRINGS = {
  * One short figure per WINS entry (same order), shown big on each card the way
  * a price is on a pricing card. Each restates the card's own title.
  */
-export const WIN_FIGURES: ReadonlyArray<{ readonly kicker: Localized; readonly figure: string }> = [
+export interface WinFigure {
+  readonly kicker: Localized;
+  readonly figure: string;
+}
+
+const WIN_FIGURES: readonly WinFigure[] = [
   { kicker: { en: 'Memory', 'pt-br': 'Memória' }, figure: '1 GB' },
   { kicker: { en: 'Pieces to run', 'pt-br': 'Peças para rodar' }, figure: '2' },
   { kicker: { en: 'Backups', 'pt-br': 'Backups' }, figure: 'PITR' },
   { kicker: { en: 'Access', 'pt-br': 'Acesso' }, figure: 'RLS' },
 ];
+
+/** A WINS entry without a figure: WIN_FIGURES fell out of step with src/data/compare.ts. */
+export class MissingWinFigureError extends Error {
+  override readonly name = 'MissingWinFigureError';
+
+  constructor(index: number) {
+    super(`No WIN_FIGURES entry for WINS[${index}]`);
+  }
+}
+
+/** The figure for WINS[index]; fails the build when the two lists differ in length. */
+export function winFigure(index: number): WinFigure {
+  const figure = WIN_FIGURES[index];
+
+  if (figure == null) throw new MissingWinFigureError(index);
+
+  return figure;
+}
 
 /**
  * Splits a heading into its lead and its last word, for the two-tone titles

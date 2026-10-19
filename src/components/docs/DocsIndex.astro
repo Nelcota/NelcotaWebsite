@@ -38,9 +38,11 @@ const GROUP_TONES: Readonly<Record<DocGroup, Tone>> = {
   reference: 'lilac',
   design: 'lime',
 };
+/** Card numbers read "01", "02", "03". */
+const FEATURED_NUMBER_DIGITS = 2;
 const featured = FEATURED.map((entry, index) => ({
   ...entry,
-  number: String(index + 1).padStart(2, '0'),
+  number: String(index + 1).padStart(FEATURED_NUMBER_DIGITS, '0'),
   page: findDoc(bundle, entry.id),
 }));
 const groups = DOC_GROUPS.map((group) => ({
@@ -76,7 +78,7 @@ const versionNote = latest == null ? null : dict.versionNote.replace('{version}'
       <DocsSearch locale={locale} id="docs-search" size="large" />
     </div>
     {
-      versionNote && (
+      versionNote != null && (
         <p class="docs-hero-note">
           <Icon name="package" size={15} />
           <span>{versionNote}</span>

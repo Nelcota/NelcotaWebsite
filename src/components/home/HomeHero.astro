@@ -48,6 +48,13 @@ const CARD_STYLE: ReadonlyArray<{ mark: MarkSpec; tone: string }> = [
   { mark: icon('layout'), tone: 't-lilac' },
   { mark: brand('postgresql'), tone: 't-paper' },
 ];
+
+const cards = story.cards.map((card, index) => {
+  const style = CARD_STYLE[index];
+  if (style == null) throw new RangeError(`HomeHero: story card ${index + 1} has no entry in CARD_STYLE`);
+
+  return { ...card, ...style };
+});
 ---
 
 <section class="relative overflow-x-clip" aria-labelledby="hero-title" data-hides-sticky-cta>
@@ -70,20 +77,16 @@ const CARD_STYLE: ReadonlyArray<{ mark: MarkSpec; tone: string }> = [
     <div class="fan">
       <ul class="fan-list" aria-label={dict.nav.product}>
         {
-          story.cards.map((card, index) => {
-            const style = CARD_STYLE[index];
-
-            return (
-              <li class:list={['fan-slot', `c${index + 1}`]}>
-                <div class:list={['fan-card', style?.tone]}>
-                  <span class="fan-icon">{style && <Mark mark={style.mark} size={18} />}</span>
-                  <p class="mt-auto text-lg font-semibold tracking-[-0.02em]">{card.title}</p>
-                  <code class="fan-code">{card.code}</code>
-                  <p class="fan-body">{card.body}</p>
-                </div>
-              </li>
-            );
-          })
+          cards.map((card, index) => (
+            <li class:list={['fan-slot', `c${index + 1}`]}>
+              <div class:list={['fan-card', card.tone]}>
+                <span class="fan-icon"><Mark mark={card.mark} size={18} /></span>
+                <p class="mt-auto text-lg font-semibold tracking-[-0.02em]">{card.title}</p>
+                <code class="fan-code">{card.code}</code>
+                <p class="fan-body">{card.body}</p>
+              </div>
+            </li>
+          ))
         }
       </ul>
       <div class="bubble b1" aria-hidden="true">{story.bubbles[0]}</div>

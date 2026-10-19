@@ -32,7 +32,7 @@ const free = t(locale).landing.free;
           <li class:list={['plan', `p${index + 1}`]}>
             <p class="flex items-center justify-between gap-2 text-sm font-semibold">
               {plan.label}
-              {plan.badge && <span class="rounded-full bg-white px-2 py-0.5 text-[0.6875rem] font-bold text-[#111213]">{plan.badge}</span>}
+              {plan.badge != null && plan.badge.length > 0 && <span class="rounded-full bg-white px-2 py-0.5 text-[0.6875rem] font-bold text-[#111213]">{plan.badge}</span>}
             </p>
             <p class="mt-6 text-[clamp(2rem,4vw,2.75rem)] leading-none font-semibold tracking-[-0.04em]">{plan.price}</p>
             {plan.unit.length > 0 && <p class="mt-1 text-sm font-medium opacity-80">{plan.unit}</p>}

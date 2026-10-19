@@ -1,5 +1,6 @@
 ---
 import { getImage } from 'astro:assets';
+import { getAbsoluteLocaleUrl } from 'astro:i18n';
 import mascot from '../assets/mascot.png';
 import { type Locale, t } from '../i18n/utils.ts';
 import Base from '../layouts/Base.astro';
@@ -34,7 +35,8 @@ const license = spdxUrl(repo.license ?? LICENSE);
 // Highlighted snippets are rendered before <Base> so their stylesheet hash lands in the CSP <meta>.
 const snippets = await buildSnippets(dict);
 Astro.csp?.insertStyleHash(snippets.cssHash);
-const site = Astro.site ?? new URL('http://localhost:4321/');
+// Absolute URLs take their origin from the configured `site`; without it this throws instead of pointing at localhost.
+const site = new URL(getAbsoluteLocaleUrl(locale));
 const pageUrl = new URL(withBase(locale === 'en' ? '/' : `/${locale}/`), site).href;
 const logo = await getImage({ src: mascot, width: 512, height: 512, format: 'png' });
 

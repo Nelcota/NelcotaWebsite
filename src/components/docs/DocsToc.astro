@@ -10,13 +10,15 @@ interface Props {
   lang: string;
 }
 const { headings, lang } = Astro.props;
+/** h3 entries are indented under their h2. */
+const SUB_HEADING_LEVEL = 3;
 ---
 
 <ul class="docs-toc-list" lang={lang} data-toc>
   {
     headings.map((heading) => (
       <li>
-        <a href={`#${heading.id}`} class:list={['docs-toc-link', heading.level === 3 && 'docs-toc-sub']}>
+        <a href={`#${heading.id}`} class:list={['docs-toc-link', heading.level === SUB_HEADING_LEVEL && 'docs-toc-sub']}>
           {heading.text}
         </a>
       </li>

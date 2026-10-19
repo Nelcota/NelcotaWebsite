@@ -16,15 +16,14 @@ export const brand = (name: BrandName): MarkSpec => ({ kind: 'brand', name });
 interface Props {
   mark: MarkSpec;
   size?: number;
-  class?: string;
 }
-const { mark, size = 18, class: className } = Astro.props;
+const { mark, size = 18 } = Astro.props;
 ---
 
 {
   mark.kind === 'brand' ? (
-    <BrandLogo name={mark.name} size={size} class:list={['shrink-0', className]} />
+    <BrandLogo name={mark.name} size={size} class="shrink-0" />
   ) : (
-    <Icon name={mark.name} size={size} class:list={['shrink-0 text-mint-ink', className]} />
+    <Icon name={mark.name} size={size} class="shrink-0 text-mint-ink" />
   )
 }

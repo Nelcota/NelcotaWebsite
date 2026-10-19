@@ -29,14 +29,17 @@ const NOTES: Readonly<Record<DocStatus, string | null>> = {
 };
 const note = NOTES[page.status];
 const MIN_TOC_HEADINGS = 3;
-const toc = page.headings.filter((heading) => heading.level <= 3);
+/** h2 and h3 only: deeper headings would crowd the "on this page" column. */
+const MAX_TOC_LEVEL = 3;
+const toc = page.headings.filter((heading) => heading.level <= MAX_TOC_LEVEL);
 const hasToc = toc.length >= MIN_TOC_HEADINGS;
 const MAX_DESCRIPTION = 160;
 const description = page.lead.length > 0 ? page.lead.slice(0, MAX_DESCRIPTION) : page.summary;
 const latest = (await loadRepo()).releases[0];
 const versionNote = latest == null ? null : dict.versionNote.replace('{version}', latest.tag);
+const SHORT_COMMIT_LENGTH = 7;
 const synced = dict.syncedFrom
-  .replace('{commit}', bundle.lock.commit.slice(0, 7))
+  .replace('{commit}', bundle.lock.commit.slice(0, SHORT_COMMIT_LENGTH))
   .replace('{date}', formatDate(bundle.lock.committedAt, locale));
 const readingTime = dict.readingTime.replace('{minutes}', String(page.readingMinutes));
 ---
@@ -88,7 +91,7 @@ const readingTime = dict.readingTime.replace('{minutes}', String(page.readingMin
       </header>
 
       {
-        note && (
+        note != null && (
           <p class="docs-note">
             <span class="docs-bubble docs-note-badge" data-tone={page.lang === 'en' ? 'blue' : 'forest'} aria-hidden="true">
               {page.lang === 'en' ? 'EN' : 'PT'}
@@ -104,7 +107,7 @@ const readingTime = dict.readingTime.replace('{minutes}', String(page.readingMin
         <p>
           {dict.source}: <a href={editUrl(page.source)} rel="noopener" class="docs-source-path">{page.source}</a>
         </p>
-        {versionNote && <p>{versionNote}</p>}
+        {versionNote != null && <p>{versionNote}</p>}
         <p>
           <a href={`${REPO_URL}/tree/${bundle.lock.commit}`} rel="noopener">{synced}</a>
         </p>
@@ -113,7 +116,7 @@ const readingTime = dict.readingTime.replace('{minutes}', String(page.readingMin
 
     <nav aria-label={`${dict.previous} / ${dict.next}`} class="docs-pager">
       {
-        previous && (
+        previous != null && (
           <a href={previous.url} class="docs-pager-card docs-pager-prev">
             <span class="docs-pager-hint">{dict.previous}</span>
             <span class="docs-pager-title">{previous.label}</span>
@@ -124,7 +127,7 @@ const readingTime = dict.readingTime.replace('{minutes}', String(page.readingMin
         )
       }
       {
-        next && (
+        next != null && (
           <a href={next.url} class="docs-pager-card docs-pager-next">
             <span class="docs-pager-hint">{dict.next}</span>
             <span class="docs-pager-title">{next.label}</span>

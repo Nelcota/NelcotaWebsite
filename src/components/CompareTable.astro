@@ -87,7 +87,7 @@ const isNelcota = (product: Product): boolean => product === 'nelcota';
                   return (
                     <td data-col={product} class:list={['p-4 sm:p-5', isNelcota(product) ? 'is-nelcota text-ink' : 'text-muted']}>
                       <span class="flex items-start gap-2.5">
-                        {cell.support && (
+                        {cell.support != null && (
                           <span class:list={['mark shrink-0', `mark-${cell.support}`]}>
                             {cell.support === 'yes' && <Icon name="check" size={13} />}
                             {cell.support === 'no' && <Icon name="x" size={13} />}

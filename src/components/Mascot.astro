@@ -6,16 +6,17 @@
  * stylesheet (under its 4 KB limit): no request competing with the fonts, and no
  * repeated data URI in the HTML. Decorative: it always sits next to the name.
  */
+export type MascotSize = 20 | 28;
+
 interface Props {
-  size?: number;
-  class?: string;
+  size?: MascotSize;
 }
-const { size = 28, class: className } = Astro.props;
-const SIZE_CLASS: Readonly<Record<number, string>> = { 20: 'size-5', 28: 'size-7', 32: 'size-8' };
-const sizeClass = SIZE_CLASS[size] ?? 'size-7';
+const { size = 28 } = Astro.props;
+const SIZE_CLASS: Readonly<Record<MascotSize, string>> = { 20: 'size-5', 28: 'size-7' };
+const sizeClass = SIZE_CLASS[size];
 ---
 
-<span class:list={['mascot-mark inline-block shrink-0', sizeClass, className]} aria-hidden="true"></span>
+<span class:list={['mascot-mark inline-block shrink-0', sizeClass]} aria-hidden="true"></span>
 
 <style>
   .mascot-mark {

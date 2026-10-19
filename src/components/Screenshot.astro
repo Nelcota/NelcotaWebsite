@@ -11,15 +11,15 @@ interface Props {
   dark: ImageMetadata;
   alt: string;
   sizes: string;
-  eager?: boolean;
   class?: string;
 }
-const { light, dark, alt, sizes, eager = false, class: className } = Astro.props;
-const widths = [480, 640, 800, 1200, 1440].filter((width) => width <= light.width);
-const loading = eager ? 'eager' : 'lazy';
+const { light, dark, alt, sizes, class: className } = Astro.props;
+/** srcset steps; none wider than the source, so nothing is upscaled. */
+const CANDIDATE_WIDTHS: readonly number[] = [480, 640, 800, 1200, 1440];
+const widths = CANDIDATE_WIDTHS.filter((width) => width <= light.width);
 ---
 
 <div class:list={['overflow-hidden rounded-lg border border-line bg-surface', className]}>
-  <Picture src={light} alt={alt} formats={['avif', 'webp']} widths={widths} sizes={sizes} loading={loading} decoding="async" class="only-light h-auto w-full" />
-  <Picture src={dark} alt={alt} formats={['avif', 'webp']} widths={widths} sizes={sizes} loading={loading} decoding="async" class="only-dark h-auto w-full" />
+  <Picture src={light} alt={alt} formats={['avif', 'webp']} widths={widths} sizes={sizes} loading="lazy" decoding="async" class="only-light h-auto w-full" />
+  <Picture src={dark} alt={alt} formats={['avif', 'webp']} widths={widths} sizes={sizes} loading="lazy" decoding="async" class="only-dark h-auto w-full" />
 </div>
