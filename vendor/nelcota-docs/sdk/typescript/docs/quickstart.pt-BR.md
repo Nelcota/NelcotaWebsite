@@ -1,17 +1,26 @@
 # Começando com o SDK JavaScript do Nelcota
 
+Este guia descreve o SDK **0.2.1**, com correções posteriores ao 0.2.0 publicado. O cancelamento passa a retirar
+logins pendentes da fila, preservando a conclusão de operações já aceitas.
+`Bucket.file_size_limit` passa a `number | string | null`: mantenha limites
+grandes como strings decimais exatas ao ler e atualizar o bucket. O SDK envia
+esses valores como inteiros JSON, e o servidor mantém as validações de faixa.
+Converter primeiro para `number` pode perder precisão; use `null` para limpar
+o limite. Atualizar o servidor não atualiza o pacote do aplicativo.
+
 O mesmo pacote funciona em JavaScript e TypeScript. Use um servidor Nelcota
 com os recursos descritos na [matriz de compatibilidade](../README.md#compatibility).
 
 ## 1. Instale
 
 ```sh
-npm install @nelcota/client@0.1.2
+npm install @nelcota/client@0.2.1
 ```
 
-O pacote publicado é 0.1.2. O README do checkout descreve também mudanças
-não publicadas; atualizar o servidor não atualiza seu SDK. Para experimentar
-a versão de fonte, execute da raiz deste repositório:
+A instalação pelo registro exige a publicação bem-sucedida do 0.2.1. Consulte
+as [notas de atualização](contract.md#upgrading-from-020); atualizar o servidor não atualiza seu SDK.
+Antes de a versão estar disponível, use um arquivo local validado a partir da
+raiz do repositório:
 
 ```sh
 cd sdk/typescript
@@ -22,6 +31,26 @@ cd ../../.nelcota/sdk-consumer
 npm init -y
 npm install "$NELCOTA_SDK_TARBALL"
 ```
+
+## Atualizar do 0.2.0
+
+Execute `npm install --save-exact @nelcota/client@0.2.1`, confira a versão com
+`npm ls @nelcota/client` e versione o manifesto/lockfile do aplicativo. Rode seus
+testes, a checagem de tipos e o build. Preserve `number | string | null` nos
+limites de bucket; strings decimais exatas evitam arredondamento de int64.
+Os tipos de `single()`/`maybeSingle()` após outro `select()` agora refletem o
+resultado correto e podem exigir ajustar código que usava o tipo anterior.
+
+Trate validações de recuperação de senha, link mágico e confirmação com
+`await`/`catch` ou `.catch()`: os métodos rejeitam a Promise. Falhas HTTP/rede
+continuam no campo `error`. Linhas malformadas, códigos OAuth em branco e uploads
+sem corpo são recusados antes do HTTP; representações de storage ausentes geram
+`invalid_response`. Campos null válidos, coleções e arquivos vazios continuam
+aceitos. Atualize os mocks de HTTP para retornar as representações documentadas.
+
+Recarregue as abas abertas depois da atualização e verifique login, refresh,
+logout, leitura/escrita tipada e um upload/download no staging. Cancelar uma
+espera na fila não interrompe a publicação de sessão já aceita por outro dono.
 
 ## 2. Prepare os dados
 

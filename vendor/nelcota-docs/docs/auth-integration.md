@@ -6,7 +6,7 @@ dependency is `nelcota-auth`; `nelcota-core` is the only internal transitive
 dependency. Server, CLI, REST, panel, storage and webhooks are absent from its
 dependency graph. No Node runtime is required.
 
-This archive/facade workflow describes unpublished source after server 0.4.0.
+This archive/facade workflow is included in the server 0.5.0 source tree.
 A workspace version does not establish registry availability; use matched
 candidate archives until core/auth receive a separately reviewed release.
 
@@ -91,6 +91,9 @@ are reachable from the auth facade. EdDSA is preferred; JWKS exposes only public
 key material. HS256 requires at least 32 bytes and publishes no shared secret.
 With EdDSA and HS256 configured, signing uses EdDSA and legacy HS256 verification
 continues. Unknown algorithms/keys and malformed/expired claims fail closed.
+Optional `nbf` and `iat` must be whole non-negative epoch seconds and cannot be
+more than 30 seconds in the future, using the same leeway as expiration.
+This applies to both algorithms and raw-payload verification.
 `aud` remains informative and issuer validation is not enforced by `Keys`:
 applications needing stricter policies must supply a verifier for their own
 protected routes and middleware around auth routes. The built-in auth router
