@@ -169,6 +169,7 @@ const cards = story.cards.map((card, index) => {
       gap: 0.75rem;
       margin-inline: -1.25rem;
       padding: 1rem 1.25rem 1.75rem;
+      scroll-padding-inline: 1.25rem;
       overflow-x: auto;
       overscroll-behavior-x: contain;
       scroll-snap-type: x mandatory;
@@ -184,6 +185,15 @@ const cards = story.cards.map((card, index) => {
     }
     .bubble {
       display: none;
+    }
+  }
+
+  /* From sm the page gutter is 2rem: the swipe row still runs edge to edge. */
+  @media (40rem <= width < 72rem) {
+    .fan-list {
+      margin-inline: -2rem;
+      padding-inline: 2rem;
+      scroll-padding-inline: 2rem;
     }
   }
 

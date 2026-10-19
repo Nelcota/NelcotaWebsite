@@ -36,7 +36,7 @@ const SCATTER: readonly IconName[] = ['zap', 'activity', 'clock', 'server', 'cod
         {stats.method}
         <Icon name="external" size={14} />
       </a>
-      <div class="scatter mt-10" aria-hidden="true">
+      <div class="scatter mt-10 max-lg:hidden" aria-hidden="true">
         {SCATTER.map((name, index) => <Icon name={name} size={30} class:list={['scatter-icon', `i${index + 1}`]} />)}
       </div>
     </div>
@@ -53,14 +53,14 @@ const SCATTER: readonly IconName[] = ['zap', 'activity', 'clock', 'server', 'cod
 
       {/* biome-ignore lint/a11y/noNoninteractiveTabindex: the APG tabs pattern makes a panel focusable when it starts with text */}
       <div role="tabpanel" id="panel-speed-numbers" aria-labelledby="tab-speed-numbers" tabindex="0" class="p-4 sm:p-6">
-        <ul class="grid grid-cols-2 gap-3 sm:gap-4">
+        <ul class="grid grid-cols-1 gap-3 min-[22.5rem]:grid-cols-2 sm:gap-4">
           {
             stats.stats.map((stat, index) => {
               const figure = parseFigure(stat.value, locale);
 
               return (
                 <li class:list={['stat', `st${index + 1}`]}>
-                  <span class="text-[clamp(2.25rem,5vw,3.75rem)] leading-none font-semibold tracking-[-0.05em]" aria-hidden="true" data-count-to={figure.target} data-decimals={figure.decimals} data-locale={bcp47[locale]}>
+                  <span class="text-[clamp(2.25rem,5vw,3.75rem)] leading-none font-semibold tracking-[-0.05em] whitespace-nowrap" aria-hidden="true" data-count-to={figure.target} data-decimals={figure.decimals} data-locale={bcp47[locale]}>
                     {stat.value}
                   </span>
                   <span class="sr-only">{stat.value}</span>

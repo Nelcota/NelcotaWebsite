@@ -18,7 +18,7 @@ const free = t(locale).landing.free;
 ---
 
 <section class="overflow-x-clip py-12 md:py-20" aria-labelledby="free-title">
-  <div class="mx-auto grid max-w-[90rem] items-center gap-14 px-5 sm:px-8 lg:grid-cols-[0.8fr_1.2fr]">
+  <div class="mx-auto grid max-w-[90rem] items-center gap-14 px-5 sm:px-8 xl:grid-cols-[0.8fr_1.2fr]">
     <div>
       <span class="flex size-10 items-center justify-center rounded-xl bg-ink text-canvas" aria-hidden="true"><Icon name="scale" size={20} /></span>
       <Eyebrow parts={free.eyebrow} class="mt-6" />
@@ -30,9 +30,9 @@ const free = t(locale).landing.free;
       {
         free.plans.map((plan, index) => (
           <li class:list={['plan', `p${index + 1}`]}>
-            <p class="flex items-center justify-between gap-2 text-sm font-semibold">
+            <p class="flex flex-wrap items-center justify-between gap-2 text-sm font-semibold">
               {plan.label}
-              {plan.badge != null && plan.badge.length > 0 && <span class="rounded-full bg-white px-2 py-0.5 text-[0.6875rem] font-bold text-[#111213]">{plan.badge}</span>}
+              {plan.badge != null && plan.badge.length > 0 && <span class="rounded-full bg-white px-2 py-0.5 text-[0.6875rem] font-bold whitespace-nowrap text-[#111213]">{plan.badge}</span>}
             </p>
             <p class="mt-6 text-[clamp(2rem,4vw,2.75rem)] leading-none font-semibold tracking-[-0.04em]">{plan.price}</p>
             {plan.unit.length > 0 && <p class="mt-1 text-sm font-medium opacity-80">{plan.unit}</p>}

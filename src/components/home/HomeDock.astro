@@ -93,6 +93,25 @@ const RIGHT: ReadonlyArray<{ name: string; mark: MarkSpec }> = [
     height: 4.5rem;
     background-color: transparent;
   }
+  /* The smallest phones (320px): smaller tiles and the four nearest Nelcota, so the dock fits. */
+  @media (width < 24rem) {
+    .dock {
+      gap: 0.35rem;
+      padding: 0.45rem;
+    }
+    .dock-tile {
+      width: 2.75rem;
+      height: 2.75rem;
+    }
+    .dock-main {
+      width: 3.75rem;
+      height: 3.75rem;
+    }
+    .dock-tile:nth-child(2),
+    .dock-tile:nth-child(8) {
+      display: none;
+    }
+  }
   /* Phones keep the six tiles nearest Nelcota, so the dock fits the screen. */
   @media (width < 40rem) {
     .dock-tile:nth-child(1),
