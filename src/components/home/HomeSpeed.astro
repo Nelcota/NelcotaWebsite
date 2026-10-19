@@ -132,14 +132,31 @@ const SCATTER: readonly IconName[] = ['zap', 'activity', 'clock', 'server', 'cod
     max-width: 20rem;
     color: var(--color-ink);
   }
-  :global(.scatter-icon) {
+  /* Each icon drifts a few pixels on its own period, so the cluster never moves in step. */
+  .scatter :global(.scatter-icon) {
     position: absolute;
   }
-  .scatter :global(.i1) { top: 0; left: 8%; transform: rotate(-12deg); }
-  .scatter :global(.i2) { top: 2.5rem; left: 0; transform: rotate(8deg); }
-  .scatter :global(.i3) { top: 3rem; left: 24%; }
-  .scatter :global(.i4) { top: 4.5rem; left: 44%; transform: rotate(-6deg); }
-  .scatter :global(.i5) { top: 1rem; left: 62%; transform: rotate(14deg); }
-  .scatter :global(.i6) { top: 6rem; left: 12%; transform: rotate(-18deg); }
-  .scatter :global(.i7) { top: 5.5rem; left: 70%; transform: rotate(10deg); }
+  .scatter :global(.i1) { top: 0; left: 8%; rotate: -12deg; --drift-duration: 6.5s; --drift-delay: -1s; }
+  .scatter :global(.i2) { top: 2.5rem; left: 0; rotate: 8deg; --drift-duration: 8s; --drift-delay: -3s; }
+  .scatter :global(.i3) { top: 3rem; left: 24%; --drift-duration: 7.2s; --drift-delay: -5s; }
+  .scatter :global(.i4) { top: 4.5rem; left: 44%; rotate: -6deg; --drift-duration: 9s; --drift-delay: -2s; }
+  .scatter :global(.i5) { top: 1rem; left: 62%; rotate: 14deg; --drift-duration: 6.8s; --drift-delay: -4s; }
+  .scatter :global(.i6) { top: 6rem; left: 12%; rotate: -18deg; --drift-duration: 8.5s; --drift-delay: -6s; }
+  .scatter :global(.i7) { top: 5.5rem; left: 70%; rotate: 10deg; --drift-duration: 7.6s; --drift-delay: -0.5s; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .scatter :global(.scatter-icon) {
+      animation: scatter-drift var(--drift-duration, 7s) ease-in-out var(--drift-delay, 0s) infinite alternate;
+    }
+  }
+  /* The pause button in the closing section (drift-pause.ts) stops these too. */
+  :global([data-motion-paused]) .scatter :global(.scatter-icon) {
+    animation-play-state: paused;
+  }
+
+  @keyframes scatter-drift {
+    0% { translate: 0 0; }
+    50% { translate: 2px -4px; }
+    100% { translate: -2px 2px; }
+  }
 </style>
