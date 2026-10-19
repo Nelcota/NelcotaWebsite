@@ -1,6 +1,7 @@
 import { getImage } from 'astro:assets';
 import type { APIRoute } from 'astro';
 import mascot from '../assets/mascot.png';
+import { t } from '../i18n/utils.ts';
 import { SITE_NAME } from '../lib/site.ts';
 
 /** Light canvas color (--color-canvas in global.css), shown while the app loads. */
@@ -20,7 +21,8 @@ export const GET: APIRoute = async () => {
   const manifest = {
     name: SITE_NAME,
     short_name: SITE_NAME,
-    description: 'Open-source backend-as-a-service on plain PostgreSQL: one Rust binary.',
+    // The manifest has no locale: it uses the default (English) description.
+    description: t('en').meta.description,
     start_url: import.meta.env.BASE_URL,
     display: 'browser',
     background_color: CANVAS_LIGHT,

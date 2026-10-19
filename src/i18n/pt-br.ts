@@ -197,19 +197,6 @@ export const ptBr = {
     switchLocale: 'Read in English',
     switchLocaleShort: 'EN',
   },
-  hero: {
-    title: ['Seu Postgres.', 'Seu backend.', 'Sua infraestrutura.'],
-    subtitle:
-      'Um backend completo num único binário Rust: API REST gerada do seu schema, login, arquivos, webhooks e painel admin. No seu servidor, em PostgreSQL padrão.',
-    complement: 'Sem lock-in, sem cobrança por requisição. Open source, Apache-2.0.',
-    getStarted: 'Começar',
-    viewOnGithub: 'Ver no GitHub',
-    facts: ['Open source', 'Apache-2.0', 'Feito em Rust', 'PostgreSQL'],
-    latestRelease: 'Última versão',
-    installNote: 'Linux com o Docker rodando.',
-    mascotHint: 'Copia aqui!',
-    otherSystems: 'macOS e Windows',
-  },
   showcase: {
     overviewAlt:
       'Visão geral do painel do Nelcota com gráficos de tráfego da API, contagem de tabelas e usuários e próximos passos',
@@ -834,6 +821,7 @@ export const ptBr = {
     },
   },
   notFound: {
+    eyebrow: 'Erro',
     title: 'Página não encontrada',
     body: 'O mascote procurou em todo canto. Não há nada neste endereço.',
     home: 'Voltar para o início',

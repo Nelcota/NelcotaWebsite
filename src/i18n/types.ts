@@ -220,21 +220,6 @@ export interface Dictionary {
     switchLocale: string;
     switchLocaleShort: string;
   };
-  hero: {
-    /** Three short lines; the last one is set in the brand color. */
-    title: readonly [string, string, string];
-    subtitle: string;
-    complement: string;
-    getStarted: string;
-    viewOnGithub: string;
-    facts: readonly [string, string, string, string];
-    latestRelease: string;
-    /** Under the install command: what it assumes and where the other systems are. */
-    installNote: string;
-    /** Speech bubble of the waving mascot above the install bar. */
-    mascotHint: string;
-    otherSystems: string;
-  };
   showcase: {
     overviewAlt: string;
     tableAlt: string;
@@ -476,6 +461,8 @@ export interface Dictionary {
     winsTitle: string;
   };
   notFound: {
+    /** Small label over the title, before the code: "Error 404". */
+    eyebrow: string;
     title: string;
     body: string;
     home: string;

@@ -28,16 +28,113 @@ function resolveLocale(lang: string | undefined): Locale {
 const decode = (dataUri: string): Buffer =>
   Buffer.from(dataUri.slice(dataUri.indexOf(',') + 1), 'base64');
 
+/** Gallery palette (global.css tokens), fixed here because satori has no CSS variables. */
+const CANVAS = '#f5f5f4';
+const INK = '#111213';
+const MUTED = '#62666a';
+const BRAND = '#1b7640';
+/** The three tilted cards behind the mascot: color, left offset, top offset, rotation. */
+const CARDS = [
+  { color: '#cdbdff', left: 0, top: 80, rotate: -10 },
+  { color: '#f1dfb8', left: 100, top: 40, rotate: 2 },
+  { color: '#87dba6', left: 200, top: 90, rotate: 12 },
+] as const;
+const CARD_WIDTH = 180;
+const CARD_HEIGHT = 240;
+/** Where the fan starts and how wide it is, so nothing runs off the 1200 px canvas. */
+const FAN_LEFT = 740;
+const FAN_WIDTH = 400;
+
+// satori takes a React-like element tree; plain objects avoid a JSX runtime.
+const el = (type: string, props: Record<string, unknown>, ...children: unknown[]) => ({
+  type,
+  props: { ...props, children: children.length === 1 ? children[0] : children },
+});
+
+/** The brand chip: a green square with the name next to it, like the site header. */
+const brand = () =>
+  el(
+    'div',
+    {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '14px',
+        fontSize: '30px',
+        fontWeight: 700,
+      },
+    },
+    el('div', {
+      style: { width: '40px', height: '40px', borderRadius: '11px', backgroundColor: BRAND },
+    }),
+    SITE_NAME,
+  );
+
+/** Three tilted cards with the mascot standing in front, and one @mention bubble. */
+const fan = () =>
+  el(
+    'div',
+    {
+      style: {
+        display: 'flex',
+        position: 'absolute',
+        left: `${FAN_LEFT}px`,
+        top: '150px',
+        width: `${FAN_WIDTH}px`,
+        height: '420px',
+      },
+    },
+    ...CARDS.map((card) =>
+      el('div', {
+        style: {
+          position: 'absolute',
+          left: `${card.left}px`,
+          top: `${card.top}px`,
+          width: `${CARD_WIDTH}px`,
+          height: `${CARD_HEIGHT}px`,
+          borderRadius: '28px',
+          backgroundColor: card.color,
+          transform: `rotate(${card.rotate}deg)`,
+          boxShadow: '0 24px 48px -20px rgba(11, 13, 12, 0.35)',
+        },
+      }),
+    ),
+    el('img', {
+      src: mascot,
+      width: MASCOT_WIDTH,
+      height: MASCOT_HEIGHT,
+      style: {
+        position: 'absolute',
+        left: '60px',
+        top: '70px',
+        width: `${MASCOT_WIDTH}px`,
+        height: `${MASCOT_HEIGHT}px`,
+      },
+    }),
+    el(
+      'div',
+      {
+        style: {
+          display: 'flex',
+          position: 'absolute',
+          right: '0px',
+          top: '10px',
+          padding: '10px 18px',
+          borderRadius: '999px 999px 999px 6px',
+          backgroundColor: '#d4246f',
+          color: '#ffffff',
+          fontSize: '22px',
+          fontWeight: 700,
+        },
+      },
+      '200 OK',
+    ),
+  );
+
 export const GET: APIRoute = async ({ params }) => {
   const lang = resolveLocale(params.lang);
   const dict = t(lang);
-  const [lineOne, lineTwo, lineThree] = dict.hero.title;
-
-  // satori takes a React-like element tree; plain objects avoid a JSX runtime.
-  const el = (type: string, props: Record<string, unknown>, ...children: unknown[]) => ({
-    type,
-    props: { ...props, children: children.length === 1 ? children[0] : children },
-  });
+  const [lineOne, lineTwo] = dict.landing.hero.title;
 
   const tree = el(
     'div',
@@ -47,70 +144,48 @@ export const GET: APIRoute = async ({ params }) => {
         width: '100%',
         height: '100%',
         display: 'flex',
-        alignItems: 'center',
         position: 'relative',
-        paddingLeft: '80px',
-        backgroundColor: '#121212',
-        backgroundImage: 'radial-gradient(circle at 82% 60%, #1b3a29 0%, #121212 55%)',
-        color: '#ededed',
+        padding: '72px 80px',
+        backgroundColor: CANVAS,
+        color: INK,
         fontFamily: 'Manrope',
       },
     },
     el(
       'div',
-      { style: { display: 'flex', flexDirection: 'column', width: '720px', flexShrink: 0 } },
-      el(
-        'div',
-        {
-          style: {
-            display: 'flex',
-            alignItems: 'center',
-            gap: '14px',
-            fontSize: '30px',
-            fontWeight: 700,
-          },
-        },
-        el('div', {
-          style: { width: '14px', height: '14px', borderRadius: '7px', backgroundColor: '#87dba6' },
-        }),
-        SITE_NAME,
-      ),
+      { style: { display: 'flex', flexDirection: 'column', width: '680px', flexShrink: 0 } },
+      brand(),
       el(
         'div',
         {
           style: {
             display: 'flex',
             flexDirection: 'column',
-            marginTop: '36px',
-            fontFamily: 'Manrope',
+            marginTop: '64px',
             fontWeight: 700,
-            fontSize: '66px',
+            fontSize: '68px',
             lineHeight: 1,
-            letterSpacing: '-3.5px',
+            letterSpacing: '-4px',
           },
         },
         el('div', { style: { display: 'flex' } }, lineOne),
-        el('div', { style: { display: 'flex' } }, lineTwo),
-        el('div', { style: { display: 'flex', color: '#87dba6' } }, lineThree),
+        el('div', { style: { display: 'flex', color: MUTED, marginTop: '8px' } }, lineTwo),
       ),
       el(
         'div',
-        { style: { display: 'flex', marginTop: '36px', fontSize: '28px', color: '#a1a1a1' } },
+        {
+          style: {
+            display: 'flex',
+            maxWidth: '600px',
+            marginTop: '44px',
+            fontSize: '26px',
+            color: MUTED,
+          },
+        },
         dict.meta.ogEyebrow,
       ),
     ),
-    el('img', {
-      src: mascot,
-      width: MASCOT_WIDTH,
-      height: MASCOT_HEIGHT,
-      style: {
-        position: 'absolute',
-        right: '90px',
-        top: '156px',
-        width: `${MASCOT_WIDTH}px`,
-        height: `${MASCOT_HEIGHT}px`,
-      },
-    }),
+    fan(),
   );
 
   const svg = await satori(tree as Parameters<typeof satori>[0], {
