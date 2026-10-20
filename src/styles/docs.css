@@ -1351,3 +1351,29 @@
   margin-top: 0.5rem;
   box-shadow: none;
 }
+
+/* Version navigation stays usable without JavaScript and does not affect landing-page CSS. */
+.docs-versions {
+  padding-block: 1rem;
+  font-size: 0.8rem;
+}
+.docs-versions nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.docs-versions nav a {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--color-line, #ddd);
+  border-radius: 999px;
+}
+.docs-versions nav a[aria-current] {
+  background: var(--color-forest, #183f32);
+  color: white;
+}
+.docs-version-metadata {
+  margin-top: 0.6rem;
+}
+.docs-archive-note {
+  max-width: 80ch;
+}

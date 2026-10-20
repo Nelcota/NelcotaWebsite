@@ -1,0 +1,228 @@
+{
+  "repository": "Nelcota/Nelcota",
+  "ref": "v0.5.0",
+  "commit": "b18412a65f4accc4d759d7f840e50420d32d7579",
+  "committedAt": "2026-10-18T21:20:26-03:00",
+  "pages": [
+    {
+      "id": "quickstart",
+      "group": "start",
+      "source": "docs/quickstart.md",
+      "catalog": "quickstart"
+    },
+    {
+      "id": "sdk-start",
+      "group": "start",
+      "source": "sdk/typescript/docs/quickstart.pt-BR.md",
+      "language": "pt-BR"
+    },
+    {
+      "id": "notes",
+      "group": "start",
+      "source": "docs/onboarding/notes.md"
+    },
+    {
+      "id": "troubleshooting",
+      "group": "start",
+      "source": "docs/troubleshooting.md",
+      "catalog": "troubleshooting"
+    },
+    {
+      "id": "glossary",
+      "group": "start",
+      "source": "docs/glossary.md"
+    },
+    {
+      "id": "api",
+      "group": "build",
+      "source": "docs/api.md",
+      "catalog": "api"
+    },
+    {
+      "id": "auth",
+      "group": "build",
+      "source": "docs/schema-auth.md",
+      "catalog": "auth"
+    },
+    {
+      "id": "roles",
+      "group": "build",
+      "source": "docs/jwt-and-roles.md",
+      "catalog": "roles"
+    },
+    {
+      "id": "storage",
+      "group": "build",
+      "source": "docs/storage.md",
+      "catalog": "storage"
+    },
+    {
+      "id": "webhooks",
+      "group": "build",
+      "source": "docs/webhooks.md",
+      "catalog": "webhooks"
+    },
+    {
+      "id": "sdk",
+      "group": "build",
+      "source": "sdk/typescript/README.md",
+      "catalog": "sdk"
+    },
+    {
+      "id": "sdk-rust",
+      "group": "build",
+      "source": "sdk/rust/README.md",
+      "catalog": "sdk-rust"
+    },
+    {
+      "id": "rust-start",
+      "group": "build",
+      "source": "sdk/rust/docs/quickstart.pt-BR.md",
+      "language": "pt-BR"
+    },
+    {
+      "id": "examples",
+      "group": "build",
+      "source": "examples/README.md"
+    },
+    {
+      "id": "auth-integration",
+      "group": "build",
+      "source": "docs/auth-integration.md"
+    },
+    {
+      "id": "deploy",
+      "group": "operate",
+      "source": "docs/deploy.md",
+      "catalog": "deploy"
+    },
+    {
+      "id": "backup",
+      "group": "operate",
+      "source": "docs/backup.md",
+      "catalog": "backup"
+    },
+    {
+      "id": "panel",
+      "group": "operate",
+      "source": "docs/panel.md",
+      "catalog": "panel"
+    },
+    {
+      "id": "panel-updates",
+      "group": "operate",
+      "source": "docs/panel-updates.md"
+    },
+    {
+      "id": "host-management",
+      "group": "operate",
+      "source": "docs/host-management.md"
+    },
+    {
+      "id": "security",
+      "group": "operate",
+      "source": "docs/security/README.md"
+    },
+    {
+      "id": "release",
+      "group": "operate",
+      "source": "docs/onboarding/release.md"
+    },
+    {
+      "id": "leaving",
+      "group": "operate",
+      "source": "docs/leaving.md",
+      "catalog": "leaving"
+    },
+    {
+      "id": "configuration",
+      "group": "reference",
+      "source": "docs/configuration.md"
+    },
+    {
+      "id": "cli",
+      "group": "reference",
+      "source": "docs/cli.md"
+    },
+    {
+      "id": "sdk-contract",
+      "group": "reference",
+      "source": "sdk/typescript/docs/contract.md",
+      "catalog": "sdk-contract"
+    },
+    {
+      "id": "rust-contract",
+      "group": "reference",
+      "source": "sdk/rust/docs/contract.md",
+      "catalog": "rust-contract"
+    },
+    {
+      "id": "architecture",
+      "group": "design",
+      "source": "docs/architecture.md",
+      "catalog": "architecture"
+    },
+    {
+      "id": "decisions",
+      "group": "design",
+      "source": "docs/decisions.md",
+      "catalog": "decisions"
+    }
+  ],
+  "versions": {
+    "server": "0.5.0",
+    "typescript": "0.2.0",
+    "rust": "0.1.3"
+  },
+  "files": {
+    "Cargo.toml": "5d102700f9ded80dc221cecfc1944e1dfd77da73bc912cebc7c3f5e540f22f69",
+    "docs/api.md": "76ea29c048a1ef86ca0cb9f79e857f803f024afe0141d4561b5205cc707a860e",
+    "docs/architecture.md": "0bc8e0b98d4e5f5e61e361d52d6e53c4f84a8dcc072cf5e48b27bd3ca9df5fc6",
+    "docs/auth-integration.md": "8624c21a9ad91967ebd5994d024bc8323f3f54317aed219747bdf17cfd1026eb",
+    "docs/backup.md": "7c0fee619f133abb75da2d9180bbec642dee806193597452a083ca33a3ea71b4",
+    "docs/cli.md": "8d8076429f1255783876b90a61df354a637278bb653eca9e2e46fa456dc4f28c",
+    "docs/configuration.md": "a32e7b3ad90c0005f7d87028cc44fcff2340197bd5bcdc9e03c21f5c959ccc60",
+    "docs/decisions.md": "eb31cb308bbbe2d27a16ec6c5110102a7bd1c68fb36f2eaa2e3dd14cc3e354f4",
+    "docs/deploy.md": "ac0cc03198984f4480d4ce4ac00f2db3f9c165a7b9d38b0920405d8f7d370cad",
+    "docs/glossary.md": "662d398cbde388445857a2ad16955e823f1897cb97299a26fd8481e42d215797",
+    "docs/host-management.md": "63a81ac084f36c3f93e5a5f8446f79efff6863bb6f3edf729aedcf49f6751171",
+    "docs/i18n/pt-BR/api.json": "e76b30944fd8e72a62ee26fda7c8c76c715330e3b17747f16fed2a65cd5d4b93",
+    "docs/i18n/pt-BR/architecture.json": "8bf2924d41b9993be1755bd67787bb875205a666aa3a46546faf9b31aba63367",
+    "docs/i18n/pt-BR/auth.json": "c757f1f02164eea7eed043802b464296b9dc1ec8159ac905223d12321c93146f",
+    "docs/i18n/pt-BR/backup.json": "1b32172ceb5f92e352dff9a6076ee862da74db8cecf3a3fdc20228a19166d0e7",
+    "docs/i18n/pt-BR/decisions.json": "445e7c034ae0a301797815cc0c14e46d487f4c9d3ba9bb91ac01b964d2a93bc5",
+    "docs/i18n/pt-BR/deploy.json": "f236d96c33d7159c4595bc7f238361b18730535d1c1cab6b1480a278daf2e68b",
+    "docs/i18n/pt-BR/leaving.json": "c6112cec141a215ff81fd14bf68d93bb82531c72e94b564f378c931272481ea1",
+    "docs/i18n/pt-BR/panel.json": "02a84b6f0db43e6417f1fd966e22fb0e921f67f9d5fadca404acadf368add476",
+    "docs/i18n/pt-BR/quickstart.json": "a98bb6cbd7a4daa4e280670d5e8b05b3d53be466d62004fbe3bcb1f872f766c4",
+    "docs/i18n/pt-BR/roles.json": "d44b1b0e2c10a19773cedfb2551061423b257874ab243247c5889b556a173d15",
+    "docs/i18n/pt-BR/rust-contract.json": "ea9dff53c39c20b8f83c824422b86cc943af9caef21e9c4b1633cb6ecc2e1113",
+    "docs/i18n/pt-BR/sdk-contract.json": "0950cb630c9b066872969425526657708196bd90e327390ef19939252aab08ee",
+    "docs/i18n/pt-BR/sdk-rust.json": "c29da2420d0c87590cde3b91dfd2481d3abfb650f65654743dc67edf74c7100b",
+    "docs/i18n/pt-BR/sdk.json": "bc642ef3957a5b2e93a798252ea2ba003e91b6126101114996a392c76b82a225",
+    "docs/i18n/pt-BR/storage.json": "cd6668c886ae9119ec220a75dfc645692962d6a56c0334d636fab8a3344da7fa",
+    "docs/i18n/pt-BR/troubleshooting.json": "91e7eefa1c611d506a49800ad6454a56e56daa6a815a5007ccecb70959f9f1be",
+    "docs/i18n/pt-BR/webhooks.json": "35ee39552e5aa344c56bee93b7bbdbb98fc60b173283d1d1ad6326db53d1c029",
+    "docs/jwt-and-roles.md": "907591b2f8f435ac006aeca2805351afb8e35d8f3cfa44a8a572c0049553882e",
+    "docs/leaving.md": "80d7d2741fecf6ec3f215673ee6a72fdf4769c8f4c9db89108f6e30ba732a833",
+    "docs/onboarding/notes.md": "b1414f13d7eca493af3d60c04d8774be78e005e5494e1c0aaa9c5c164e065b03",
+    "docs/onboarding/release.md": "e019061e2f54ee9182365b3686374a89fbb0baae6995052505d7fad3ef8de014",
+    "docs/panel-updates.md": "a6bb83781ec190014884dc855c9535bb8b29153c3baa00f30b9ef8139a29c14b",
+    "docs/panel.md": "8bc899887fd81f7f498e15d82be120a56e67a55cf93a99ffd2dc2394883804ce",
+    "docs/quickstart.md": "d363929eedc2b7702aa3ccfb125a47d81ca58c355b0196e86c6b1267165f8b8d",
+    "docs/schema-auth.md": "43fe3137d1fc2d489ae9faf310d2a46224641c2a7ea8bfea0617a733c8d7a863",
+    "docs/security/README.md": "48b9ef92648dce895a9bbe75ad961231ff061d6d27efa08edad28799e8e06220",
+    "docs/storage.md": "979933bd7e2afab7146cb1d0da799f88fc21dd256aeea1a63a05b81fb1f16dc0",
+    "docs/troubleshooting.md": "1116cbb729662119ba355a3e7e8e9c67bcf637c6f64d2efe71a7b059e15821d7",
+    "docs/webhooks.md": "61a3faa99147ad2d7fea534f5aa60bead8bd875adcdc654d8bebc491b70cd7c5",
+    "examples/README.md": "8000034e7a93ed0a03ce923216c96df8a7f7f4678f91e830a2ccafb7c302a5af",
+    "sdk/rust/Cargo.toml": "9e9d4c130d2b659f2ace2b6c59659b7aa36213720848681e20e94d8b81dc94ef",
+    "sdk/rust/README.md": "58b058ffa213dbbfdfb27e2bbcf06ca1395321076760843ea1f83c264eab934c",
+    "sdk/rust/docs/contract.md": "de92cada48d2aafc77f3043a34cda53941a82d0f969dce82a9b00655f59a10a9",
+    "sdk/rust/docs/quickstart.pt-BR.md": "9b109863ad186038bb20a7c47fe99ace89d0678935d79947c1a1044543dc2dff",
+    "sdk/typescript/README.md": "d1bf30851df5ecb940a6325dc75ba60debace40484663da8499b4601b044abc0",
+    "sdk/typescript/docs/contract.md": "72292dcc85c5edf6ccad2e48c7da38b9d5c2c506f2fbd0d49aa99c6f5d252b5c",
+    "sdk/typescript/docs/quickstart.pt-BR.md": "ef439235c3d6d136d877a558d45dd1e4a566208c4d3ee42112f3306d5f60c856",
+    "sdk/typescript/package.json": "66e8dd79eb6d264c6b07ac31cc0a4f25fe2c02f897eff08c6ee72903dc5c5cec"
+  }
+}

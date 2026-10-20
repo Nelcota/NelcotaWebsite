@@ -1,0 +1,12 @@
+---
+import type { GetStaticPaths } from 'astro';
+import DocsArticle from '../../../../../components/docs/DocsArticle.astro';
+import { docsLock, loadDocs } from '../../../../../lib/docs/content.ts';
+import { docsVersion, RELEASE_DOC_VERSIONS } from '../../../../../lib/docs/versions.ts';
+
+export const getStaticPaths = (() => RELEASE_DOC_VERSIONS.flatMap(({ id }) => docsLock(id).pages.map((page) => ({ params: { version: id, page: page.id } })))) satisfies GetStaticPaths;
+const version = docsVersion(Astro.params.version).id;
+const bundle = await loadDocs('pt-br', version);
+---
+
+<DocsArticle locale="pt-br" bundle={bundle} id={Astro.params.page} />

@@ -25,7 +25,7 @@ or the [client contract](docs/contract.md). Empty results, 401/403 or a
   a browser.
 
 ```sh
-npm install @nelcota/client@0.1.2
+npm install @nelcota/client@0.2.1
 nelcota types -o src/database.ts
 ```
 
@@ -45,12 +45,13 @@ const nelcota = createClient('https://api.example.com');
 
 ## Version scope
 
-The installation above selects published 0.1.2. This reference describes current
-source, including Unreleased changes. Native IndexedDB session/PKCE journaling,
-exact numeric preservation and the latest cancellation ownership fixes are not
-in published 0.1.2. Read that package's bundled README for its release contract;
-use a locally built package to try source changes. Updating the server does not
-update installed clients. Node is SDK tooling/runtime, not a backend requirement.
+This guide targets 0.2.1. Version 0.2.0 is the previous published baseline;
+0.2.1 adds queued-auth cancellation, profile ordering, exact bucket-limit writes
+and input/response guards. Registry installation requires successful publication
+of that version; use a locally packed archive before it is available. See the
+[upgrade notes](docs/contract.md#upgrading-from-020) for compatibility changes and application
+checks. Updating the server does not update installed clients. Node is SDK
+tooling/runtime, not a backend requirement.
 
 ## Independent modules
 
@@ -250,6 +251,8 @@ On upgrade, the journal imports the existing `localStorage` session once.
 Reload all open tabs to avoid mixing old and new coordination protocols.
 Use `signOut()` or clear all site data to remove native sessions; editing
 only `localStorage` no longer changes authoritative session state.
+Signing out also clears the pending OAuth verifier from the journal and
+its storage mirror, including when no session exists or server logout fails.
 
 Failed sign-in/logout publication keeps the newer local state while the exact
 prior journal revision remains current, even if another client wrote that
@@ -488,8 +491,8 @@ error immediately with `retryAfter`, allowing the app to decide when to retry.
 
 | @nelcota/client | Server baseline | Support |
 |---|---|---|
-| 0.1.x | Server `v0.3.0` or later | Full contract suite, OAuth routes, `updateUser`, exposed CORS headers and generated `Relationships` |
-| 0.1.x | Server `v0.2.0` | Not supported: lacks the OAuth routes, `PUT /auth/v1/user`, the JSON error contract, generated `Relationships` and the newer exposed headers |
+| 0.2.x | Server `v0.3.0` or later | Full contract suite, OAuth routes, `updateUser`, exposed CORS headers and generated `Relationships` |
+| 0.2.x | Server `v0.2.0` | Not supported: lacks the OAuth routes, `PUT /auth/v1/user`, the JSON error contract, generated `Relationships` and the newer exposed headers |
 
 Release verification covers Node 22/24/26, Bun, Deno and the Chromium, Firefox
 and WebKit engines. Other runtimes need their own validation.

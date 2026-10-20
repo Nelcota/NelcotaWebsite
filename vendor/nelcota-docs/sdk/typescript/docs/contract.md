@@ -1,15 +1,43 @@
 # Client contract
 
-`@nelcota/client` 0.1.x targets the Nelcota HTTP protocol implemented by this
+`@nelcota/client` 0.2.x targets the Nelcota HTTP protocol implemented by this
 repository. The package has its own version; server compatibility is determined
 by the endpoints and features below, not by matching package version numbers.
 
 ## Version scope
 
-This is the current source contract. Published 0.1.2 predates native IndexedDB
-journaling and exact numeric preservation below; consult its bundled package
-docs for that release. Unreleased client behavior requires a rebuilt/new client
-package, independently of a server update.
+This is the 0.2.1 package contract. It includes queued-auth cancellation, exact
+bucket-limit writes, profile ordering and the input/response guards below.
+Version 0.2.0 predates these corrections. Registry installation requires
+successful publication of 0.2.1; a server update does not install the client.
+See the [upgrade notes](#upgrading-from-020). Older packages keep the contract in their
+own bundled documentation.
+
+## Upgrading from 0.2.0
+
+Install 0.2.1 explicitly, update the application lockfile and run its type check,
+build and tests. Server and SDK versions remain independent. Existing package
+entrypoints, result/error codes, timeouts and HTTP routes are preserved.
+
+- `Bucket.file_size_limit` is now correctly `number | string | null`. Preserve
+  exact decimal strings when reading/updating large limits; converting them to
+  `number` can lose precision. Use explicit null to clear a limit.
+- `single()`/`maybeSingle()` keep their corrected result types through a chained
+  `select()`. Code relying on the previous inaccurate type may need adjustment.
+- Handle password-reset, magic-link and confirmation validation with
+  `await`/`catch` or `.catch()`: invalid arguments reject the Promise. HTTP and
+  network failures still use the existing result's `error` field.
+- Malformed write rows, blank OAuth codes and absent upload bodies are usage
+  errors before HTTP. Missing storage representations return `invalid_response`.
+  Valid null fields, default row objects, empty collections and zero-byte files
+  remain supported. Storage response checks are minimum shape guards.
+- Cancelled queued auth callers leave the queue without cancelling another
+  refresh owner or an already accepted session publication. Older profile reads
+  cannot overwrite newer cached user data. Writes are never automatically replayed.
+
+Reload open browser tabs after updating so they use the same installed SDK.
+Verify login/refresh/sign-out, a typed read/write and storage against staging;
+update HTTP mocks to return the documented response representation.
 
 ## Interface
 
@@ -71,6 +99,27 @@ at runtime. RLS and GRANTs always remain server/Postgres decisions.
   errors must be handled by the caller; `download()` buffers into a Blob and
   returns body failures in its result.
 
+## Input and response guards
+
+Insert/upsert arrays require object rows, including at sparse array positions.
+An empty object can request database defaults; empty strings and explicit null
+field values remain valid. An omitted `referencedTable` targets the parent;
+an explicitly empty or null target is refused rather than changing the parent.
+
+Storage uploads require a body. Use an empty string, Blob or byte buffer for a
+zero-byte file; null or undefined is a usage error. Item responses require a
+nonempty string identity; bucket collections and object listings require their
+array containers and item identities. These are minimum representation guards,
+not exhaustive field-by-field schemas. Missing/invalid representations return
+`invalid_response` with the HTTP status and are not retried. Empty collections
+and nullable owner, metadata and bucket limits remain valid.
+
+Blank OAuth codes are rejected before HTTP or verifier consumption. Sessions
+need a nonempty user identity. Password-reset, magic-link and confirmation
+methods return promises even when email validation fails; handle those errors
+with `await`/`catch` or `.catch()`. Synchronous query builders still throw
+`NelcotaUsageError` directly for invalid input.
+
 ## Sessions and lifecycle
 
 Each client owns its session adapter. Native localStorage uses an IndexedDB
@@ -116,6 +165,9 @@ seconds before a background attempt; explicit session reads still refresh it
 immediately.
 
 Auth methods that perform HTTP accept `{signal,timeout}` as the last argument.
+Signals also cancel queued authentication before HTTP starts; withdrawing a
+wait never cancels another operation's lifecycle ownership. Once a response is
+accepted, its session publication can finish after the caller stops waiting.
 Concurrent refresh callers share the first caller's timeout. Signals cancel
 each caller's wait independently; rotation continues and persists its result
 even when a waiter cancels. An already aborted caller does not start rotation.
@@ -154,6 +206,15 @@ Creation accepts `BucketSettings` with optional fields. Updating uses
 `allowed_mime_types`, and replaces the entire settings object with PUT.
 Use explicit null to clear a limit. Missing fields throw `NelcotaUsageError`
 before any HTTP request, including in JavaScript consumers.
+
+`Bucket.file_size_limit` is `number | string | null`. Limits beyond JavaScript's
+safe integer range are returned as exact decimal strings, and bucket settings
+accept those strings for read-modify-write. Pass a positive canonical decimal
+string for large int64 limits; the SDK sends it as an unquoted JSON integer.
+Do not first convert an exact string to `number`: JavaScript rounding cannot
+be recovered. The server retains its positive-int64 range and settings validation;
+invalid values return their existing HTTP errors. Non-finite numbers still throw
+before HTTP. Noncanonical decimal strings remain JSON-escaped and quoted.
 
 ## Release acceptance
 

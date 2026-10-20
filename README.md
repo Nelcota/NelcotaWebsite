@@ -17,8 +17,9 @@
 ---
 
 - **Home, comparison and docs** in English (`/`) and Portuguese (`/pt-br/`).
-- **Docs synced** from the Markdown in `Nelcota/Nelcota`, rendered at build time, with search.
-- **Static and fast:** Astro, Tailwind CSS 4, under 4 KiB of client JavaScript, GSAP only after the first interaction, strict CSP, no third-party requests.
+- **Docs synced** from canonical Markdown in `Nelcota/Nelcota`, with current guides, an immutable v0.5.0 snapshot, pinned source links and search per version.
+- **Published site:** [Nelcota documentation](https://nelcota.github.io/NelcotaWebsite/docs/).
+- **Static and fast:** Astro, Tailwind CSS 4, under 4 KiB of client JavaScript on the home page, GSAP only after the first interaction, strict CSP, no third-party requests.
 
 ## Quick start
 

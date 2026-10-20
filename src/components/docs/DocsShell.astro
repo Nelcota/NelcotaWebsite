@@ -6,6 +6,7 @@ import CopyScript from '../CopyScript.astro';
 import Icon from '../Icon.astro';
 import DocsNav from './DocsNav.astro';
 import DocsSearch from './DocsSearch.astro';
+import DocsVersions from './DocsVersions.astro';
 // Docs-only styles: kept out of global.css so the home page does not carry them.
 import '../../styles/docs.css';
 
@@ -35,6 +36,7 @@ Astro.csp?.insertStyleHash(bundle.cssHash);
 ---
 
 <Base locale={locale} title={title} description={description} path={path}>
+  <DocsVersions locale={locale} bundle={bundle} current={current} />
   {
     isLanding && (
       <div class="docs-container docs-landing">
@@ -54,7 +56,7 @@ Astro.csp?.insertStyleHash(bundle.cssHash);
                 <Icon name="chevron" size={14} class="docs-sheet-chevron" />
               </summary>
               <div class="docs-sheet-panel">
-                <DocsSearch locale={locale} id="docs-search-mobile" />
+                <DocsSearch locale={locale} version={bundle.version} id="docs-search-mobile" />
                 <nav aria-label={dict.nav}>
                   <DocsNav locale={locale} pages={bundle.pages} current={current} />
                 </nav>
@@ -67,7 +69,7 @@ Astro.csp?.insertStyleHash(bundle.cssHash);
         <div class="docs-container docs-layout">
           <aside class="docs-sidebar">
             <div class="docs-sidebar-inner">
-              <DocsSearch locale={locale} id="docs-search" />
+              <DocsSearch locale={locale} version={bundle.version} id="docs-search" />
               <nav aria-label={dict.nav} class="docs-scroll docs-sidebar-nav">
                 <DocsNav locale={locale} pages={bundle.pages} current={current} />
               </nav>

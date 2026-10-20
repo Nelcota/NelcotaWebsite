@@ -4,7 +4,6 @@
  * Rendered once per locale and build, then shared by every docs route.
  */
 import { createHash } from 'node:crypto';
-import lockJson from '../../../vendor/nelcota-docs/source.json';
 import type { Dictionary } from '../../i18n/types.ts';
 import { bcp47, type Locale, t } from '../../i18n/utils.ts';
 import { HighlightRegistry } from '../highlight.ts';
@@ -12,16 +11,22 @@ import { REPO_URL } from '../site.ts';
 import { SPRITE_URL } from '../sprite.ts';
 import { docsIndexUrl, docUrl } from './links.ts';
 import { type DocsLock, lockSchema } from './lock.ts';
-import { catalogPath, DOC_PAGES, type DocGroup, type DocPage, type DocPageId } from './manifest.ts';
+import { catalogPath, type DocGroup, type DocPage, type DocPageId } from './manifest.ts';
 import { documentTitle, type RenderedDoc, renderDoc } from './render.ts';
 import { parseCatalog, type TranslationCatalog } from './translate.ts';
+import { type DocsVersion, docsVersion } from './versions.ts';
 
-const VENDOR_PREFIX = '../../../vendor/nelcota-docs/';
-const files = import.meta.glob<string>('../../../vendor/nelcota-docs/**/*.{md,json}', {
-  query: '?raw',
-  import: 'default',
-  eager: true,
-});
+const files = import.meta.glob<string>(
+  [
+    '../../../vendor/nelcota-docs/**/*.{md,json}',
+    '../../../vendor/nelcota-docs-releases/**/*.{md,json}',
+  ],
+  {
+    query: '?raw',
+    import: 'default',
+    eager: true,
+  },
+);
 
 /**
  * How the page text relates to the locale: `source` (written in it),
@@ -49,6 +54,7 @@ export { docsIndexUrl, docUrl };
 export interface DocsBundle {
   readonly pages: readonly DocsPage[];
   readonly lock: DocsLock;
+  readonly version: DocsVersion;
   /** Highlight classes for every code block of the locale, and its CSP hash. */
   readonly css: string;
   readonly cssHash: `sha256-${string}`;
@@ -58,34 +64,40 @@ class MissingDocError extends Error {
   override readonly name = 'MissingDocError';
 }
 
-function readVendored(path: string): string {
-  const text = files[`${VENDOR_PREFIX}${path}`];
+function readVendored(path: string, version: DocsVersion): string {
+  const directory = docsVersion(version).directory;
+  const text = files[`../../../vendor/${directory}/${path}`];
   if (text == null)
     throw new MissingDocError(`${path} is not in vendor/nelcota-docs/ (run pnpm docs:sync)`);
 
   return text;
 }
 
-const PAGES = DOC_PAGES as readonly DocPage[];
-const bySource = new Map(PAGES.map((page) => [page.source, page.id]));
+export function docsLock(version: DocsVersion): DocsLock {
+  return lockSchema.parse(JSON.parse(readVendored('source.json', version)));
+}
 
 /** A repository file that is not published under /docs: link to it on GitHub. */
-function repoFileUrl(path: string, anchor: string): string {
+function repoFileUrl(path: string, anchor: string, commit: string): string {
   const kind = path.length === 0 || path.endsWith('/') ? 'tree' : 'blob';
   const hash = anchor.length === 0 ? '' : `#${anchor}`;
 
-  return `${REPO_URL}/${kind}/main/${path}${hash}`;
+  return `${REPO_URL}/${kind}/${commit}/${path}${hash}`;
 }
 
-export function editUrl(source: string): string {
-  return `${REPO_URL}/blob/main/${source}`;
+export function editUrl(source: string, commit: string): string {
+  return `${REPO_URL}/blob/${commit}/${source}`;
 }
 
-function catalogFor(page: DocPage, locale: Locale): TranslationCatalog | undefined {
+function catalogFor(
+  page: DocPage,
+  locale: Locale,
+  version: DocsVersion,
+): TranslationCatalog | undefined {
   if (locale !== 'pt-br' || page.catalog == null) return undefined;
 
   const path = catalogPath(page.catalog);
-  return parseCatalog(readVendored(path), path);
+  return parseCatalog(readVendored(path, version), path);
 }
 
 function statusOf(page: DocPage, locale: Locale, untranslated: number): DocStatus {
@@ -105,14 +117,18 @@ const LANG_OF_STATUS: Readonly<Record<DocStatus, string | null>> = {
 };
 
 /** Page titles come first so links written as file names can show them. */
-function pageTitles(locale: Locale): Map<string, string> {
+function pageTitles(
+  locale: Locale,
+  version: DocsVersion,
+  pages: readonly DocPage[],
+): Map<string, string> {
   const titles = new Map<string, string>();
-  for (const page of PAGES) {
+  for (const page of pages) {
     // Same rule as the page itself, so a "# comment" inside a code block is never taken as the title.
-    const heading = documentTitle(readVendored(page.source));
+    const heading = documentTitle(readVendored(page.source, version));
     if (heading == null) continue;
 
-    const translated = catalogFor(page, locale)?.[heading] ?? heading;
+    const translated = catalogFor(page, locale, version)?.[heading] ?? heading;
     titles.set(page.id, translated.replace(/[`*_]/g, ''));
   }
 
@@ -139,21 +155,24 @@ function reportBrokenAnchors(pages: readonly DocsPage[]): void {
 /** What every page of one locale's build shares. */
 interface BuildContext {
   readonly locale: Locale;
+  readonly version: DocsVersion;
+  readonly lock: DocsLock;
+  readonly bySource: ReadonlyMap<string, string>;
   readonly dict: Dictionary;
   readonly registry: HighlightRegistry;
   readonly titles: ReadonlyMap<string, string>;
 }
 
 async function buildPage(page: DocPage, context: BuildContext): Promise<DocsPage> {
-  const { locale, dict, registry, titles } = context;
-  const rendered = await renderDoc(readVendored(page.source), {
+  const { locale, version, lock, bySource, dict, registry, titles } = context;
+  const rendered = await renderDoc(readVendored(page.source, version), {
     source: page.source,
-    catalog: catalogFor(page, locale),
+    catalog: catalogFor(page, locale, version),
     registry,
     pageForSource: (path) => bySource.get(path),
-    pageUrl: (id, anchor) => docUrl(locale, id, anchor),
+    pageUrl: (id, anchor) => docUrl(locale, id, anchor, version),
     pageTitle: (id) => titles.get(id),
-    repoFileUrl,
+    repoFileUrl: (path, anchor) => repoFileUrl(path, anchor, lock.commit),
     spriteUrl: SPRITE_URL,
     labels: {
       copy: dict.code.copy,
@@ -171,26 +190,35 @@ async function buildPage(page: DocPage, context: BuildContext): Promise<DocsPage
     id: page.id,
     group: page.group,
     source: page.source,
-    url: docUrl(locale, page.id),
+    url: docUrl(locale, page.id, '', version),
     status,
     lang: LANG_OF_STATUS[status] ?? bcp47[locale],
-    label: text.label,
-    summary: text.summary,
+    label: text?.label ?? rendered.title,
+    summary: text?.summary ?? rendered.lead,
     readingMinutes: readingMinutes(rendered.html),
   };
 }
 
-async function buildDocs(locale: Locale): Promise<DocsBundle> {
+async function buildDocs(locale: Locale, version: DocsVersion): Promise<DocsBundle> {
   const registry = new HighlightRegistry();
-  const context: BuildContext = { locale, dict: t(locale), registry, titles: pageTitles(locale) };
+  const lock = docsLock(version);
+  const context: BuildContext = {
+    locale,
+    version,
+    lock,
+    dict: t(locale),
+    registry,
+    titles: pageTitles(locale, version, lock.pages),
+    bySource: new Map(lock.pages.map((page) => [page.source, page.id])),
+  };
 
-  const pages = await Promise.all(PAGES.map((page) => buildPage(page, context)));
+  const pages = await Promise.all(lock.pages.map((page) => buildPage(page, context)));
   if (locale === 'en') reportBrokenAnchors(pages);
 
   const css = registry.css();
   const cssHash = `sha256-${createHash('sha256').update(css).digest('base64')}` as const;
 
-  return { pages, lock: lockSchema.parse(lockJson), css, cssHash };
+  return { pages, lock, version, css, cssHash };
 }
 
 const WORDS_PER_MINUTE = 220;
@@ -210,14 +238,15 @@ function readingMinutes(html: string): number {
   return Math.max(MIN_READING_MINUTES, Math.round(words.length / WORDS_PER_MINUTE));
 }
 
-const cache = new Map<Locale, Promise<DocsBundle>>();
+const cache = new Map<string, Promise<DocsBundle>>();
 
-export function loadDocs(locale: Locale): Promise<DocsBundle> {
-  const cached = cache.get(locale);
+export function loadDocs(locale: Locale, version: DocsVersion = 'current'): Promise<DocsBundle> {
+  const key = `${version}:${locale}`;
+  const cached = cache.get(key);
   if (cached != null) return cached;
 
-  const bundle = buildDocs(locale);
-  cache.set(locale, bundle);
+  const bundle = buildDocs(locale, version);
+  cache.set(key, bundle);
 
   return bundle;
 }

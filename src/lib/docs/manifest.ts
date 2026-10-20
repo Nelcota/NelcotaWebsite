@@ -16,12 +16,13 @@ export interface DocPage {
   readonly group: DocGroup;
   /** Path of the Markdown file in the Nelcota repository. */
   readonly source: string;
-  readonly catalog?: string;
-  readonly language?: 'pt-BR';
+  readonly catalog?: string | undefined;
+  readonly language?: 'pt-BR' | undefined;
 }
 
 export const DOC_PAGES = [
   { id: 'quickstart', group: 'start', source: 'docs/quickstart.md', catalog: 'quickstart' },
+  { id: 'versions', group: 'start', source: 'docs/releases/README.md' },
   {
     id: 'sdk-start',
     group: 'start',
@@ -94,9 +95,15 @@ export function catalogPath(catalog: string): string {
 }
 
 /** Every repository file the docs area needs: page sources plus their catalogs. */
-export function requiredFiles(): string[] {
-  const files: string[] = [];
-  for (const page of DOC_PAGES as readonly DocPage[]) {
+export const VERSION_FILES = [
+  'Cargo.toml',
+  'sdk/rust/Cargo.toml',
+  'sdk/typescript/package.json',
+] as const;
+
+export function requiredFiles(pages: readonly DocPage[] = DOC_PAGES): string[] {
+  const files: string[] = [...VERSION_FILES];
+  for (const page of pages) {
     files.push(page.source);
     if (page.catalog != null) files.push(catalogPath(page.catalog));
   }
