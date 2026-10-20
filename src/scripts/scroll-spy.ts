@@ -11,7 +11,15 @@ const CLICK_LOCK_MAX_MS = 2000;
 const SUPPORTS_SCROLL_END = 'onscrollend' in window;
 
 function sectionIdOf(link: HTMLAnchorElement): string | null {
-  const hash = new URL(link.href).hash;
+  const url = new URL(link.href);
+  if (
+    url.origin !== location.origin ||
+    url.pathname !== location.pathname ||
+    url.search !== location.search
+  )
+    return null;
+
+  const hash = url.hash;
   if (hash.length <= 1) return null;
 
   return hash.slice(1);
@@ -67,8 +75,10 @@ function setupScrollSpy(): void {
   // scroll passes over must not take it on the way.
   let isFollowingClick = false;
   let releaseTimer: number | undefined;
+  let safetyTimer: number | undefined;
   const releaseClickLock = (): void => {
     window.clearTimeout(releaseTimer);
+    window.clearTimeout(safetyTimer);
     isFollowingClick = false;
     markReading();
   };
@@ -89,26 +99,43 @@ function setupScrollSpy(): void {
       if (!isFollowingClick) return;
 
       // Without scrollend, the scroll is over once its events stop.
-      releaseAfter(SUPPORTS_SCROLL_END ? CLICK_LOCK_MAX_MS : SCROLL_SETTLE_MS);
+      if (!SUPPORTS_SCROLL_END) releaseAfter(SCROLL_SETTLE_MS);
     },
     { passive: true },
   );
   window.addEventListener('scrollend', releaseOnEvent);
   // The reader takes over the scroll: the spy follows them again.
-  for (const type of ['wheel', 'touchstart', 'keydown']) {
+  for (const type of ['wheel', 'touchstart']) {
     window.addEventListener(type, releaseOnEvent, { passive: true });
   }
 
+  window.addEventListener('keydown', (event) => {
+    if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key))
+      releaseOnEvent();
+  });
+
   for (const link of links) {
-    link.addEventListener('click', () => {
+    link.addEventListener('click', (event) => {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey ||
+        link.hasAttribute('download') ||
+        (link.target && link.target !== '_self')
+      )
+        return;
       const id = sectionIdOf(link);
       // Only sections on this page: a link to another page must not lock the dot.
       if (id == null || !sectionsInOrder.includes(id)) return;
-      if (readingSectionId() === id) return;
 
       isFollowingClick = true;
       mark(id);
-      releaseAfter(CLICK_LOCK_MAX_MS);
+      window.clearTimeout(releaseTimer);
+      window.clearTimeout(safetyTimer);
+      safetyTimer = window.setTimeout(releaseClickLock, CLICK_LOCK_MAX_MS);
     });
   }
 

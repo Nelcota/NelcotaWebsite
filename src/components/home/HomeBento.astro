@@ -82,7 +82,7 @@ const ROWS = ['128', '127', '126', '125', '124'];
                   </span>
                 </span>
                 <span class="panel-sql">
-                  <span class="block opacity-70">select count(*) from notes;</span>
+                  <span class="block">select count(*) from notes;</span>
                   <span class="mt-1 block font-semibold">→ 128</span>
                 </span>
               )}
@@ -288,10 +288,6 @@ const ROWS = ['128', '127', '126', '125', '124'];
   .panel-row:nth-child(3) .panel-bar-cell { width: 64%; }
   .panel-row:nth-child(4) .panel-bar-cell { width: 46%; }
   .panel-row:nth-child(5) .panel-bar-cell { width: 58%; }
-  .panel-row:nth-child(odd) .panel-avatar { background-color: #cdbdff; }
-  .panel-row:nth-child(2) .panel-avatar { background-color: #f1dfb8; }
-  .panel-row:nth-child(4) .panel-avatar { background-color: #ff6b3d; }
-  .panel-row:nth-child(3) .panel-avatar { background-color: #87dba6; }
   .panel-avatar {
     background-color: #cdbdff;
     width: 1rem;
@@ -300,6 +296,10 @@ const ROWS = ['128', '127', '126', '125', '124'];
     margin-left: auto;
     border-radius: 999px;
   }
+  .panel-row:nth-child(odd) .panel-avatar { background-color: #cdbdff; }
+  .panel-row:nth-child(2) .panel-avatar { background-color: #f1dfb8; }
+  .panel-row:nth-child(4) .panel-avatar { background-color: #ff6b3d; }
+  .panel-row:nth-child(3) .panel-avatar { background-color: #87dba6; }
   .panel-sql {
     position: absolute;
     right: 8%;

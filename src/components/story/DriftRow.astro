@@ -59,7 +59,7 @@ const copies = [0, 1, 2, 3] as const;
     flex-shrink: 0;
   }
   /* The pause button in the closing section (drift-pause.ts) stops every row. */
-  :global([data-motion-paused]) .drift-set {
+  :global([data-motion-paused]) .drift .drift-set {
     animation-play-state: paused;
   }
   @media (prefers-reduced-motion: no-preference) {
