@@ -34,10 +34,10 @@ const STACK: readonly Item[] = [
   { name: 'Linux', mark: brand('linux') },
 ];
 /**
- * One set is narrower than a wide screen, so two copies left a gap before the
- * loop restarted. Four copies cover any viewport up to ~4800px.
+ * Each set spans at least the viewport, so two copies cover the whole loop
+ * even on ultrawide screens.
  */
-const copies = [0, 1, 2, 3] as const;
+const copies = [0, 1] as const;
 ---
 
 <section class="overflow-x-clip py-14 md:py-20" aria-labelledby="built-title">
@@ -77,6 +77,8 @@ const copies = [0, 1, 2, 3] as const;
   .logos-set {
     display: flex;
     flex-shrink: 0;
+    min-width: 100vw;
+    justify-content: space-around;
     align-items: center;
   }
   .logo {

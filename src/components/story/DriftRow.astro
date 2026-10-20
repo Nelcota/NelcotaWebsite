@@ -5,8 +5,8 @@ import Icon, { type IconName } from '../Icon.astro';
 
 /**
  * A row of tiles drifting sideways forever (CSS only), as a frame around the
- * closing call to action. The list is rendered four times (one set is narrower
- * than a wide screen) and each set moves by its own width, so the loop is seamless;
+ * closing call to action. Two sets each span at least the viewport and move
+ * by their own width, so the loop stays filled even on ultrawide screens;
  * the whole row is decorative and hidden from assistive tech. It stops with
  * reduced motion, and a button in the closing section pauses it (WCAG 2.2.2).
  */
@@ -20,7 +20,7 @@ interface Props {
   direction: 'left' | 'right';
 }
 const { tiles, direction } = Astro.props;
-const copies = [0, 1, 2, 3] as const;
+const copies = [0, 1] as const;
 ---
 
 <div class:list={['drift', `drift-${direction}`]} aria-hidden="true">
@@ -57,6 +57,8 @@ const copies = [0, 1, 2, 3] as const;
   .drift-set {
     display: flex;
     flex-shrink: 0;
+    min-width: 100vw;
+    justify-content: space-around;
   }
   /* The pause button in the closing section (drift-pause.ts) stops every row. */
   :global([data-motion-paused]) .drift .drift-set {

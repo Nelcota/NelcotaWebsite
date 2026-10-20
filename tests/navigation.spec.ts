@@ -72,3 +72,37 @@ test('scroll completion and manual input release the click lock', async ({ page 
     );
   }
 });
+
+test('smooth navigation keeps the target selected while passing other sections', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/');
+  const selected = await page.evaluate(async () => {
+    const selections: string[] = [];
+    const observer = new MutationObserver(() => {
+      const href = document
+        .querySelector('a[data-spy][aria-current="location"]')
+        ?.getAttribute('href');
+      if (href) selections.push(href);
+    });
+    observer.observe(document.querySelector('header') as HTMLElement, {
+      attributes: true,
+      attributeFilter: ['aria-current'],
+      subtree: true,
+    });
+    await new Promise<void>((resolve) => {
+      window.addEventListener('scrollend', () => resolve(), { once: true });
+      window.setTimeout(resolve, 2500);
+      document.querySelector<HTMLAnchorElement>('a[data-spy][href$="#speed"]')?.click();
+    });
+    observer.disconnect();
+    return selections;
+  });
+  expect(selected.length).toBeGreaterThan(0);
+  expect(selected.every((href) => href === '/#speed')).toBe(true);
+  await expect(page.locator('a[data-spy][href$="#speed"]').first()).toHaveAttribute(
+    'aria-current',
+    'location',
+  );
+});
