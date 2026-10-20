@@ -345,6 +345,7 @@ test.describe('motion', () => {
   });
 
   test('the moving band and tiles can be paused', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.goto('/');
     const pause = page.locator('[data-motion-pause]');
 
@@ -352,6 +353,11 @@ test.describe('motion', () => {
 
     await expect(pause).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('html')).toHaveAttribute('data-motion-paused', '');
+    const states = await page
+      .locator('.drift-set, .logos-set, .scatter-icon')
+      .evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).animationPlayState));
+    expect(states.length).toBeGreaterThan(0);
+    expect(states.every((state) => state === 'paused')).toBe(true);
   });
 });
 

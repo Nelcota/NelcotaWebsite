@@ -33,6 +33,10 @@ const STACK: readonly Item[] = [
   { name: 'TypeScript', mark: brand('typescript') },
   { name: 'Linux', mark: brand('linux') },
 ];
+/**
+ * Each set spans at least the viewport, so two copies cover the whole loop
+ * even on ultrawide screens.
+ */
 const copies = [0, 1] as const;
 ---
 
@@ -46,7 +50,7 @@ const copies = [0, 1] as const;
     <div class="logos-track">
       {
         copies.map((copy) => (
-          <ul class="logos-set" aria-hidden={copy === 1 ? 'true' : undefined}>
+          <ul class="logos-set" aria-hidden={copy > 0 ? 'true' : undefined}>
             {STACK.map((item) => (
               <li class="logo">
                 {item.mark && <Mark mark={item.mark} size={22} />}
@@ -73,6 +77,8 @@ const copies = [0, 1] as const;
   .logos-set {
     display: flex;
     flex-shrink: 0;
+    min-width: 100vw;
+    justify-content: space-around;
     align-items: center;
   }
   .logo {
@@ -88,17 +94,18 @@ const copies = [0, 1] as const;
     filter: grayscale(1);
     opacity: 0.85;
   }
+  /* Each set moves by its own width, so the loop is seamless with any number of copies. */
   @media (prefers-reduced-motion: no-preference) {
-    .logos-track {
-      animation: logos 40s linear infinite;
+    .logos-set {
+      animation: logos-drift 40s linear infinite;
     }
   }
-  :global([data-motion-paused]) .logos-track {
+  :global([data-motion-paused]) .logos-set {
     animation-play-state: paused;
   }
-  @keyframes logos {
+  @keyframes logos-drift {
     to {
-      transform: translateX(-50%);
+      transform: translateX(-100%);
     }
   }
 </style>

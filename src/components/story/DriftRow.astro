@@ -5,7 +5,8 @@ import Icon, { type IconName } from '../Icon.astro';
 
 /**
  * A row of tiles drifting sideways forever (CSS only), as a frame around the
- * closing call to action. The list is rendered twice so the loop is seamless;
+ * closing call to action. Two sets each span at least the viewport and move
+ * by their own width, so the loop stays filled even on ultrawide screens;
  * the whole row is decorative and hidden from assistive tech. It stops with
  * reduced motion, and a button in the closing section pauses it (WCAG 2.2.2).
  */
@@ -25,17 +26,19 @@ const copies = [0, 1] as const;
 <div class:list={['drift', `drift-${direction}`]} aria-hidden="true">
   <div class="drift-track">
     {
-      copies.map(() =>
-        tiles.map((tile) => (
-          <div class:list={['drift-tile', tile.kind !== 'image' && tile.tone, `drift-${tile.kind}`]}>
-            {tile.kind === 'image' && (
-              <Picture src={tile.src} formats={['avif', 'webp']} widths={[72, 144]} sizes="72px" alt="" loading="lazy" class="h-auto w-[4.5rem]" />
-            )}
-            {tile.kind === 'icon' && <Icon name={tile.icon} size={28} />}
-            {tile.kind === 'code' && <code class="font-mono text-sm whitespace-nowrap">{tile.text}</code>}
-          </div>
-        )),
-      )
+      copies.map(() => (
+        <div class="drift-set">
+          {tiles.map((tile) => (
+            <div class:list={['drift-tile', tile.kind !== 'image' && tile.tone, `drift-${tile.kind}`]}>
+              {tile.kind === 'image' && (
+                <Picture src={tile.src} formats={['avif', 'webp']} widths={[72, 144]} sizes="72px" alt="" loading="lazy" class="h-auto w-[4.5rem]" />
+              )}
+              {tile.kind === 'icon' && <Icon name={tile.icon} size={28} />}
+              {tile.kind === 'code' && <code class="font-mono text-sm whitespace-nowrap">{tile.text}</code>}
+            </div>
+          ))}
+        </div>
+      ))
     }
   </div>
 </div>
@@ -45,27 +48,33 @@ const copies = [0, 1] as const;
     overflow: hidden;
     mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
   }
-  /* Margins, not gap: with gap, -50% lands half a gap off and the loop jumps. */
   .drift-track {
     display: flex;
     width: max-content;
     padding-block: 0.75rem;
   }
+  /* Margins, not gap: with gap, -100% lands a gap off and the loop jumps. */
+  .drift-set {
+    display: flex;
+    flex-shrink: 0;
+    min-width: 100vw;
+    justify-content: space-around;
+  }
   /* The pause button in the closing section (drift-pause.ts) stops every row. */
-  :global([data-motion-paused]) .drift-track {
+  :global([data-motion-paused]) .drift .drift-set {
     animation-play-state: paused;
   }
   @media (prefers-reduced-motion: no-preference) {
-    .drift-left .drift-track {
-      animation: drift 60s linear infinite;
+    .drift-left .drift-set {
+      animation: drift-row 60s linear infinite;
     }
-    .drift-right .drift-track {
-      animation: drift 60s linear infinite reverse;
+    .drift-right .drift-set {
+      animation: drift-row 60s linear infinite reverse;
     }
   }
-  @keyframes drift {
+  @keyframes drift-row {
     to {
-      transform: translateX(-50%);
+      transform: translateX(-100%);
     }
   }
 

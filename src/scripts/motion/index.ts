@@ -171,7 +171,9 @@ function openFan(): void {
         '--open': 1.18,
         y: -40,
         ease: 'none',
-        scrollTrigger: { trigger: fan, start: 'top 75%', end: 'bottom top', scrub: 0.6 },
+        // clamp(): the fan already sits above 75% at the top of the page, so an unclamped
+        // start lands at a negative scroll and the first click (which loads this file) jumps it.
+        scrollTrigger: { trigger: fan, start: 'clamp(top 75%)', end: 'bottom top', scrub: 0.6 },
       },
     );
   }
