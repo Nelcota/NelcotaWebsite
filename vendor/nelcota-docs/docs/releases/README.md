@@ -1,13 +1,15 @@
 # Versions and upgrades
 
-Server **0.5.0** is published. SDKs are distributed independently: installing
+This checkout targets server **0.5.3**; confirm published artifacts and readiness
+on its [release page](https://github.com/Nelcota/Nelcota/releases/tag/v0.5.3).
+SDKs are distributed independently: installing
 or updating the server does not update dependencies in a client application.
 This checkout documents the following versions; a version number in source
 does not itself publish a package.
 
 | Component | Documented version | Distribution and availability |
 | --- | --- | --- |
-| Server | 0.5.0 | [Official release](https://github.com/Nelcota/Nelcota/releases/tag/v0.5.0), verified binary or OCI image |
+| Server | 0.5.3 | [Official release](https://github.com/Nelcota/Nelcota/releases/tag/v0.5.3), verified binary or OCI image |
 | TypeScript SDK | 0.2.1 | [npm version](https://www.npmjs.com/package/@nelcota/client/v/0.2.1); confirm with `npm view @nelcota/client@0.2.1 version` |
 | Rust SDK | 0.1.4 | [crates.io version](https://crates.io/crates/nelcota-client/0.1.4); confirm the version before updating Cargo.lock |
 
@@ -51,8 +53,9 @@ changed by these patch releases.
 
 ## Update a server
 
-Review the [0.5.0 notes in English](0.5.0.en.md) or
-[Portuguese](0.5.0.pt-BR.md). Upgrading from 0.4.0 applies internal migrations
+Review the [0.5.3 notes in English](0.5.3.en.md) or
+[Portuguese](0.5.3.pt-BR.md). The 0.5.2 → 0.5.3 patch adds no internal
+migrations; the schema remains at V16. Upgrading from 0.4.0 applies internal migrations
 V14–V16. Take and restore-test a paired database/file backup and allow a
 maintenance window for large metadata tables. Verify the exact binary/image,
 not just its version text. Follow [the release handoff](../onboarding/release.md).

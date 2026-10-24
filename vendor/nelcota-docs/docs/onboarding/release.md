@@ -1,7 +1,8 @@
 # Release handoff after Notes acceptance
 
-The next release consolidates the changes recorded under **Unreleased** in
-the [server changelog](../../CHANGELOG.md). A local acceptance pass proves
+The 0.5.3 release refines panel branding, grouped navigation and the operator console,
+and improves bounded diagnostic logging
+in the [server changelog](../../CHANGELOG.md). A local acceptance pass proves
 the selected binary and its Notes workflow; it does not publish binaries,
 container images, Rust crates or either SDK package.
 
@@ -24,6 +25,15 @@ Repeat a soak on the final candidate if sustained-load certification is part
 of the release scope.
 
 ## Upgrade an existing project
+
+The 0.5.2 → 0.5.3 patch retains internal schema V16 with no new migration.
+Rehearse that exact upgrade and a paired database/file restore on a disposable
+installation before publishing. Existing legacy-upgrade CI also covers
+0.3.1 → this checkout; that result does not substitute for the 0.5.1 baseline.
+
+SMTP now requires implicit TLS or mandatory STARTTLS, and Linux initialization
+checks privileges, the cron scheduler and requested UFW operations. Review
+[the deployment prerequisites](../deploy.md) and [configuration](../configuration.md).
 
 1. Take a database backup and, for disk storage, its paired file snapshot.
    Keep the `.dump` and `.dump.files/` together and test their restore in a

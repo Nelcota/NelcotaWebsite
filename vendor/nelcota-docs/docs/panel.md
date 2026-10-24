@@ -19,7 +19,7 @@ or an enrolled update-operator login. This reference describes current source.
 ## Several projects
 
 Each project has its own panel, on its own domain, showing only its data. At
-the top left, next to the mascot, the **project switcher** (current project name) lists
+the top left, next to the Nelcota symbol, the **project switcher** (current project name) lists
 the other projects on the host and leads to "All projects": name, domain,
 state (up / down), version and a button to open each panel.
 
@@ -64,10 +64,14 @@ is embedded in the binary: no CDN and no Node in production (fonts too,
 because of the CSP `font-src 'self'`). Dark theme by default; theme and
 language are in the account menu, at the top right.
 
-The pages are pills across the top (on narrow screens, in their own row; on
-phones, in the menu). **Database** groups Tables, SQL and Migrations, with
-tabs between them inside each page; **User sign-in** is reached from the
-Users page. The project chip at the top left shows the project, whether it
+The sidebar groups related pages into expandable subcategories; phones use
+the same hierarchy in the menu. **Database** contains Tables, SQL editor and
+Migrations; **Users** contains the user list and user sign-in settings;
+**Events and webhooks** contains webhook configuration and delivery history.
+**API** contains links to its address, caller roles, SDK setup, examples and
+token sections. The active page or section is highlighted within its group.
+These groups replace page-level tab bars. Table views, filters and example
+languages remain next to the content they control. The project chip at the top left shows the project, whether it
 runs locally or on which host, and a dot for whether the server answers
 (checked every minute and when the window regains focus). Search (Ctrl K)
 sits beside the account chip. The
@@ -80,6 +84,22 @@ for 24 hours: restarting the server starts them again.
 
 RLS state shows as a colored badge: green (RLS with policies), amber (RLS on
 without policies) and red (table exposed without RLS).
+
+Altered forms ask before discarding changes, including internal navigation and
+browser Back/Forward. Reloading or leaving the panel uses the browser's own
+confirmation. While a modal is open, Ctrl+K does not open another dialog.
+On phones, open Guides from the navigation menu. Bucket size limits are edited
+in MiB (1,048,576 bytes); changing other settings preserves the exact byte limit,
+and clearing the limit field restores the server default.
+
+Ordinary JSON requests have a 60-second deadline, including reading the response.
+If it expires, the panel releases the pending form and keeps its draft. A timed-out
+write may already have completed: refresh the data before trying it again. The
+panel does not automatically repeat writes. File transfers and the enrolled update
+controller retain their separate deadlines.
+
+Table and user page numbers whose offset cannot fit in a signed 64-bit integer
+are refused before querying the database. Return to the first page to continue.
 
 | Feature | How to use it |
 |---|---|
@@ -104,6 +124,11 @@ without policies) and red (table exposed without RLS).
 | Generate migration | **Migrations** page: schema changes made in the panel (tables, columns, policies) that are not in any file yet, and the project's migrations (applied or only in the folder). "Generate migration" downloads `V<n>__<name>.sql` and registers it as applied in this database; the file goes into `migrations/` (see [deploy](deploy.md#changes-made-in-the-panel)) |
 | Profile photo | account menu, at the top right: "Add photo…". The image is center-cropped and scaled to 256px in the browser; the server accepts PNG, JPEG or WebP up to 256 KB. It lives in the project's database (`nelcota.admin_avatar`, out of reach of the API roles), so it works in any browser, but it is per project |
 | Dates in the grid | `timestamptz` shows in the viewer's time zone and language; `timestamp` and `date` as stored. The exact value is in the tooltip, in edit mode and in exports |
+
+When there are no tables, the editor shows a single workspace with a table
+count, a guide link and one primary creation action. The
+table sidebar and search appear once tables exist. A failed catalog request
+shows a retryable error, never an empty-project message.
 
 CSV exports protect spreadsheet imports: formula-like cells and headers receive
 a quoted tab prefix, including formulas hidden behind whitespace or control
@@ -185,6 +210,18 @@ a failed request can be retried.
 - **RLS without policies**: RLS on and no policy. Nobody but `service_role`
   (and the owner) has access: it is safe, but maybe not what you want.
 
+## Server operations workspace (unreleased)
+
+The source after server 0.5.1 adds **Server** to the separately authenticated host controller, with **Health**, **Projects**, **Backups** and **Settings**. Published 0.5.1 does not include these new controls. Install a matching reviewed CLI/controller release before using them; project-panel credentials do not grant host authority.
+
+Health runs read-only checks for application/database health, DNS, public HTTPS, the boot-enabled backup scheduler, disk reserve and backup freshness. Missing CPU or memory measurements remain unavailable. A saved external destination, a verified downloaded copy and a restore on another machine are distinct results; none enables update installation by itself.
+
+Settings offers typed SMTP, Google/GitHub sign-in, external backup destination, daily schedule/local retention and panel-administrator password changes. Secrets are write-only: blank preserves an existing credential, and disabling a section removes its settings. SMTP requires encrypted transport and an application recovery page. OAuth return pages are shared by the project's providers. Configuring a provider does not prove a successful provider login.
+
+Review the affected projects, type the displayed phrase and confirm the operator password before execution. Shared panel-password changes affect every project and restart their applications. Other email/login changes restart only the selected application; administrator sessions there end. Configuration failures restore configuration only, never an old database snapshot. A failed rollback keeps the job pending for explicit recovery.
+
+Backups supports local capture, an HTTPS destination write/read/delete test and an external copy with database/file/configuration readback verification. Test email is sent only to the operator: server acceptance does not prove inbox delivery. Recovery of an interrupted email test can send another message. Daily schedules use the VPS time zone; retention deletes older local copies, not remote objects. Keep independent off-host restore rehearsals and the existing update acceptance gates.
+
 ## Changing the admin password
 
 ```sh
@@ -254,3 +291,15 @@ and removal with visual review, typed confirmation, operator reauthentication
 and durable recovery. It uses a separate HTTPS origin and SSH-granted host
 authority. The Projects page links to this controller when enrolled.
 Deployment, supported layouts and activation are described in `docs/host-management.md`.
+
+### Operational alerts (unreleased)
+
+In **Server → Alerts**, enrolled host operators can review and configure email
+and HTTPS webhook incident digests for application/database/HTTPS health, low
+disk, certificate expiry and overdue/failed backups. The page shows confirmed
+incidents, recovery, scan freshness, transport acceptance and retry status.
+Changes and delivery tests require explicit approval; project logins have no
+host authority. Secret URLs are write-only. A complete VPS outage requires an
+independent heartbeat provider, configured and rehearsed separately. Follow
+[operational alerts](operational-alerts.md) before enabling; published 0.5.1
+does not include these controls.
