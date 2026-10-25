@@ -31,10 +31,11 @@ function topBand(): number {
   return pagePadding + headingMargin + BAND_SLACK_PX;
 }
 
-let band = topBand();
+let band: number | undefined;
 
 function update(): void {
   frame = 0;
+  if (band === undefined) return;
   let active = headings[0]?.id ?? '';
   for (const heading of headings) {
     if (heading.getBoundingClientRect().top > band) break;
@@ -59,10 +60,14 @@ if (headings.length > 0) {
     },
     { passive: true },
   );
-  window.addEventListener('resize', () => {
+  // Initial geometry and breakpoint changes are read after layout, rather
+  // than forcing it while the document's modules are still initializing.
+  const geometry = new ResizeObserver(() => {
     band = topBand();
+    if (frame !== 0) window.cancelAnimationFrame(frame);
+    update();
   });
-  update();
+  geometry.observe(document.documentElement);
 }
 
 // A module, so top-level names stay private to this file.

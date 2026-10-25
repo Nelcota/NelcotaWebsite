@@ -27,7 +27,14 @@ Thanks for helping. The organization-wide [code of conduct](https://github.com/N
 | @astrojs/sitemap | 3.7.4 | `sitemap-index.xml` with hreflang alternates |
 | subset-font, @fontsource(-variable) | 2.9.0, 5.3.0 | Dev-only: regenerate the self-hosted font files |
 
-All versions are pinned exactly in `package.json`.
+Direct versions are pinned exactly in `package.json`. Patched audit-tool
+dependencies and the approved native build scripts are pinned in
+`pnpm-workspace.yaml`, which pnpm 12 reads instead of the former `package.json`
+`pnpm` field. Keep the Docker build's initial `COPY` in sync with these files.
+Lighthouse CI 0.15.1 retains Lighthouse 12.6.1 and its audit IDs, with patched
+Puppeteer 25.16.0/browser-download dependencies in place of the older archive chain. Preserve all existing audit assertions and size budgets when
+updating this tooling, and run `pnpm audit` and `pnpm peers check` as well as
+the full CI checks below.
 
 ## Run it
 
@@ -42,6 +49,8 @@ Quality gates (the same ones CI runs):
 
 ```sh
 pnpm lint           # Biome (lint + format check); `pnpm lint:fix` applies fixes
+pnpm audit --audit-level=high # fail on high/critical dependency advisories
+pnpm peers check    # validate the patched toolchain's peer requirements
 pnpm check          # astro check (types)
 pnpm test           # Playwright smoke tests (needs `pnpm build` first; `pnpm exec playwright install chromium` once)
 pnpm sizes          # gzip size budgets: JS <= 5 KB, CSS <= 20 KB per page

@@ -1,0 +1,20 @@
+packages:
+  - .
+
+# pnpm 12 reads build approval and overrides here, not package.json.
+allowBuilds:
+  '@biomejs/biome': true
+  esbuild: true
+  sharp: true
+
+overrides:
+  '@lhci/cli>tmp': 0.2.7
+  'external-editor>tmp': 0.2.7
+  '@lhci/cli>uuid': 11.1.1
+  '@lhci/utils>uuid': 11.1.1
+  'get-uri>basic-ftp': 6.2.1
+  '@puppeteer/browsers': 3.2.6
+  proxy-agent: 8.0.1
+  'satori>fflate': 0.7.5
+  '@shuding/opentype.js>fflate': 0.7.5
+  puppeteer-core: 25.16.0
