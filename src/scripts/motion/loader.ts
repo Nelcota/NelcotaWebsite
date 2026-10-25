@@ -22,6 +22,7 @@ function startOnFirstInteraction(): void {
     if (hasStarted) return;
     hasStarted = true;
 
+    firstLayout.disconnect();
     window.clearTimeout(settleTimer);
     for (const type of INTENT_EVENTS) window.removeEventListener(type, start);
     window.removeEventListener('scroll', startWhenSettled);
@@ -36,11 +37,17 @@ function startOnFirstInteraction(): void {
     settleTimer = window.setTimeout(start, SCROLL_SETTLE_MS);
   };
 
+  // Reading scrollY during module evaluation can force the first page layout.
+  // ResizeObserver runs after layout, including for a restored scroll position.
+  const firstLayout = new ResizeObserver(() => {
+    firstLayout.disconnect();
+    if (!hasStarted && window.scrollY > 0) startWhenSettled();
+  });
+
   for (const type of INTENT_EVENTS) window.addEventListener(type, start, { passive: true });
   window.addEventListener('scroll', startWhenSettled, { passive: true });
 
-  // Reloaded mid-page: the visitor is already scrolling.
-  if (window.scrollY > 0) startWhenSettled();
+  firstLayout.observe(document.documentElement);
 }
 
 startOnFirstInteraction();
