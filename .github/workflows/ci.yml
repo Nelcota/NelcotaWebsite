@@ -35,6 +35,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Dependency advisories and peer compatibility
+        run: pnpm audit --audit-level=high && pnpm peers check
+
       - name: Docs copy matches its recorded commit
         run: pnpm docs:check
 

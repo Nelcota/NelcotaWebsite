@@ -34,7 +34,7 @@
     "docs:check": "node scripts/sync-docs.ts --check",
     "astro": "astro",
     "sizes": "node scripts/sizes.ts",
-    "test:ci": "pnpm docs:check && pnpm test:unit && pnpm build && playwright test && pnpm sizes && lhci autorun",
+    "test:ci": "pnpm audit --audit-level=high && pnpm peers check && pnpm docs:check && pnpm test:unit && pnpm build && playwright test && pnpm sizes && lhci autorun",
     "subset-fonts": "node scripts/subset-fonts.ts"
   },
   "dependencies": {
@@ -60,12 +60,5 @@
     "@types/node": "26.6.5",
     "subset-font": "2.9.0",
     "typescript": "6.0.3"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@biomejs/biome",
-      "esbuild",
-      "sharp"
-    ]
   }
 }
