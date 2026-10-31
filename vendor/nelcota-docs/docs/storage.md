@@ -58,8 +58,12 @@ equivalent directory ACL; Unix modes do not configure Windows ACLs.
 | `NELCOTA_STORAGE_PUBLIC_URL` | the API's | origin of public file URLs, e.g. `https://files.shop.com` |
 
 Uploads reserve capacity while their bodies are being received. A request
-without `Content-Length` reserves up to its allowed file size or the remaining
-capacity; another upload may receive 507 until that reservation is released.
+without `Content-Length` grows its reservation as bytes arrive, up to 1 MiB
+ahead of what it has received but never more than half of the capacity left,
+so small concurrent uploads still share the remaining capacity. Near a full
+quota, that room held ahead can refuse another upload slightly early, by at
+most 1 MiB per upload in progress. Declared lengths reserve their full size
+before reception.
 The committed total is checked in a serialized database transaction, including
 when several server instances share the same database. Replacements receive
 credit for their old bytes against the total quota, but still need disk space
@@ -121,6 +125,13 @@ still go through the policies.
 | download, sign, list | `SELECT` |
 | delete | `SELECT`, `DELETE` |
 
+An upload (`POST` or `PUT`) to a name already taken by a file the caller
+cannot see answers exactly like a policy refusal (403, or 401 for `anon`), not
+409 `object_exists`. Names are still unique in a bucket: where policies let a
+caller create files in a shared folder, a refusal there, where another name
+would be accepted, reveals that the name is in use. Give each user a folder of
+their own when names must stay private.
+
 `owner` is filled with `auth.uid()` on upload, so `owner = auth.uid()` is the
 simplest private-files policy. Helpers for paths:
 `storage.foldername('a/b/c.png')` → `{a,b}`, `storage.filename(...)` →
@@ -169,6 +180,10 @@ Listing applies `limit` and `offset` independently to the sorted `folders` and
 `objects` arrays. Advance the offset by the requested limit while either array
 fills a page; a page containing only folders can still have a next page.
 
+A signed URL covers the version of the file that was signed. Once the file is
+replaced, or deleted and uploaded again under the same name, the URL answers
+404 `object_not_found`; sign the new version again.
+
 A file the caller may not see answers 404, as if it did not exist. Downloads
 take `?download` to force a "save as". Errors: 400 `invalid_path`, 404
 `bucket_not_found`/`object_not_found`, 409 `object_exists`, 413
@@ -183,26 +198,66 @@ has the API's JSON shape (see [api.md](api.md#errors)).
 
 - **The type comes from the bytes**, not from the client: a "PNG" that is
   really HTML is stored as `text/html` (and refused by an `image/*` bucket).
-- **Files are inert.** Every response has `X-Content-Type-Options: nosniff` and
-  `Content-Security-Policy: sandbox`. Only images (not SVG), audio, video and
-  plain text open in the browser; HTML, SVG, PDF and the rest download.
+- **Files are inert.** Only images (not SVG), audio, video and plain text open
+  in the browser; HTML, SVG, PDF and the rest download. Files served from disk
+  also carry `X-Content-Type-Options: nosniff` and
+  `Content-Security-Policy: sandbox` (S3: see below).
   For public files on their own origin, point `NELCOTA_STORAGE_PUBLIC_URL` at
   a second domain that proxies `/storage/v1/object/public/*` to the app.
 - **Disk:** `Range` (video seeking, resumed downloads), `ETag` and
   `If-None-Match`. Public files are cacheable for 60 s; private ones are
   revalidated each time.
 - **S3:** downloads are a `302` to a presigned URL valid for at most 5 minutes;
-  the bytes come straight from the provider.
+  the bytes come straight from the provider. The URL fixes the file's
+  `Content-Type` and `Content-Disposition`, but a presigned URL cannot set
+  security headers, so the provider's response lacks
+  `X-Content-Type-Options: nosniff` and `Content-Security-Policy: sandbox`.
+  Add both on the provider (bucket response-header settings, where it has them)
+  or on a CDN in front of the bucket.
 
 ## Consistency
 
 A file's bytes are stored under a new key (`<bucket>/<uuidv7>`) on every
 upload, and the row is written only after the bytes are complete. Readers
-never see a half-written file, and an upload that fails or is refused leaves
-nothing behind. Replacing or deleting a file removes the old bytes right
-away: **a database restore does not bring deleted files back**. An hourly
-collector removes bytes no row points to once they are a day old (left by a
-crash mid-upload).
+never see a half-written file. Known failures before metadata publication
+attempt to remove the unpublished bytes. If the database's commit reply is
+lost, the request returns an error but retains the new version: PostgreSQL
+may already reference it. Check the current object before retrying a write
+whose outcome is unknown.
+
+Replacing or deleting a file removes the old bytes right away:
+**a database restore does not bring deleted files back**. An hourly collector
+checks authoritative metadata and removes unreferenced versions once they are
+a day old, including bytes left by an interrupted upload or an uncertain
+publication. A version still referenced by a row is retained.
+
+On disk, collection also checks hidden `<bucket>/<uuidv7>#<part>` staging files
+left by a process crash. Both the version timestamp and the file's last write
+must be older than the collection grace period. The grace is at least one day
+and exceeds the configured upload deadline by an hour. Foreign names, symlinks
+and directories are retained, and the same ownership checks guard deletion.
+Failed deletes emit `storage.collector_delete_failed` and are retried later.
+
+Use a separate physical disk root or S3 bucket for each independent metadata
+database. Application instances connected to the same writable metadata database
+may share it. Independent physical copies, lagging database replicas and older
+writers that do not enforce ownership must use separate targets. The server
+records a database identity in `.nelcota-gc-owner-v1`. If another database uses
+that store, or an unmarked store contains versioned files not known to the current
+database, it records `.nelcota-gc-shared-v1` and disables automatic collection.
+File APIs remain available; ambiguous bytes are retained. Missing, changed or
+unsafe ownership markers also prevent collection. These internal markers are
+not objects in the file API and are never automatically removed.
+
+After `storage.collector_quarantined` or `storage.ownership_unavailable`, keep
+the original store and investigate before deleting anything. Stop sharing the
+target, provision a separate empty target for each database, and copy only that
+database's referenced `<bucket>/<version>` objects into its target while writes
+are stopped. Verify the restored files against metadata/backups, then restart
+with that target: it can be adopted when every version is accounted for. Do not
+remove markers to make an ambiguous target collectible. A provider outage or a
+large legacy scan may defer initialization; uploads retry within their existing
+deadline and collection stays disabled until ownership can be verified.
 
 ## Backups
 
@@ -212,7 +267,7 @@ SHA-256 manifest. `nelcota backup --upload` uploads that immutable snapshot to
 snapshots intact. After losing the server:
 
 ```sh
-nelcota -p shop restore backups/nelcota-shop-<date>.dump --files --yes
+nelcota -p shop restore projects/shop/backups/nelcota-shop-<date>.dump --files --yes
 ```
 
 `--files` verifies and restores that dump's snapshot, locally or from the backup

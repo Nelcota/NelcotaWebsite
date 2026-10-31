@@ -3,7 +3,7 @@
 Configure the server from process environment variables or a TOML file. This
 reference is derived from `Config` and its defaults in `crates/core/src/config.rs`,
 plus the CLI, installer and backup adapters. Use the matching release source for
-published binaries; deployment validation settings below exist only in `main`.
+published binaries; the deployment validation settings below exist since 0.5.0.
 
 ## Loading and file ownership
 
@@ -25,7 +25,8 @@ listen = "127.0.0.1:8000"
 ```
 
 Generate keys with `nelcota keygen`, passwords with `openssl rand -base64 48`,
-and panel hashes with the CLI. Keep files containing these values owner-readable
+and panel argon2id PHC hashes with `nelcota init` or `nelcota admin-password` on
+a host; for standalone `serve`, supply your own argon2id PHC hash. Keep files containing these values owner-readable
 and out of version control. Optional secret/mail values that normalize to blank
 are absent; do not assume every optional field accepts an empty string.
 
@@ -40,20 +41,24 @@ provider IDs or generated values require your own credentials.
 | --- | --- | --- | --- | --- |
 | `NELCOTA_DATABASE_URL` | `Secret` | `empty (required)` | `postgres://postgres:REPLACE@127.0.0.1:5432/postgres` | Required administrator connection for bootstrap and panel; request pools replace credentials with authenticator. Private PostgreSQL only: built-in connectors use NoTls. |
 | `NELCOTA_AUTHENTICATOR_PASSWORD` | `Secret` | `empty (required)` | `runtime-generated secret` | Required, at least 16 bytes; cluster-global authenticator password. Coordinate independent databases or use separate clusters. |
-| `NELCOTA_JWT_PRIVATE_KEY` | `Option<Secret>` | `unset` | `nelcota keygen output` | Ed25519 PKCS#8 PEM or one-line base64. Signs EdDSA and publishes its public JWKS; preferred over HS256. |
+| `NELCOTA_JWT_PRIVATE_KEY` | `Option<Secret>` | `unset` | `nelcota keygen output` | One of this or `NELCOTA_JWT_SECRET` is required (blank counts as unset). Ed25519 PKCS#8 PEM or one-line base64. Signs EdDSA and publishes its public JWKS; preferred over HS256. |
 | `NELCOTA_JWT_SECRET` | `Option<Secret>` | `unset` | `runtime-generated 48-byte base64 secret` | HS256 requires at least 32 bytes. Signs when no Ed25519 key exists; otherwise verifies legacy HS256 tokens only. |
 | `NELCOTA_JWT_ISSUER` | `String` | `nelcota` | `my-api` | Issued iss claim; built-in verification does not enforce issuer/audience. Choose a consistent nonempty value. |
 | `NELCOTA_JWT_EXPIRY_SECS` | `u64` | `900` | `900` | Positive access-token lifetime in seconds; must not overflow its representable range. |
 | `NELCOTA_REFRESH_TOKEN_TTL_DAYS` | `u32` | `30` | `30` | Positive refresh lifetime in days, renewed per rotation; bounded by PostgreSQL timestamp horizon. |
 | `NELCOTA_SIGNUP_ENABLED` | `bool` | `true` | `false` | Allows public signup. Provider sign-in for existing linked accounts has its own documented flow. |
-| `NELCOTA_AUTH_RATE_LIMIT_PER_MINUTE` | `u32` | `30` | `30` | Positive password/signup/email/provider budget per IP. Password login also has an email budget. Refresh/PKCE use a separate 10x budget. |
-| `NELCOTA_TRUST_PROXY` | `bool` | `false` | `true` | Uses rightmost X-Forwarded-For for caller IP. Enable only behind a correctly configured trusted proxy with direct access restricted. |
-| `NELCOTA_SMTP_URL` | `Option<Secret>` | `unset` | `smtps://user:REPLACE@smtp.example.com:465` | Auth email transport; smtps or smtp with required TLS. Set sender and recovery page together. Blank is absent. |
+| `NELCOTA_AUTH_RATE_LIMIT_PER_MINUTE` | `u32` | `30` | `30` | Positive password/signup/email/provider budget per IP (IPv6 per /64); signup also per IPv6 /48. Existing accounts also have a per-account password budget of 10x; over it only networks (IPv4 /24, IPv6 /64) where the account has an open session from the last 30 days get through, after a delay and up to a second 10x budget. Refresh/PKCE use a separate 10x budget. |
+| `NELCOTA_API_RATE_LIMIT_PER_MINUTE` | `u32` | `600` | `600` | REST and storage budget: per account with a user token, per IP (IPv6 per /64) without one. `service_role` tokens and public or signed file downloads are exempt. 0 turns it off. |
+| `NELCOTA_TRUST_PROXY` | `bool` | `false` | `true` | Reads the caller IP from X-Forwarded-For (see `NELCOTA_TRUSTED_PROXY_HOPS`) and marks panel session cookies `Secure` (an `https://` `NELCOTA_API_URL` also does). Enable only behind a correctly configured trusted HTTPS proxy with direct access restricted. |
+| `NELCOTA_TRUSTED_PROXY_HOPS` | `u8` | `1` | `2` | With `NELCOTA_TRUST_PROXY`, how many trusted proxies append to X-Forwarded-For; the caller is that many entries from the right. 1 for Caddy alone, 2 for a CDN in front of Caddy (Caddy must then list the CDN ranges in `trusted_proxies`). Between 1 and 8 when the proxy is trusted; ignored otherwise. |
+| `NELCOTA_PRODUCTION` | `bool` | `false` | `true` | Block direct panel table/policy schema writes; deploy repository migrations instead. |
+| `NELCOTA_SMTP_URL` | `Option<Secret>` | `unset` | `smtps://user:REPLACE@smtp.example.com:465` | Auth email transport: `smtps://` or `smtp://` with one `tls=required`. Other TLS/query options, repeated options and fragments are refused. Set sender and recovery page together. Blank is absent. |
+| `NELCOTA_SMTP_CA_FILE` | `Option<PathBuf>` | `unset` | `/path/to/private-ca.pem` | Additional PEM trust anchor for a private SMTP server. Hostname and certificate verification remain enabled. |
 | `NELCOTA_SMTP_FROM` | `Option<String>` | `unset` | `App <no-reply@example.com>` | Sender mailbox/display name. Quote spaces in the deployment environment-file format. |
 | `NELCOTA_PASSWORD_RECOVERY_URL` | `Option<String>` | `unset` | `https://app.example.com/recovery` | Required with SMTP; HTTP(S) application link page without a fragment. Production should use HTTPS. |
 | `NELCOTA_EMAIL_CONFIRMATION_URL` | `Option<String>` | `unset` | `https://app.example.com/confirm` | With SMTP, makes signup wait for email confirmation. HTTP(S) page without a fragment. |
 | `NELCOTA_MAGIC_LINK_URL` | `Option<String>` | `unset` | `https://app.example.com/sign-in` | With SMTP, enables passwordless links for existing accounts. HTTP(S) page without a fragment. |
-| `NELCOTA_API_URL` | `Option<String>` | `unset` | `https://api.example.com` | Public API HTTP(S) origin for OAuth callback; required when a provider is enabled. Also used as Vite proxy override during UI development. |
+| `NELCOTA_API_URL` | `Option<String>` | `unset` | `https://api.example.com` | Public API HTTP(S) origin for OAuth callback; required when a provider is enabled. An `https://` origin marks panel session cookies `Secure`, even without `NELCOTA_TRUST_PROXY`. Also used as Vite proxy override during UI development. |
 | `NELCOTA_OAUTH_REDIRECT_URLS` | `Option<String>` | `unset` | `https://app.example.com/auth` | Comma-separated application pages allowed after OAuth; same origin and equal/below path. Required with a provider. |
 | `NELCOTA_OAUTH_GOOGLE_CLIENT_ID` | `Option<String>` | `unset` | `provider-issued ID` | Google OAuth client ID; set together with its secret and API/redirect URLs. |
 | `NELCOTA_OAUTH_GOOGLE_CLIENT_SECRET` | `Option<Secret>` | `unset` | `provider-issued secret` | Google OAuth secret; keep out of frontend configuration. |
@@ -70,10 +75,11 @@ provider IDs or generated values require your own credentials.
 | `NELCOTA_MAX_BODY_BYTES` | `usize` | `2097152` | `2097152` | Positive REST write/RPC body cap in bytes; bodies are buffered. Does not set the streamed file-upload limit. |
 | `NELCOTA_LISTEN` | `SocketAddr` | `0.0.0.0:8000` | `127.0.0.1:8000` | HTTP bind socket. Raw serve defaults to all interfaces; dev overrides to loopback, and host runtime controls binding separately. |
 | `NELCOTA_DB_POOL_SIZE` | `usize` | `10` | `10` | Positive request-pool capacity; does not set separate panel/webhook/export budgets. |
+| `NELCOTA_API_CONCURRENCY_PER_CALLER` | `Option<usize>` | `unset` (half the pool, at least 1) | `5` | Concurrent REST requests per caller (signed-in user, else client address; IPv6 per /64; `service_role` exempt). Extras wait up to 1 s, then get 429 with Retry-After. 0 disables. |
 | `NELCOTA_REQUEST_TIMEOUT_SECS` | `u64` | `15` | `15` | Positive ordinary HTTP request deadline in seconds. Must exceed nonzero statement timeout; streamed uploads/exports have separate budgets. |
-| `NELCOTA_STATEMENT_TIMEOUT_SECS` | `u64` | `10` | `10` | Request-pool PostgreSQL statement timeout in seconds. 0 disables that timeout; use deliberately. Panel SQL has separate fixed budgets. |
+| `NELCOTA_STATEMENT_TIMEOUT_SECS` | `u64` | `10` | `10` | Request-pool PostgreSQL statement timeout in seconds, at most 86400 (one day). 0 disables that timeout; use deliberately. Panel SQL has separate fixed budgets. |
 | `NELCOTA_LOG_FORMAT` | `LogFormat` | `text` | `json` | text or json tracing output; verbosity comes from RUST_LOG. |
-| `NELCOTA_WEBHOOKS_ALLOW_LOOPBACK` | `bool` | `false` | `false` | Development-only HTTP(S) to localhost/127.0.0.1/::1. Does not permit LAN/metadata addresses or arbitrary public HTTP. |
+| `NELCOTA_WEBHOOKS_ALLOW_LOOPBACK` | `bool` | `false` | `false` | Development-only HTTP(S) to localhost/127.0.0.1/::1. Does not permit LAN/metadata addresses or arbitrary public HTTP. Startup fails when combined with `NELCOTA_PRODUCTION=true`. |
 | `NELCOTA_DEPLOYMENT_VALIDATION` | `bool` | `false` | `controller-managed` | Linux controller-owned candidate gate; requires gate path and identity. Never configure manually to enable an update. |
 | `NELCOTA_DEPLOYMENT_GATE` | `Option<PathBuf>` | `unset` | `controller-managed absolute path` | Absolute controller-owned gate path bound to the candidate. Keep ownership and protocol managed by enrollment. |
 | `NELCOTA_DEPLOYMENT_ID` | `Option<String>` | `unset` | `controller-managed 64-character hex ID` | Controller-owned candidate operation identity; 64 lowercase hexadecimal characters while validation is enabled. |
@@ -89,7 +95,7 @@ provider IDs or generated values require your own credentials.
 | `NELCOTA_STORAGE_MAX_TOTAL_SIZE` | `Option<u64>` | `unset` | `10737418240` | Optional committed total-byte cap across all buckets. Unset has no cap; 0 leaves no capacity for nonempty files. |
 | `NELCOTA_STORAGE_MIN_FREE_BYTES` | `u64` | `1073741824` | `1073741824` | Disk backend free-space reserve, in bytes. Default is 1 GiB. |
 | `NELCOTA_STORAGE_PUBLIC_URL` | `Option<String>` | `unset` | `https://files.example.com` | Public-file URL origin; absent uses relative API URLs. Configure an HTTPS proxy to public object routes. |
-| `NELCOTA_STORAGE_UPLOAD_TIMEOUT_SECS` | `u64` | `3600` | `3600` | Positive admission/policy/byte-reception deadline in seconds when enabled. Metadata publication and multipart cleanup have separate bounded settlement. |
+| `NELCOTA_STORAGE_UPLOAD_TIMEOUT_SECS` | `u64` | `3600` | `3600` | Positive admission/policy/byte-reception deadline in seconds when enabled, at most 86400 (one day). Metadata publication and multipart cleanup have separate bounded settlement. |
 
 All 52 fields are listed above. `Secret` affects log formatting, not encryption
 of the environment file. API signatures are not a substitute for private key
@@ -102,7 +108,7 @@ storage. Backend and backup S3 credentials/settings are separate.
 | `NELCOTA_CONFIG` | server path | `nelcota.toml` | `/etc/nelcota/server.toml` | Selects TOML file; environment overrides it. |
 | `NELCOTA_ROOT` | CLI host path | `.` | `/opt/nelcota` | Equivalent to global `--dir`; does not chdir the raw server TOML loader. |
 | `NELCOTA_IMAGE` | init image string | `ghcr.io/nelcota/nelcota-server` | `ghcr.io/nelcota/nelcota-server` | Default project app image; custom images are outside controlled-update V1. |
-| `NELCOTA_VERSION` | installer/host version string | installer: `latest`; init: CLI version | `0.5.0` | Installer release selection; persisted host image tag. Installing the CLI does not upgrade running projects. |
+| `NELCOTA_VERSION` | installer/host version string | installer: `latest`; init: CLI version | `0.5.6` | Installer release selection; persisted host image tag. Installing the CLI does not upgrade running projects. |
 | `NELCOTA_REPO` | installer repository string | `Nelcota/Nelcota` | `Nelcota/Nelcota` | Release source override; use official artifacts for supported deployments. |
 | `PREFIX` | installer directory | `/usr/local/bin` | `$HOME/.local/bin` | Writable user-owned prefix can avoid sudo for binary installation. Add it to your PATH yourself. |
 | `NELCOTA_SKIP_DOCKER` | installer string switch | `0` | `1` | Exactly `1` skips Docker installation; does not provide Docker for dev. |

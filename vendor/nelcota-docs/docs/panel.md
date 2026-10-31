@@ -19,7 +19,7 @@ or an enrolled update-operator login. This reference describes current source.
 ## Several projects
 
 Each project has its own panel, on its own domain, showing only its data. At
-the top left, next to the mascot, the **project switcher** (current project name) lists
+the top left, next to the Nelcota symbol, the **project switcher** (current project name) lists
 the other projects on the host and leads to "All projects": name, domain,
 state (up / down), version and a button to open each panel.
 
@@ -64,28 +64,52 @@ is embedded in the binary: no CDN and no Node in production (fonts too,
 because of the CSP `font-src 'self'`). Dark theme by default; theme and
 language are in the account menu, at the top right.
 
-The pages are pills across the top (on narrow screens, in their own row; on
-phones, in the menu). **Database** groups Tables, SQL and Migrations, with
-tabs between them inside each page; **User sign-in** is reached from the
-Users page. The project chip at the top left shows the project, whether it
+The sidebar groups related pages into expandable subcategories; phones use
+the same hierarchy in the menu. **Database** contains Tables (with its list
+filters: all, attention, views), SQL editor and Migrations; **Users** contains
+the user list and sign-in methods; **Access** holds the policies page and its
+filters (all, protected, unprotected, attention); **Webhooks** contains the
+configuration and the deliveries; **Connect** links to the API's address,
+caller roles, SDK setup, AI context, examples and token sections. Sidebar
+items use short labels when the page title does not fit; the page keeps its
+full title. The active page, filter or section is highlighted within its
+group. These groups replace page-level tab bars and list filters; table views
+and example languages remain next to the content they control. The project chip at the top left shows the project, whether it
 runs locally or on which host, and a dot for whether the server answers
 (checked every minute and when the window regains focus). Search (Ctrl K)
 sits beside the account chip. The
-**overview** leads with the API's traffic: requests in the last 24 hours,
-the share refused and the share that failed, then cards for tables (how
-many are protected), users (how many have signed in from the app) and
-refused calls, beside a chart of requests and refused calls over the last
-hour or day, with a table view. The counts are kept in memory per minute
+**overview** leads with what needs attention (unprotected or locked tables
+and the first steps of a new project, hidden once they are done), then the
+API's traffic: requests in the last hour or day, the share refused and the
+share that failed, with a chart of requests and refused calls and a table
+view; then cards for tables (how many are protected), users (how many have
+signed in from the app) and refused calls, and the recent blocks. The counts are kept in memory per minute
 for 24 hours: restarting the server starts them again.
 
 RLS state shows as a colored badge: green (RLS with policies), amber (RLS on
 without policies) and red (table exposed without RLS).
 
+Altered forms ask before discarding changes, including internal navigation and
+browser Back/Forward. Reloading or leaving the panel uses the browser's own
+confirmation. While a modal is open, Ctrl+K does not open another dialog.
+On phones, open Guides from the navigation menu. Bucket size limits are edited
+in MiB (1,048,576 bytes); changing other settings preserves the exact byte limit,
+and clearing the limit field restores the server default.
+
+Ordinary JSON requests have a 60-second deadline, including reading the response.
+If it expires, the panel releases the pending form and keeps its draft. A timed-out
+write may already have completed: refresh the data before trying it again. The
+panel does not automatically repeat writes. File transfers and the enrolled update
+controller retain their separate deadlines.
+
+Table and user page numbers whose offset cannot fit in a signed 64-bit integer
+are refused before querying the database. Return to the first page to continue.
+
 | Feature | How to use it |
 |---|---|
 | Edit a cell | double click; Enter saves, Esc cancels, NULL button for nulls |
 | Edit or insert a full row | expand button next to the row's checkbox / "Insert row" (side panel). Closing an altered form asks whether to keep editing or discard |
-| Delete several rows | tick the boxes and "Delete N" (a single transaction) |
+| Delete several rows | tick the boxes and "Delete" in the selection bar (a single transaction) |
 | Sort | click the column header (asc → desc → unsorted) |
 | Filter | "Filter" in the grid: equals, not equal, contains, greater/less, is/is not NULL. Filters live in the URL in the REST API format (`/admin/tables/orders?status=eq.paid`). Page, page size and sort use `_page`, `_size`, `_sort` and `_desc`; the complete view survives switching between Data and Structure, refresh and browser navigation |
 | Export a table | "Export" → CSV or JSON, with the grid's order and filters. The server streams with bounded buffers and no collection row cap; exports have a two-minute lifetime and can fail on timeout/cancellation. CSV has a BOM for Excel accents |
@@ -98,12 +122,28 @@ without policies) and red (table exposed without RLS).
 | Command palette | Ctrl+K (⌘K on Mac) or the search button at the top right: pages, tables, saved queries, templates and actions |
 | Create a table | "New table" in the table list: columns (type, default, PK, identity, UNIQUE, foreign key), RLS on by default and a GRANTs matrix. Shows the SQL before creating |
 | Edit the structure | the table's **Structure** tab (`/admin/tables/<name>/structure`): add, edit and delete columns; rename the table; description; turn RLS on/off; GRANTs per role; delete the table (by typing its name) |
-| Policies | search tables and filter their RLS status; "New policy" on each table, with templates (public read, signed-in users read, owner reads/creates/updates/deletes); edit and delete; "Enable RLS" on tables without it. Long expressions expand on demand |
-| service_role token | **API** page, expandable token section after the examples: issues a token with the chosen validity; shown once and never stored |
+| Policies | what needs attention first, each problem with its fix beside it; then every table, the ones with problems first; filters in the sidebar, search on the page; "New rule" on each table, with templates (public read, signed-in users read, owner reads/creates/updates/deletes); edit and delete; "Turn on row protection (RLS)" on tables without it. Long expressions expand on demand |
+| service_role token | **Connect** page, expandable token section after the examples: issues a token with the chosen validity; shown once and never stored |
 | Create a user / reset a password | **Users** page: "New user" and "Reset password…" in each user's menu, with a password generator. Same rules as public signup. Accounts created here count as confirmed and the panel sends no invitations; end users can recover their own password by email when the project has SMTP configured ([schema-auth.md](schema-auth.md#password-recovery)) |
 | Generate migration | **Migrations** page: schema changes made in the panel (tables, columns, policies) that are not in any file yet, and the project's migrations (applied or only in the folder). "Generate migration" downloads `V<n>__<name>.sql` and registers it as applied in this database; the file goes into `migrations/` (see [deploy](deploy.md#changes-made-in-the-panel)) |
-| Profile photo | account menu, at the top right: "Add photo…". The image is center-cropped and scaled to 256px in the browser; the server accepts PNG, JPEG or WebP up to 256 KB. It lives in the project's database (`nelcota.admin_avatar`, out of reach of the API roles), so it works in any browser, but it is per project |
+| Profile photo | account menu, at the top right: "Add photo…" or "Change photo…". Drag to frame, zoom, rotate by 90°, and check the live previews before saving. The final avatar remains 256px and at most 256 KB. A metadata-free source (up to 2048px and 1 MB) and its framing are saved privately in the project database so editing works across browsers. Removing the photo also deletes its retained source |
 | Dates in the grid | `timestamptz` shows in the viewer's time zone and language; `timestamp` and `date` as stored. The exact value is in the tooltip, in edit mode and in exports |
+
+The avatar editor accepts PNG, JPEG, WebP, GIF and AVIF files up to 20 MB,
+subject to browser decoding support and a 40-megapixel decoded-image limit.
+Use the arrow keys on the framing area to move the photo (Shift for larger
+steps), Enter to centre it, and the Zoom slider or a two-finger pinch to zoom.
+Cancel keeps the saved photo unchanged; a failed save keeps the draft for retry.
+Photos saved before the editor can be adjusted from their existing crop; choose
+the original file again to recover image areas that were previously discarded.
+Sources are stored in `nelcota.admin_avatar`, outside the API roles, and
+are served only to a signed-in panel administrator with `Cache-Control: no-store`.
+Internal migration V18 adds nullable editor fields without changing existing avatars.
+
+When there are no tables, the editor shows a single workspace with a table
+count, a guide link and one primary creation action. The
+table sidebar and search appear once tables exist. A failed catalog request
+shows a retryable error, never an empty-project message.
 
 CSV exports protect spreadsheet imports: formula-like cells and headers receive
 a quoted tab prefix, including formulas hidden behind whitespace or control
@@ -119,11 +159,11 @@ Use JSON export when you need the original text without this neutralization.
 | **Storage** | buckets with file count, size, limit and accepted types (create, edit, delete when empty); a file browser by folder: upload by selection or drop, per-file progress (asks before replacing), preview, download, copy the public URL, delete. Passive image formats and PDFs up to 20 MB can be previewed; plain text, CSV and JSON up to 1 MB. PDFs open in the browser viewer. Files go through the same checks as the API ([storage.md](storage.md)) |
 | **Users** | search by email, how each account signs in (password, Google, GitHub, or email links only), last sign-in, active sessions, unconfirmed emails; create a user, confirm an email, reset a password (ends their sessions), end sessions or delete a user |
 | **Policies** | each table's policies (`USING`/`WITH CHECK`): create, edit and delete; tables without RLS; functions `anon` can execute |
-| **API** | section navigation, project address, how each role calls the API, curl and JavaScript examples generated from each table's columns, service_role token. Topic, language and table are shareable through the URL |
+| **Connect** | section navigation, project address, how each role calls the API, curl and JavaScript examples generated from each table's columns, service_role token. Topic, language and table are shareable through the URL |
 
 ## Connecting an app and understanding access
 
-- **API → Connect with the SDK**: install command, a **Download database.ts**
+- **Connect → Connect with the SDK**: install command, a **Download database.ts**
   button (the same file `nelcota types` writes) and the `createClient` lines
   for this project. The examples switch between the TypeScript SDK (default),
   curl and plain `fetch`, generated from the chosen table's columns.
@@ -151,7 +191,7 @@ Use JSON export when you need the original text without this neutralization.
 
 ## Guides and references
 
-The book icon in the top bar opens **Guides and references** at `/admin/guides`.
+The book icon in the left rail (or **Guides** in the sidebar) opens **Guides and references** at `/admin/guides`.
 The reader includes its registered project guides, JavaScript/TypeScript and
 Rust SDK references, SQL examples and server recipes. Repository-only references
 and historical reports are not automatically added to the reader. Search matches the full text,
@@ -159,11 +199,11 @@ code blocks have copy buttons, and a table of contents links to each section.
 On phones, a guide selector replaces the sidebar. Guides and references follow
 the panel language, with Portuguese translations of the English sources. Code
 examples, inline code, URLs and section identifiers remain unchanged. Translations
-live in `docs/i18n/pt-BR/`; `npm run guides:check` verifies every prose fragment
+live in `docs/i18n/pt-BR/`; `bun run guides:check` verifies every prose fragment
 against its source and fails on missing or outdated translations. Code-only
 changes flow straight from the source without requiring a translation update.
 
-SDK help on the API page and the S3 guide on the Storage page open in this
+SDK help on the Connect page and the S3 guide on the Storage page open in this
 reader. Links between repository documents stay in the panel, including
 section links that can be shared and survive a reload. Registered sources and images are bundled, so reading those needs no GitHub
 access. The longer Notes staging guide opens on GitHub. Some unregistered
@@ -184,6 +224,18 @@ a failed request can be retried.
   prominently at the top of the panel and on the policies page.
 - **RLS without policies**: RLS on and no policy. Nobody but `service_role`
   (and the owner) has access: it is safe, but maybe not what you want.
+
+## Server operations workspace
+
+Server 0.5.2 adds **Server** to the separately authenticated host controller, with **Health**, **Projects**, **Backups** and **Settings**. Use matching CLI/controller versions; project-panel credentials do not grant host authority.
+
+Health runs read-only checks for application/database health, DNS, public HTTPS, the boot-enabled backup scheduler, disk reserve and backup freshness. Missing CPU or memory measurements remain unavailable. A saved external destination, a verified downloaded copy and a restore on another machine are distinct results; none enables update installation by itself.
+
+Settings offers typed SMTP, Google/GitHub sign-in, external backup destination, daily schedule/local retention and panel-administrator password changes. Secrets are write-only: blank preserves an existing credential, and disabling a section removes its settings. SMTP requires encrypted transport and an application recovery page. OAuth return pages are shared by the project's providers. Configuring a provider does not prove a successful provider login.
+
+Review the affected projects, type the displayed phrase and confirm the operator password before execution. Shared panel-password changes affect every project and restart their applications. Other email/login changes restart only the selected application; administrator sessions there end. Configuration failures restore configuration only, never an old database snapshot. A failed rollback keeps the job pending for explicit recovery.
+
+Backups supports local capture, an HTTPS destination write/read/delete test and an external copy with database/file/configuration readback verification. Test email is sent only to the operator: server acceptance does not prove inbox delivery. Recovery of an interrupted email test can send another message. Daily schedules use the VPS time zone; retention deletes older local copies, not remote objects. Keep independent off-host restore rehearsals and the existing update acceptance gates.
 
 ## Changing the admin password
 
@@ -225,23 +277,29 @@ because of the `$`), followed by `docker compose up -d --force-recreate app`.
 
 ## Panel development
 
+Ordinary panel requests have at least a 40-second HTTP deadline, allowing their
+30-second PostgreSQL statement timeout and pool wait to settle first. Public API
+requests retain `NELCOTA_REQUEST_TIMEOUT_SECS`. Uploads and streaming exports keep
+their own lifetime limits. Framework rejections use the panel's JSON error shape,
+and public API CORS permission does not apply to `/admin/` routes.
+
 ```sh
 cd crates/admin/ui
-npm ci
-npm run dev        # http://127.0.0.1:5173/admin/; proxy: http://127.0.0.1:8000
-npm run check      # types (svelte-check)
-npm run build      # generates dist/ (versioned and embedded in the binary)
+bun install --frozen-lockfile
+bun run dev        # http://127.0.0.1:5173/admin/; proxy: http://127.0.0.1:8000
+bun run check      # types (svelte-check)
+bun run build      # generates dist/ (versioned and embedded in the binary)
 ```
 
-After bundled guide/UI changes, run `npm run build` and rebuild the binary
+After bundled guide/UI changes, run `bun run build` and rebuild the binary
 (`cargo build --locked -p nelcota-server`). Commit generated `dist/` in its own
 build commit. CI checks it for drift. Set `NELCOTA_API_URL` when Vite should
 proxy another backend.
 
-Interface texts live in `src/lib/i18n/messages/<area>.ts`, with a Portuguese
-(`pt-BR`) and an English (`en`) object; the English one is typed against the
-Portuguese one, so a missing key fails `npm run check`. Never hardcode a
-user-facing string in a component.
+Interface texts live in `src/lib/i18n/messages/pt-BR/<area>.ts` and
+`src/lib/i18n/messages/en/<area>.ts`; the English one is typed against the
+Portuguese one, so a missing key fails `bun run check`. The panel downloads
+only the active language. Never hardcode a user-facing string in a component.
 
 ## Related guides
 
@@ -254,3 +312,25 @@ and removal with visual review, typed confirmation, operator reauthentication
 and durable recovery. It uses a separate HTTPS origin and SSH-granted host
 authority. The Projects page links to this controller when enrolled.
 Deployment, supported layouts and activation are described in `docs/host-management.md`.
+
+### Operational alerts
+
+In **Server → Alerts**, enrolled host operators can review and configure email
+and HTTPS webhook incident digests for application/database/HTTPS health, low
+disk, certificate expiry and overdue/failed backups. The page shows confirmed
+incidents, recovery, scan freshness, transport acceptance and retry status.
+Changes and delivery tests require explicit approval; project logins have no
+host authority. Secret URLs are write-only. A complete VPS outage requires an
+independent heartbeat provider, configured and rehearsed separately. Follow
+[operational alerts](operational-alerts.md) before enabling; these controls
+require server 0.5.2 or later.
+
+## AI context freshness
+
+Connect → Context for AI records the latest applied application migration in
+`llms.txt` and on the page. An empty exposed schema displays a warning in both
+places. Apply your migrations and regenerate before giving the file to an
+assistant. The page checks migration changes every 30 seconds while visible
+and when the window regains focus. Copy/download is disabled for an outdated
+context or a failed freshness check; Refresh regenerates it. Type downloads
+read schema and migration version from one database snapshot.

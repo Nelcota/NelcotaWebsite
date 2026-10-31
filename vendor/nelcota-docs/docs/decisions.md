@@ -290,7 +290,7 @@ Postgres' exact text (`RawValue`). Batch deletes in a single transaction. The
 SPA is served at any `/admin/*` (fallback to `index.html`). Hashed assets get
 immutable caching; `index.html`, `no-cache`.
 
-**D54. CodeMirror loaded on demand.** The main bundle stays around 130 KB
+**D54. CodeMirror loaded on demand.** The login screen loads about 135 KB
 gzip; the SQL editor (~145 KB gzip) is only downloaded when its page opens.
 The Inter and JetBrains Mono fonts come from `@fontsource-variable` (OFL),
 served by the binary itself.
@@ -303,7 +303,7 @@ toasts, an icon before every title, subtitles explaining the obvious and the
 Criterion: color only for problems (no RLS, RLS without policies, error,
 destructive action); short texts. Inter/JetBrains Mono swapped for IBM Plex
 Sans/Mono, less ubiquitous and with the feel of a technical tool. Security
-warnings stay, as plain text.
+warnings stay, as plain text. (D102 later replaced the typeface with Manrope.)
 
 ## Several projects per host
 
@@ -345,7 +345,8 @@ taking the others down).
 
 ## Identity and account in the panel
 
-**D62. The mascot is the panel's identity, the only exception to D55.** It
+**D62. The mascot is the panel's identity, the only exception to D55**
+(superseded by D102). It
 comes from the NelcotaScreenShare atlas (`src/assets/mascot/`), cropped with
 the poses anchored at the feet and right arm so the figure does not jump when
 the expression changes. It is not decoration because it reacts to the login
@@ -354,7 +355,7 @@ its eyes while the password is typed and looks sad after a refused login. The
 eyes are a vector layer over the PNG's (only the pupil moves); with
 `prefers-reduced-motion` the gaze jumps straight to the target.
 
-**D63. Full-height sidebar.** Project at the top (same height and border as
+**D63. Full-height sidebar** (superseded by D98 and D103). Project at the top (same height and border as
 the topbar), pages in the middle, account at the bottom; the topbar covers
 only the content area. Pinned, it takes 240px from `xl` up; collapsed, it
 becomes an icon rail that expands over the content. "Projects" left the menu:
@@ -566,7 +567,7 @@ outside the request timeout and the gzip layer.
 
 **D79. User files are served as inert content.** Every object response
 carries `X-Content-Type-Options: nosniff` and `Content-Security-Policy:
-sandbox`; only raster images, audio, video and plain text are served
+sandbox` (on the S3 backend the redirected download cannot, see `storage.md`); only raster images, audio, video and plain text are served
 `inline`, everything else (HTML, SVG, PDF...) as an `attachment`. The type is
 sniffed from the first bytes, not taken from the client. Paths reject `..`,
 empty segments, control characters and over-long names, and are normalized
@@ -811,6 +812,22 @@ TS 6 package once svelte-check supports 7. Updates still wait seven days
 after release (Dependabot cooldown), so "newest" means newest that has
 been out for a week.
 
+**D105. Bun is the primary JavaScript runtime and tool; Node stays
+supported.** Bun installs dependencies (`bun.lock`), runs the scripts, the
+panel's Vite and tests, the examples and the main CI jobs. The SDKs target
+both runtimes: published code uses only the web and `node:` APIs that Bun and
+Node share, never `Bun.*` or `bun:*`, and every SDK suite also runs on Node
+22/24/26 (`test:node`). Tests stay on Vitest, run by Bun: `bun test` lacks
+`vi.stubGlobal` and the async fake timers the suites rely on, and the same
+suite must keep running on Node. The garbage-collection leak checks run on
+Node only, because JavaScriptCore's conservative collector can keep an
+unreachable object alive and so cannot prove that nothing leaks. npm still
+packs and publishes (trusted publishing with provenance) and drives the
+npm-consumer smokes. New releases wait 14 days, through the Dependabot
+cooldown and `minimumReleaseAge` in each `bunfig.toml`, replacing the week
+in D96. TypeScript 7 now also checks `@nelcota/ssr`, `@nelcota/nextjs` and
+the App Router example; only svelte-check keeps TypeScript 6.
+
 ## Connecting apps and access
 
 **D97. The panel connects apps and explains refusals.** The API page leads
@@ -949,6 +966,168 @@ effects stay gated by an operation identity. Production installation starts
 disabled until exact-binary VPS fault/offsite evidence passes. See
 the repository-only operating guide at `docs/panel-updates.md` and G03 at
 `docs/goals/panel-updates-and-recovery.md`. These are not registered panel guides.
+
+**D102. The official SVG identity replaces the panel mascot.** This supersedes
+D62 and the mascot retained in D98. The maintainer retains graphite surfaces and orange contextual accents, with
+cobalt blue primary buttons. Use black
+marks on light surfaces and white on dark surfaces. Apply the October 2026
+brand guide to proportions, clear space and unchanged
+SVG masters. Retain Manrope for the interface and IBM Plex Mono for code. Use a single brand placement per screen, a horizontal logo at 240 px or
+larger where space permits, and a symbol at 40 px or larger in compact areas.
+Keep at least 25% of the emblem height as clear space. Project cards and context
+selectors use functional icons instead of repeating the logo. Remove animated
+mascot assets and gaze tracking; authentication and update confirmations remain
+unchanged. Semantic success, warning and error colors retain their meanings.
+
+**D103. Group page navigation in the sidebar.** Database, Users, Events and
+webhooks, and API expose expandable subcategories in the workspace sidebar and
+the same mobile menu. Only the selected child carries the current-page marker;
+parents expose their expanded state. API sections follow scroll position.
+The controller places server areas in its own sidebar, preserving the existing
+unsaved-change and operation guards. Do not duplicate these links in horizontal
+tab bars. Keep table-specific views, example languages and filters beside the
+content they control, using one compact neutral segmented style.
+Blue primary actions remain distinct from neutral selection, secondary controls
+and destructive actions. Contextual icons supplement visible labels and remain
+hidden from assistive technology.
+
+**D104. `crypto-bigint` 0.5 ignored in `cargo audit`/`cargo deny`
+(RUSTSEC-2026-0387).** It comes through `p256`/`p384` 0.13, which the latest
+`jsonwebtoken` and `openidconnect` still require; the fix exists only in
+`crypto-bigint` 0.7. The timing issues affect operations on secret integers.
+Nelcota signs with EdDSA or HS256 (D16) and uses these curves only to verify
+provider signatures with public keys. Remove the ignore once both crates move to
+`elliptic-curve` 0.14, or revisit if ECDSA is ever used for signing.
+
+**D106. One outbound address policy for user-supplied destinations.** Project
+webhooks and host alert webhooks share `nelcota_core::net::is_public_address`:
+IPv4 refuses private, shared, reserved, benchmarking and documentation ranges;
+IPv6 is an allowlist of 2000::/3 minus the IETF, documentation and 6to4 blocks.
+The host-management policy check stays looser on purpose, because its
+addresses are the operator's own servers and installed policies must keep
+loading, but it refuses reserved IPv4 and IPv6 forms that embed an IPv4 address.
+
+**D107. The panel's assets are brotli-precompressed at build time.**
+`crates/admin/build.rs` compresses the embedded `ui/dist` at quality 11 and
+embeds only the brotli copy (about 2 MB more binary); clients without br get the
+existing runtime gzip. Variants are cached by content hash, so a rebuilt but
+unchanged `dist` is not compressed again. HTML entry points carry an ETag and
+answer 304; hashed assets stay immutable (D53).
+
+**D108. The panel loads only what the first screen needs.** Each language's
+texts are a separate chunk loaded before mount, with no fallback to the other
+language (the types already require every key in both). Guides load one at a
+time and index their text only when someone searches. A browser that was signed
+in last time prefetches the shell and the current page alongside `/session`;
+a first visit downloads only the sign-in screen. Response validators load on
+first use, always before the request is sent, so a failed download can never
+follow a committed write.
+
+**D109. Internal tooling scripts are TypeScript run by Bun.** Scripts that
+only maintainers run (`scripts/*.ts` in the TypeScript SDK and the panel) are
+type-checked by `bun run check`. Consumer smokes and `package-test.mjs` stay
+JavaScript because they stand in for a JavaScript user of the published package
+on every supported Node version; examples stay copy-paste JavaScript; generated
+validators, framework configs and k6 benchmarks keep the format their tools
+expect.
+
+**D110. The one-command VPS setup turns the firewall on.** D44 still holds
+for `init` run by hand. The installer, though, prepares a whole public VPS, and
+a missing firewall or an active one that blocks 80/443 are the usual failed
+setups. It adds HTTP/HTTPS to an already active firewalld or ufw; otherwise it
+passes `--firewall` to `init`, which allows SSH on 22 and the ports `sshd -T`
+reports. `--no-firewall` opts out, and a `--local` host is left alone. Below
+2 GB of RAM without swap it adds a 2 GB swap file, and on Debian/Ubuntu it
+enables unattended-upgrades.
+
+**D111. List filters live in the sidebar.** Amends D103: a page whose main
+content is a filtered list (Tables, Access policies) exposes its filters as
+sidebar sub-items, kept in the URL (`?filter=`), and keeps only the search on
+the page. Sidebar items may carry a short label when the page title does not
+fit the sidebar; the page itself keeps the full title. Views of one object
+(a table's data and structure) and example languages stay beside the content.
+
+**D112. Rate limits cover the whole public API and every account.** Amends
+D26 and D69. Keys group IPv6 by /64. Existing accounts get an account-wide
+password budget of ten times the per-IP one, in a store of their own; over it,
+only networks (IPv4 /24, IPv6 /64) where the account has an open recent
+session in `auth.sessions` get through, up to a second budget of the same
+size. This trades admission from new networks under a sustained distributed
+attack for a hard cap on distributed guessing: one address cannot lock anyone
+out, but about ten addresses (or IPv6 /64s) can keep an account closed to new
+networks. Loopback, private and link-local addresses, which a proxy or
+server-side renderer presents for many users, never count as known. The REST and storage
+APIs have a per-account or per-IP budget (`NELCOTA_API_RATE_LIMIT_PER_MINUTE`,
+`service_role` exempt). The client IP skips `NELCOTA_TRUSTED_PROXY_HOPS`
+trusted proxies from the right.
+
+**D113. Signed URLs are bound to one stored version.** Amends D79: a signed
+URL names the version (the key of the bytes, D78) the signer could read, not
+only the bucket and path. Replacing a file, or deleting it and uploading again
+under the same name, creates another version, which the old URL answers with
+404 as if the file were gone; a grant that names no version is refused.
+Sharing a file does not share whatever is stored under its name later.
+
+**D114. Webhook admission never aborts the business write.** V13 counted the
+queue in one `webhook_queue_usage` row and raised `53300` above 10,000
+outstanding or 100,000 retained deliveries. Every captured write locked that row
+until commit, and healthy history or one stalled destination froze writes on all
+watched tables. V19 counts outstanding work per webhook in sixteen shard rows: a
+transaction updates a shard no other transaction holds (`SKIP LOCKED`, its
+backend's shard first). When all sixteen are held, it inserts its own overflow
+row under a fresh key instead of waiting, so a writer never queues behind
+another on a counter and writers on two watched tables cannot deadlock there;
+the worker folds committed overflow rows back. Capture sums every row. Beyond
+10,000 outstanding deliveries for one webhook, the event is stored as a failed
+`queue_full` delivery with omitted contents, like an oversized payload, and the
+row commits; resends are refused at the same limit. Concurrent transactions
+cannot see each other's uncommitted work, so the limit is approximate by what
+they add together. History is bounded by retention instead: the worker deletes
+terminal deliveries older than seven days or beyond the newest 100,000,
+continuing while batches come back full. `nelcota.webhook_queue_usage` remains
+as a read-only view.
+
+**D115. One caller cannot hold the REST pool.** The request pool is small and
+RLS says which rows a query may see, not how much it may cost, so the server
+bounds who uses the pool: each REST request takes one of its caller's slots
+(the signed-in user, otherwise the client address with IPv6 grouped per /64;
+`service_role` is exempt), `NELCOTA_API_CONCURRENCY_PER_CALLER` at a time and
+half of the pool by default. Extras wait one second, then get 429. A request
+that is dropped cancels its PostgreSQL statement, and its connection is closed
+instead of returning to the pool, so a late cancel cannot reach another
+request. This limits
+concurrency, not request rate; a per-minute rate limit is a separate control.
+
+**D116. A refresh retry returns the successor it repeats.** Amends D23 and the
+ten-second retry grace: a retry of the latest rotation used to mint a new
+pair and revoke the lost successor, so a second holder that did receive that
+successor later presented it as reuse and lost the session. Now a retry
+answers with the same successor and a new access token. Because only token
+hashes are stored, each rotation keeps its successor on the rotated token's
+row, XORed with an HKDF-SHA256 key derived from the rotated token (one-time:
+a token rotates at most once) and checked against the successor's hash on
+the way out. Holding the rotated token already gave that power within the
+window. The next rotation and hourly pruning clear it. Rotations from before
+V21 keep the previous behaviour; reuse outside the window is unchanged.
+
+**D117. A signup confirmation proves the inbox, not the signup password.**
+Amends D27, D89 and D112. Opening a signup link shows only that someone reads
+the inbox; whoever signed up may have registered someone else's address with a
+password of their own. The link keeps the signup password only when the client
+confirming presents the PKCE verifier of the S256 `code_challenge` it sent with
+the signup (V22 stores the challenge with the link and joins the auth-only
+migration set). Otherwise the confirmation claims the account like a first
+magic link: the password is cleared, earlier access is revoked, and the person,
+signed in by the link, sets a password. Resent links are never bound. With
+confirmation on, signup no longer reveals accounts: an existing email gets the
+same `201 {user}` as a new one, with a random `id`, and the account does not
+change; its inbox gets an unbound confirmation link while unconfirmed, or at
+most one notice a minute once confirmed. Without confirmation the answer is a
+session, which cannot be faked, so `409 user_already_exists` remains there and
+reveals accounts. The /64s of one IPv6 /48 may hold at most 1/64 of the per-IP
+limiter store, and signup also has a per-/48 budget. Each email without an
+account gets an account-sized decoy budget of its own, in a separate store that
+drops its oldest key when full, instead of D112's 4,096 shared decoys.
 
 ### Known pending items
 

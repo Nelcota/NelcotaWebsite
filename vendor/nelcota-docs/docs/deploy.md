@@ -7,15 +7,34 @@ scheduler reads `/etc/cron.d` (Debian/Ubuntu cron or Fedora/RHEL cronie).
 Use an explicitly selected published CLI/image version; source-only features
 require their own release and acceptance. Node is not required.
 
+The quickest path is one command. Point the domain's DNS **A** record at the
+VPS, then run it on Debian/Ubuntu or Fedora/RHEL. It installs cron, Docker and
+the CLI, creates the host in `/opt/nelcota` and starts it:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Nelcota/Nelcota/main/scripts/install.sh | sudo NELCOTA_VERSION=0.5.6 sh -s -- api.yourdomain.com
+```
+
+Arguments after the script's `--` go to `nelcota init`, for example `--email`,
+`--runtime systemd` or `--s3-*`; `--dir <absolute folder>` selects another host
+folder and `--yes` skips the `init` questions, such as the S3 backup one.
+
+The installer also turns the firewall on. An already active firewalld or ufw only
+gets HTTP and HTTPS added; otherwise it installs ufw and `init --firewall` allows
+SSH on port 22 plus every port `sshd -T` reports and the current session's port,
+80 and 443. `--no-firewall` leaves it off. On Debian/Ubuntu it enables automatic
+security updates, and below 2 GB of RAM without swap it creates a 2 GB swap file.
+Run again on an existing host, it skips `init` and only runs `up`. The same steps by hand:
+
 ```sh
 sudo -i                                        # enter a root shell; omit if already root
 # Debian/Ubuntu; prepare cron before either Docker or native init:
 apt-get update
 apt-get install -y ca-certificates curl coreutils cron
 systemctl enable --now cron.service
-curl -fsSL https://raw.githubusercontent.com/Nelcota/Nelcota/main/scripts/install.sh | NELCOTA_VERSION=0.5.0 sh
+curl -fsSL https://raw.githubusercontent.com/Nelcota/Nelcota/main/scripts/install.sh | NELCOTA_VERSION=0.5.6 sh
 mkdir -p /opt/nelcota && cd /opt/nelcota
-nelcota init api.yourdomain.com --version 0.5.0  # creates the host and the first project
+nelcota init api.yourdomain.com --version 0.5.6  # creates the host and the first project
 nelcota up                                      # starts projects + Caddy, waits for the healthcheck
 nelcota doctor                                  # optional: checks DNS, ports, backups and health
 ```
@@ -27,13 +46,14 @@ nor a backup scheduler. Merely belonging to the Docker group is insufficient
 for `init`: the file-storage directory must be owned by UID/GID `65532`.
 
 The current source rejects missing installation prerequisites before writing
-host credentials, even with `--skip-checks`. These preflight fixes are
-**Unreleased**; when installing published 0.5.0, perform the preparation above
+host credentials, even with `--skip-checks`. These preflight fixes are included
+in server 0.5.1; when installing the earlier 0.5.0, perform the preparation above
 yourself. Never remove an existing project's `.env` just to retry a failed init;
 inspect and preserve any partial installation first.
 
-To request `--firewall`, install `ufw` first and allow your actual SSH port
-before enabling it; the built-in `OpenSSH` rule normally covers port 22.
+To request `--firewall`, install `ufw` first. Init allows the `OpenSSH` rule
+(port 22), every port `sshd -T` reports and the `SSH_CONNECTION` port; it warns
+when it cannot detect any, so verify a custom SSH port before enabling.
 The option applies only to the first, non-local Linux host initialization.
 Missing ufw or a failed rule aborts the current source's init. Without the
 option, configure the host firewall and provider security group manually.
@@ -155,7 +175,7 @@ On a small VPS that will only ever hold one project, Nelcota can skip Docker:
 sudo -i
 apt-get update && apt-get install -y ca-certificates curl coreutils cron
 systemctl enable --now cron.service
-curl -fsSL https://raw.githubusercontent.com/Nelcota/Nelcota/main/scripts/install.sh | NELCOTA_SKIP_DOCKER=1 sh
+curl -fsSL https://raw.githubusercontent.com/Nelcota/Nelcota/main/scripts/install.sh | NELCOTA_SKIP_DOCKER=1 NELCOTA_VERSION=0.5.6 sh
 mkdir -p /opt/nelcota && cd /opt/nelcota
 nelcota init api.yourdomain.com --runtime systemd
 nelcota up
@@ -224,7 +244,7 @@ Security details in [panel.md](panel.md).
    the compose plugin, free ports 80/443
    (in use = error, with how to find the process; `--skip-checks` continues
    anyway), RAM and the domain's DNS.
-2. **Machine:** with `--firewall`, configures `ufw` (SSH, 80 and 443), then
+2. **Machine:** with `--firewall`, configures `ufw` (SSH ports, 80 and 443), then
    installs the daily backup job (03:00, keeps 7). Failure aborts init before
    host credentials are written. These prerequisites are not skipped by
    `--skip-checks`.
@@ -295,8 +315,16 @@ with the project's `NELCOTA_VERSION` first:
 - `--dry-run` prints `current → target` for each project and changes nothing.
 
 ```sh
+# One-step CLI + project updates (CLI releases after 0.5.6):
+sudo nelcota update
+sudo nelcota update --dry-run
+
+# Older CLI: use the installer's update mode from main:
+curl -fsSL https://raw.githubusercontent.com/Nelcota/Nelcota/main/scripts/install.sh | sudo sh -s -- --update
+
+# Explicit control with an already installed CLI:
 nelcota upgrade --all --dry-run
-nelcota -p shop upgrade --version 0.5.0  # published target; already-current projects are skipped
+nelcota -p shop upgrade --version 0.5.6  # published target; already-current projects are skipped
 ```
 
 ## Local development

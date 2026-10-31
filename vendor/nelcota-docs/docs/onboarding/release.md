@@ -1,12 +1,14 @@
 # Release handoff after Notes acceptance
 
-The next release consolidates the changes recorded under **Unreleased** in
-the [server changelog](../../CHANGELOG.md). A local acceptance pass proves
+The 0.5.6 release generates panel passwords without look-alike characters and
+keeps a failed controller test from blocking the host, as recorded
+in the [server changelog](../../CHANGELOG.md). A local acceptance pass proves
 the selected binary and its Notes workflow; it does not publish binaries,
 container images, Rust crates or either SDK package.
 
-The completed local checks and artifact hashes are in
-[Notes acceptance evidence](validation.md).
+Historical Notes acceptance evidence for 0.4.0 is in
+[Notes acceptance evidence](validation.md); record new reports for the 0.5.6
+candidate before publishing.
 
 ## Candidate evidence
 
@@ -24,6 +26,16 @@ Repeat a soak on the final candidate if sustained-load certification is part
 of the release scope.
 
 ## Upgrade an existing project
+
+The 0.5.5 → 0.5.6 patch retains internal schema V16 with no new migration.
+Rehearse that exact upgrade and a paired database/file restore on a disposable
+installation before publishing. Existing legacy-upgrade CI also covers
+0.3.1 → this checkout; that result does not substitute for the 0.5.5 baseline.
+
+Since 0.5.1, SMTP requires implicit TLS or mandatory STARTTLS, and Linux
+initialization checks privileges, the cron scheduler and requested UFW
+operations; upgrades from 0.5.0 or older must review these. Review
+[the deployment prerequisites](../deploy.md) and [configuration](../configuration.md).
 
 1. Take a database backup and, for disk storage, its paired file snapshot.
    Keep the `.dump` and `.dump.files/` together and test their restore in a
