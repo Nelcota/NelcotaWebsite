@@ -200,7 +200,7 @@ export const ptBr = {
   },
   showcase: {
     overviewAlt:
-      'Visão geral do painel do Nelcota com gráficos de tráfego da API, contagem de tabelas e usuários e próximos passos',
+      'Visão geral do painel do Nelcota com o total de requisições, cartões de banco de dados, autenticação e controle de acesso e um gráfico de tráfego da API',
     tableAlt:
       'Editor de tabelas do Nelcota mostrando as linhas de uma tabela notes protegida por RLS',
   },

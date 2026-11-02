@@ -203,7 +203,7 @@ export const en = {
   },
   showcase: {
     overviewAlt:
-      'Nelcota admin panel overview with API traffic charts, table and user counts, and setup steps',
+      'Nelcota admin panel overview with request totals, database, authentication and access-control cards, and an API traffic chart',
     tableAlt: 'Nelcota table editor showing the rows of a notes table protected by RLS',
   },
   why: {
