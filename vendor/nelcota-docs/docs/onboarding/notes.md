@@ -29,14 +29,13 @@ On Linux with Docker already installed, install a specific published release
 into a user-owned directory. Run from the cloned repository:
 
 ```sh
-NELCOTA_VERSION=0.5.0 PREFIX="$HOME/.local/bin" NELCOTA_SKIP_DOCKER=1 sh scripts/install.sh
+NELCOTA_VERSION=0.5.6 PREFIX="$HOME/.local/bin" NELCOTA_SKIP_DOCKER=1 sh scripts/install.sh
 "$HOME/.local/bin/nelcota" --version
 ```
 
-The installer checks the SHA-256 before replacing the binary. The release
-above is the published baseline; it does not contain unreleased changes from
-`main`. To validate this checkout instead, use the repository's pinned Rust
-toolchain and lockfile:
+The installer checks the SHA-256 before replacing the binary. Confirm the pinned release assets and readiness receipt before installing.
+Changes after its tag require another matching artifact. To validate this
+checkout instead, use the repository's pinned Rust toolchain and lockfile:
 
 ```sh
 cargo build --locked -p nelcota-server
@@ -97,13 +96,13 @@ existing migration; it does not update an already initialized project.
 ## 4. Use the existing browser example
 
 The example already ships in `sdk/typescript/examples/browser.html`. To build
-its local SDK modules, use Node 22+ and npm only for this optional frontend
+its local SDK modules, use Bun and Node 22+ only for this optional frontend
 step, from the repository root:
 
 ```sh
 cd sdk/typescript
-npm ci
-npm run build
+bun install --frozen-lockfile
+bun run build
 python3 -m http.server 5178 --bind 127.0.0.1
 ```
 
@@ -145,8 +144,8 @@ To exercise the browser example too, build the SDK as above and install the
 browser test dependency:
 
 ```sh
-# From sdk/typescript after npm ci and npm run build:
-npx playwright-core install chromium
+# From sdk/typescript after bun install --frozen-lockfile and bun run build:
+bunx playwright-core install chromium
 cd ../..
 python3 scripts/test-onboarding.py --binary target/debug/nelcota --browser
 ```
@@ -169,11 +168,12 @@ runs when ownership can be established.
 ## Public staging and release handoff
 
 On a dedicated staging VPS, point a real domain at it and use an explicit
-published image version through the existing CLI:
+published image version through the existing CLI. Run as root (`sudo -i`), with
+cron prepared as in [deployment](../deploy.md):
 
 ```sh
 mkdir -p /opt/nelcota-staging && cd /opt/nelcota-staging
-nelcota init staging.example.com --project notes --version 0.5.0
+nelcota init staging.example.com --project notes --version 0.5.6
 nelcota up
 nelcota -p notes status
 ```

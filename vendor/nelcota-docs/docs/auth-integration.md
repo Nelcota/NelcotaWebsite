@@ -55,6 +55,10 @@ The startup order is explicit in `main.rs`: connect as the administrator for
 `bootstrap`; configure a separate request pool as `authenticator`; construct
 `Keys`, one shared `Passwords` worker pool and `AuthState::new`; own a pruner
 handle; mount `router` with a request deadline; serve with Ctrl-C shutdown.
+Serve the router with `into_make_service_with_connect_info::<SocketAddr>()` (or
+set `proxy_hops` to the number of trusted proxies that append to
+`X-Forwarded-For`); without a client address every caller shares one per-IP
+rate-limit bucket.
 The example closes the pool after aborting and awaiting its pruner.
 
 Example budgets are four DB connections, two password threads, a five-second
@@ -79,12 +83,23 @@ The existing `/auth/v1` routes are preserved: `signup`, `token`, `logout`, `user
 grants. Errors keep the existing JSON vocabulary and HTTP statuses through
 `ApiError`. Both existing SDKs can use the external host's auth routes.
 
-Assign `state.mailer`, configure `state.settings.links` before constructing
-the final state, and use the shared `MailDelivery` admission/deadline for mail
+The router marks auth handler responses `Cache-Control: no-store` and
+`Pragma: no-cache`, including errors and OAuth redirects. The separate public
+JWKS route keeps its five-minute cache policy. Preserve these headers when
+adding host middleware or a reverse proxy.
+
+Set `AuthSettings::links` before calling `AuthState::new` (which validates the
+pages), then assign `state.mailer` (and `state.oauth`) on the returned state; use the shared `MailDelivery` admission/deadline for mail
 flows. Missing adapters leave the corresponding flows disabled. Provider
 integration uses `OAuth`, `Provider`, `ProviderKind` and explicit redirect
 allowlists. Google and GitHub flows retain the existing verified-email and
 PKCE contracts. Provider HTTP transport initializes its TLS provider internally.
+
+`SmtpMailer::new` accepts implicit TLS via `smtps://` or mandatory STARTTLS via
+`smtp://` with one `tls=required`. The only query option is a single
+`tls=required` (optional for SMTPS); fragments, duplicates and other query/TLS
+settings are refused before delivery, including on loopback. Custom `Mailer`
+implementations remain responsible for their transport security.
 
 `Keys`, `JwtVerifier`, `SharedVerifier`, `Auth`, `Claims`, `Role` and `VerifyError`
 are reachable from the auth facade. EdDSA is preferred; JWKS exposes only public
@@ -102,16 +117,19 @@ assume an issuer/audience policy that the existing contract does not enforce.
 
 Access JWTs remain stateless until expiry. Logout/revocation prevents refresh;
 it does not retract an already-issued access token. Refresh rotation preserves
-the documented short retry grace: competing requests can both return a response,
-but only the newest successor remains usable. Recovery, confirmation, magic-link
+the documented short retry grace: competing requests with one token all receive
+the same successor, which remains the only usable token. Recovery, confirmation, magic-link
 and PKCE credentials retain their single-use database consumption boundaries.
 Password/link changes and revocation must not resurrect an ended session.
+Retry grace never extends a refresh token's expiration: the exact deadline is
+expired, and an expired, rotated token follows the existing reuse handling.
 
 ## Database lifecycle and authorization
 
-`nelcota_auth::bootstrap` installs canonical versions 1, 2, 5, 9, 10 and 14.
-These are the auth tables, shared roles/context functions, single-use links,
-OAuth identities and the user-listing index. Shared infrastructure includes
+`nelcota_auth::bootstrap` installs canonical versions 1, 2, 5, 9, 10, 14, 21 and
+22. These are the auth tables, shared roles/context functions, single-use links,
+OAuth identities, the user-listing index, the refresh retry successor and the
+signup-link binding. Shared infrastructure includes
 `nelcota.schema_migrations`, `extensions`, pgcrypto and pg_stat_statements.
 Panel tables, catalog triggers, storage and webhook objects are absent.
 Bootstrap needs an administrator able to create roles and the extensions.
@@ -154,7 +172,7 @@ connector integration; it is not demonstrated by this example.
 
 ## Compatibility and operation
 
-Auth/core versions travel together. The current candidate manifests use 0.4;
+Auth/core versions travel together. The current source manifests use 0.5.6;
 subsequent compatible fixes preserve constructors, routes, error vocabulary,
 claims and additive database history. Breaking Rust changes during 0.x require
 a new minor version and a migration/upgrade note. After 1.0, breaking public

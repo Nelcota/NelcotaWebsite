@@ -3,7 +3,7 @@ resolver = "3"
 members = ["crates/*", "sdk/rust"]
 
 [workspace.package]
-version = "0.5.0"
+version = "0.5.6"
 edition = "2024"
 license = "Apache-2.0"
 publish = false
@@ -11,8 +11,8 @@ rust-version = "1.99"
 repository = "https://github.com/Nelcota/Nelcota"
 
 [workspace.dependencies]
-nelcota-core = { path = "crates/core", version = "0.5.0" }
-nelcota-auth = { path = "crates/auth", version = "0.5.0" }
+nelcota-core = { path = "crates/core", version = "0.5.6" }
+nelcota-auth = { path = "crates/auth", version = "0.5.6" }
 nelcota-api = { path = "crates/api" }
 nelcota-cli = { path = "crates/cli" }
 nelcota-deployment = { path = "crates/deployment" }
@@ -25,6 +25,8 @@ argon2 = "0.6.0"
 axum = { version = "0.8.9", default-features = false, features = ["http1", "json", "tokio", "query", "macros", "form"] }
 deadpool-postgres = { version = "0.14.2", default-features = false, features = ["rt_tokio_1"] }
 base64 = "0.23.1"
+# Lowercase hex for digests and tokens; preserve the existing wire encodings.
+base16ct = { version = "1.0.0", default-features = false, features = ["alloc"] }
 bytes = "1.12.1"
 # Cookie parsing and Set-Cookie building for the panel session (no signing/encryption features).
 cookie = { version = "0.18.2", default-features = false }
@@ -44,6 +46,8 @@ jsonwebtoken = { version = "11.1.0", default-features = false, features = ["rust
 # system certificates). No native-tls/OpenSSL: the musl build stays static.
 lettre = { version = "0.11.23", default-features = false, features = ["builder", "hostname", "smtp-transport", "tokio1-rustls-tls"] }
 postgres-protocol = "0.6.12"
+# JSON Schema for the panel contracts (D83); nelcota-deployment only behind its `schema` feature.
+schemars = "1.2.2"
 # Protocol clients use our bounded reqwest transport, retaining the same TLS
 # provider and avoiding a second reqwest version.
 oauth2 = { version = "5.0.0", default-features = false }
@@ -55,18 +59,20 @@ rustls = { version = "0.23.46", default-features = false, features = ["ring", "s
 refinery = { version = "0.10.0", default-features = false, features = ["tokio-postgres"] }
 rust-embed = { version = "8.13.0", features = ["debug-embed"] }
 serde = { version = "1.0.229", features = ["derive"] }
-serde_json = "1.0.152"
+serde_json = { version = "1.0.152", features = ["arbitrary_precision"] }
 sha2 = "0.11.0"
 testcontainers-modules = { version = "0.15.0", default-features = false, features = ["postgres"] }
 thiserror = "2.0.21"
-tokio = { version = "1.53.2", features = ["macros", "rt-multi-thread", "net", "signal"] }
+# Calendar conversion only (already compiled through cookie and refinery).
+time = { version = "0.3.55", default-features = false }
+tokio = { version = "1.54.1", features = ["macros", "rt-multi-thread", "net", "signal"] }
 tokio-postgres = { version = "0.7.18", default-features = false, features = ["runtime", "with-serde_json-1", "with-uuid-1"] }
 tower = { version = "0.5.3", default-features = false, features = ["util"] }
 tower-http = { version = "0.7.1", default-features = false, features = ["cors", "timeout", "trace", "compression-gzip", "request-id"] }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", default-features = false, features = ["fmt", "env-filter", "ansi", "json"] }
 url = "2.5.8"
-uuid = { version = "1.28.0", features = ["serde"] }
+uuid = { version = "1.29.0", features = ["serde"] }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
@@ -74,6 +80,14 @@ unsafe_code = "forbid"
 [workspace.lints.clippy]
 all = { level = "warn", priority = -1 }
 redundant_else = "warn"
+
+# build.rs in nelcota-admin brotli-compresses the panel at quality 11; an
+# unoptimized compressor would add minutes to every build. Build scripts and
+# their dependencies default to opt-level 0, even in release.
+[profile.dev.build-override]
+opt-level = 3
+[profile.release.build-override]
+opt-level = 3
 
 [profile.release]
 lto = "thin"
