@@ -162,6 +162,38 @@ export const en = {
         cta: 'View on GitHub',
       },
     ],
+    xray: {
+      eyebrow: ['X-RAY OF', 'ONE REQUEST'],
+      title: ['One request,', 'five checks.'],
+      body: 'Follow a request from the network to the response. Pick a layer to see what Nelcota checks there.',
+      layers: [
+        {
+          title: 'Network',
+          heading: 'The request arrives.',
+          body: 'Caddy ends HTTPS and hands the request to the app over a private network. Only Caddy publishes ports; the database never faces the internet.',
+        },
+        {
+          title: 'Token',
+          heading: 'Who are you?',
+          body: 'The access token is checked with Ed25519 and lasts 15 minutes. An invalid token is rejected; it never falls back to anonymous.',
+        },
+        {
+          title: 'RLS',
+          heading: 'PostgreSQL decides what you see.',
+          body: 'Role and claims live in the transaction. The table policy filters rows before any of your code runs.',
+        },
+        {
+          title: 'Query',
+          heading: 'Filters become SQL.',
+          body: 'The API comes from your schema: filters, order, relations and RPC turn into one query. You wrote zero endpoints.',
+        },
+        {
+          title: 'Response',
+          heading: 'Back as JSON.',
+          body: 'The rows go back as JSON. If you subscribed to the event, a signed webhook follows, with six attempts by default if your server is down.',
+        },
+      ],
+    },
   },
   story: {
     cards: [

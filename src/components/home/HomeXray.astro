@@ -1,0 +1,235 @@
+---
+import { type Locale, t } from '../../i18n/utils.ts';
+import Eyebrow from './Eyebrow.astro';
+import Title from './Title.astro';
+
+/**
+ * "X-ray of one request": the five layers a REST call crosses, as tabs
+ * (scripts/tabs.ts). Each panel pairs the copy with what the layer sees.
+ * Facts: docs/deploy.md (Caddy ends HTTPS), docs/webhooks.md (six attempts
+ * by default) and the security notes behind why.safety.
+ */
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const xray = t(locale).landing.xray;
+
+type Kind = 'keyword' | 'string' | 'comment' | 'plain';
+type Line = ReadonlyArray<readonly [Kind, string]>;
+
+/** Same order as xray.layers: the layer's label and what it sees, token by token. */
+const LAYERS: ReadonlyArray<{ tag: string; code: readonly Line[] }> = [
+  {
+    tag: 'Caddy · HTTPS',
+    code: [
+      [['keyword', 'GET'], ['plain', ' /rest/v1/notes?order=id.desc']],
+      [['plain', 'host: api.example.com']],
+      [['plain', 'authorization: Bearer eyJhbGciOiJFZERTQ…']],
+    ],
+  },
+  {
+    tag: 'Ed25519 · 15 min',
+    code: [
+      [['comment', '// verified claims']],
+      [['plain', 'sub   '], ['string', '"6f1c…a9"']],
+      [['plain', 'role  '], ['string', '"authenticated"']],
+      [['plain', 'exp   '], ['keyword', '+15 min']],
+    ],
+  },
+  {
+    tag: 'owner = auth.uid()',
+    code: [
+      [['keyword', 'CREATE POLICY'], ['plain', ' notes_owner '], ['keyword', 'ON'], ['plain', ' notes']],
+      [['keyword', '  FOR ALL TO'], ['plain', ' authenticated']],
+      [['keyword', '  USING'], ['plain', ' (owner = auth.uid());']],
+    ],
+  },
+  {
+    tag: 'PostgreSQL',
+    code: [
+      [['keyword', 'select'], ['plain', ' id, body']],
+      [['keyword', '  from'], ['plain', ' notes']],
+      [['keyword', ' order by'], ['plain', ' id '], ['keyword', 'desc'], ['plain', ';']],
+      [['comment', '-- 2 rows, all yours']],
+    ],
+  },
+  {
+    tag: '200 · webhook',
+    code: [
+      [['keyword', '200 OK']],
+      [['plain', '[{ "id": 2, "body": '], ['string', '"Ship the webhook"'], ['plain', ' },']],
+      [['plain', ' { "id": 1, "body": '], ['string', '"My first note"'], ['plain', ' }]']],
+      [['comment', '→ POST /hooks · x-nelcota-signature: v1=5f2b…']],
+    ],
+  },
+];
+
+const layers = xray.layers.map((layer, index) => {
+  const extra = LAYERS[index];
+  if (extra == null) throw new RangeError(`HomeXray: layer ${index + 1} has no entry in LAYERS`);
+
+  return { ...layer, ...extra, number: String(index + 1).padStart(2, '0') };
+});
+---
+
+<section id="xray" class="scroll-mt-24 py-12 md:py-20" aria-labelledby="xray-title">
+  <div class="mx-auto max-w-[90rem] px-5 sm:px-8">
+    <div class="grid items-end gap-6 lg:grid-cols-2">
+      <div>
+        <Eyebrow parts={xray.eyebrow} />
+        <Title id="xray-title" parts={xray.title} class="mt-5" />
+      </div>
+      <p class="max-w-md leading-relaxed text-pretty text-muted lg:justify-self-end" data-fade>{xray.body}</p>
+    </div>
+
+    <div class="card xray mt-10 overflow-hidden" data-tabs data-fade>
+      <div role="tablist" aria-label={xray.eyebrow.join(' ')} class="xray-tabs">
+        {
+          layers.map((layer, index) => (
+            <button
+              type="button"
+              role="tab"
+              id={`tab-xray-${index + 1}`}
+              aria-controls={`panel-xray-${index + 1}`}
+              aria-selected={index === 0 ? 'true' : 'false'}
+              tabindex={index === 0 ? undefined : '-1'}
+              class="xray-tab"
+            >
+              <span class="font-mono text-[0.6875rem] text-faint">{layer.number}</span>
+              <span class="xray-tab-title">{layer.title}</span>
+              <span class="font-mono text-[0.6875rem] text-faint max-sm:hidden">{layer.tag}</span>
+            </button>
+          ))
+        }
+      </div>
+      <div class="xray-wire" aria-hidden="true"><span></span></div>
+
+      {
+        layers.map((layer, index) => (
+          <div
+            role="tabpanel"
+            id={`panel-xray-${index + 1}`}
+            aria-labelledby={`tab-xray-${index + 1}`}
+            tabindex="0"
+            class="grid gap-6 p-5 sm:p-8 md:grid-cols-[0.9fr_1.1fr] md:gap-12"
+            hidden={index !== 0}
+          >
+            <div>
+              <p class="font-mono text-xs tracking-wider text-faint uppercase">
+                {layer.number} / 05 · <span class="text-mint-ink">{layer.title}</span>
+              </p>
+              <h3 class="mt-3 text-[clamp(1.5rem,2.6vw,2rem)] leading-tight font-semibold tracking-[-0.03em] text-ink">{layer.heading}</h3>
+              <p class="mt-3 max-w-[46ch] leading-relaxed text-pretty text-muted">{layer.body}</p>
+            </div>
+            <pre class="xray-code"><code>{layer.code.map((line) => (
+              <span class="block">{line.map(([kind, text]) => <span class={`k-${kind}`}>{text}</span>)}</span>
+            ))}</code></pre>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<script>
+  import '../../scripts/tabs.ts';
+</script>
+
+<style>
+  .xray-tabs {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.375rem;
+    padding: 0.75rem 0.75rem 0;
+  }
+  .xray-tab {
+    display: flex;
+    min-height: 2.75rem;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.75rem;
+    border: 1px solid var(--color-line);
+    border-radius: 1rem;
+    text-align: left;
+    color: var(--color-muted);
+    transition:
+      border-color 150ms,
+      background-color 150ms;
+  }
+  .xray-tab-title {
+    overflow: hidden;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .xray-tab[aria-selected='true'] {
+    border-color: var(--color-mint-ink);
+    background-color: var(--color-mint-wash);
+    color: var(--color-ink);
+  }
+  @media (hover: hover) {
+    .xray-tab:not([aria-selected='true']):hover {
+      border-color: var(--color-line-strong);
+      color: var(--color-ink);
+    }
+  }
+  /* Narrow screens: tabs keep their full names and the row scrolls sideways. */
+  @media (width < 40rem) {
+    .xray-tabs {
+      grid-template-columns: repeat(5, max-content);
+      overflow-x: auto;
+      padding: 0.5rem 0.5rem 0;
+      gap: 0.25rem;
+      scrollbar-width: none;
+    }
+    .xray-tab {
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.75rem;
+    }
+  }
+
+  /* Progress along the path: the fill reaches the selected layer. */
+  .xray-wire {
+    height: 2px;
+    margin: 0.75rem 0.75rem 0;
+    background-color: var(--color-line);
+  }
+  .xray-wire span {
+    display: block;
+    width: var(--xray-progress, 20%);
+    height: 100%;
+    background-color: var(--color-mint-ink);
+    transition: width 300ms var(--ease-soft);
+  }
+  .xray:has(.xray-tab:nth-child(2)[aria-selected='true']) { --xray-progress: 40%; }
+  .xray:has(.xray-tab:nth-child(3)[aria-selected='true']) { --xray-progress: 60%; }
+  .xray:has(.xray-tab:nth-child(4)[aria-selected='true']) { --xray-progress: 80%; }
+  .xray:has(.xray-tab:nth-child(5)[aria-selected='true']) { --xray-progress: 100%; }
+
+  .xray-code {
+    margin: 0;
+    overflow-x: auto;
+    padding: 1rem 1.125rem;
+    border: 1px solid var(--color-line);
+    border-radius: 1rem;
+    background-color: var(--color-code);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.75;
+    color: var(--color-ink);
+    white-space: pre;
+  }
+  .k-keyword { color: var(--color-syn-keyword); }
+  .k-string { color: var(--color-syn-string); }
+  .k-comment { color: var(--color-syn-comment); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .xray-tab,
+    .xray-wire span {
+      transition: none;
+    }
+  }
+</style>

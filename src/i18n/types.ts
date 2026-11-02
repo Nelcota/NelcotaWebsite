@@ -172,6 +172,19 @@ export interface Landing {
   };
   readonly band: readonly string[];
   readonly duo: readonly [LandingDuo, LandingDuo];
+  /** One request followed through its five layers (the releitura test page). */
+  readonly xray: {
+    readonly eyebrow: TwoTone;
+    readonly title: TwoTone;
+    readonly body: string;
+    readonly layers: readonly [XrayLayer, XrayLayer, XrayLayer, XrayLayer, XrayLayer];
+  };
+}
+
+export interface XrayLayer {
+  readonly title: string;
+  readonly heading: string;
+  readonly body: string;
 }
 
 export interface LandingDuo {

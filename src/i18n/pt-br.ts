@@ -159,6 +159,38 @@ export const ptBr = {
         cta: 'Ver no GitHub',
       },
     ],
+    xray: {
+      eyebrow: ['RAIO-X DE', 'UMA REQUISIÇÃO'],
+      title: ['Uma requisição,', 'cinco conferências.'],
+      body: 'Siga uma requisição da rede até a resposta. Escolha uma camada para ver o que a Nelcota confere nela.',
+      layers: [
+        {
+          title: 'Rede',
+          heading: 'A requisição chega.',
+          body: 'O Caddy termina o HTTPS e entrega a requisição ao app por uma rede privada. Só o Caddy publica portas; o banco nunca fica exposto à internet.',
+        },
+        {
+          title: 'Token',
+          heading: 'Quem é você?',
+          body: 'O token de acesso é conferido com Ed25519 e vale 15 minutos. Um token inválido é recusado e nunca vira usuário anônimo.',
+        },
+        {
+          title: 'RLS',
+          heading: 'O PostgreSQL decide o que você vê.',
+          body: 'Papel e claims vivem na transação. A política da tabela filtra as linhas antes de qualquer código seu rodar.',
+        },
+        {
+          title: 'Consulta',
+          heading: 'Filtros viram SQL.',
+          body: 'A API vem do seu schema: filtros, ordem, relações e RPC viram uma consulta. Você escreveu zero endpoints.',
+        },
+        {
+          title: 'Resposta',
+          heading: 'Volta em JSON.',
+          body: 'As linhas voltam em JSON. Se você assinou o evento, um webhook assinado segue depois, com seis tentativas por padrão se o seu servidor cair.',
+        },
+      ],
+    },
   },
   story: {
     cards: [

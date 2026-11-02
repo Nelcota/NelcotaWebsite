@@ -154,7 +154,8 @@ export default defineConfig({
         defaultLocale: 'en',
         locales: { en: 'en', 'pt-br': 'pt-BR' },
       },
-      filter: (page) => !page.includes('/404'),
+      // /releitura/ is a noindex test page (docs/ROADMAP.md).
+      filter: (page) => !page.includes('/404') && !page.includes('/releitura'),
     }),
   ],
   vite: {
