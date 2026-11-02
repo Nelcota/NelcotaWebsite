@@ -1,0 +1,45 @@
+# Local testing in Docker, without Node or pnpm on the machine.
+#
+#   docker compose watch                      dev server on http://localhost:4321, reloads on save
+#   docker compose --profile prod up --build  production image (Caddy) on http://localhost:8080
+#   docker compose down                       stop everything
+#
+# "watch" copies saved files into the container instead of bind-mounting the
+# folder, so reload works the same on Windows, macOS and Linux.
+
+name: nelcota-website
+
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "4321:4321"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      SITE_URL: http://localhost:4321
+    develop:
+      watch:
+        - action: rebuild
+          path: package.json
+        - action: rebuild
+          path: pnpm-lock.yaml
+        - action: sync
+          path: .
+          target: /app
+          ignore:
+            - node_modules/
+            - dist/
+            - .astro/
+
+  site:
+    profiles: [prod]
+    build:
+      context: .
+      args:
+        SITE_URL: http://localhost:8080
+    ports:
+      - "8080:80"

@@ -30,6 +30,13 @@ pnpm install
 pnpm dev        # http://localhost:4321
 ```
 
+Or with only Docker installed:
+
+```sh
+docker compose watch                      # dev server on http://localhost:4321, reloads on save
+docker compose --profile prod up --build  # production image (Caddy) on http://localhost:8080
+```
+
 | Command | What it does |
 | --- | --- |
 | `pnpm build` / `pnpm preview` | Static build in `dist/` and a local server for it |
