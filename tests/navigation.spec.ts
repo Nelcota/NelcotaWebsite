@@ -1,10 +1,11 @@
 import { expect, test } from '@playwright/test';
+import { BAAS } from './paths.ts';
 
 // Cancel navigation after the spy sees the click, so its intermediate state and
 // safety deadline can be checked without racing a native smooth scroll.
 test.beforeEach(async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/produtos/baas/#security');
+  await page.goto(`${BAAS}#security`);
   await expect(page.locator('a[data-spy][href$="#security"]').first()).toHaveAttribute(
     'aria-current',
     'location',
@@ -20,7 +21,7 @@ test('a second click can return to the section still being read', async ({ page 
     document.querySelector<HTMLAnchorElement>('a[data-spy][href$="#security"]')?.click();
     return document.querySelector('a[data-spy][aria-current="location"]')?.getAttribute('href');
   });
-  expect(current).toBe('/produtos/baas/#security');
+  expect(current).toBe(`${BAAS}#security`);
 });
 
 test('modified clicks leave the current section unchanged', async ({ page }) => {
@@ -77,7 +78,7 @@ test('smooth navigation keeps the target selected while passing other sections',
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
-  await page.goto('/produtos/baas/');
+  await page.goto(BAAS);
   const selected = await page.evaluate(async () => {
     const selections: string[] = [];
     const observer = new MutationObserver(() => {
@@ -100,7 +101,7 @@ test('smooth navigation keeps the target selected while passing other sections',
     return selections;
   });
   expect(selected.length).toBeGreaterThan(0);
-  expect(selected.every((href) => href === '/produtos/baas/#speed')).toBe(true);
+  expect(selected.every((href) => href === `${BAAS}#speed`)).toBe(true);
   await expect(page.locator('a[data-spy][href$="#speed"]').first()).toHaveAttribute(
     'aria-current',
     'location',

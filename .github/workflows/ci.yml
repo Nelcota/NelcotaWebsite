@@ -65,6 +65,21 @@ jobs:
       - name: Lighthouse CI
         run: pnpm lhci
 
+      # The same checks on the software house version (src/lib/flags.ts), built last so the
+      # Lighthouse run above keeps auditing the site that is live today.
+      - name: Build with SOFTWARE_HOUSE=true
+        env:
+          SOFTWARE_HOUSE: 'true'
+        run: pnpm build
+
+      - name: Size budgets (software house)
+        run: pnpm sizes
+
+      - name: Playwright smoke tests (software house)
+        env:
+          SOFTWARE_HOUSE: 'true'
+        run: pnpm test
+
       - name: Upload reports
         if: always()
         uses: actions/upload-artifact@v7

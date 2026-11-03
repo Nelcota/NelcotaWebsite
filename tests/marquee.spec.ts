@@ -1,10 +1,11 @@
 import { expect, test } from '@playwright/test';
+import { BAAS } from './paths.ts';
 
 for (const width of [1440, 3840, 5120]) {
   test(`moving bands cover a ${width}px viewport throughout their loop`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.emulateMedia({ reducedMotion: 'no-preference' });
-    await page.goto('/produtos/baas/');
+    await page.goto(BAAS);
     const coverage = await page.locator('.logos, .drift').evaluateAll((bands) =>
       bands.flatMap((band) => {
         const sets = [...band.querySelectorAll<HTMLElement>('.logos-set, .drift-set')];

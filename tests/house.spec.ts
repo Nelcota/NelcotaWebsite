@@ -1,4 +1,8 @@
 import { expect, type Page, test } from '@playwright/test';
+import { SOFTWARE_HOUSE } from '../src/lib/flags.ts';
+
+// These pages exist only in a build with SOFTWARE_HOUSE=true (src/lib/flags.ts).
+test.skip(!SOFTWARE_HOUSE, 'software house pages are built only with SOFTWARE_HOUSE=true');
 
 // Software house pages (docs/ROADMAP.md): Portuguese only and noindex until the phase is approved.
 const PAGES = [

@@ -1,4 +1,5 @@
 import { expect, type Page, test } from '@playwright/test';
+import { BAAS, BAAS_PT } from './paths.ts';
 
 function collectConsoleErrors(page: Page): string[] {
   const errors: string[] = [];
@@ -12,7 +13,7 @@ function collectConsoleErrors(page: Page): string[] {
 test.describe('home (en)', () => {
   test('renders the hero, sections and metadata without console errors', async ({ page }) => {
     const errors = collectConsoleErrors(page);
-    await page.goto('/produtos/baas/');
+    await page.goto(BAAS);
 
     await expect(page).toHaveTitle(/Nelcota/);
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
@@ -41,7 +42,7 @@ test.describe('home (en)', () => {
   });
 
   test('has no horizontal overflow', async ({ page }) => {
-    await page.goto('/produtos/baas/');
+    await page.goto(BAAS);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
@@ -49,7 +50,7 @@ test.describe('home (en)', () => {
   });
 
   test('every image has alt text', async ({ page }) => {
-    await page.goto('/produtos/baas/');
+    await page.goto(BAAS);
     const missing = await page.locator('img:not([alt])').count();
     expect(missing).toBe(0);
     // Every mascot on the home page is decoration next to text that already names Nelcota.
@@ -57,7 +58,7 @@ test.describe('home (en)', () => {
   });
 
   test('logos and icons come from the shared sprite file', async ({ page, request }) => {
-    await page.goto('/produtos/baas/');
+    await page.goto(BAAS);
     const uses = page.locator('svg use[href^="/sprite-"]');
     expect(await uses.count()).toBeGreaterThan(10);
 
@@ -76,7 +77,7 @@ test.describe('home (en)', () => {
   });
 
   test('the three steps show the documented commands', async ({ page }) => {
-    await page.goto('/produtos/baas/#start');
+    await page.goto(`${BAAS}#start`);
 
     await expect(page.locator('#qs-install')).toContainText('install.sh');
     await expect(page.locator('#qs-migrate')).toContainText('mkdir -p migrations src');
@@ -85,7 +86,7 @@ test.describe('home (en)', () => {
   });
 
   test('copy buttons say what they copy', async ({ page }) => {
-    await page.goto('/produtos/baas/');
+    await page.goto(BAAS);
     const button = page.locator('[data-copy="qs-migrate"]');
     await expect(button).toHaveAttribute('aria-describedby', 'qs-migrate-caption');
     await expect(page.locator('#qs-migrate-caption')).toHaveText(/Terminal\s*second window/);
@@ -98,7 +99,7 @@ test.describe('home (en)', () => {
   }) => {
     test.skip(browserName !== 'chromium', 'clipboard permissions are Chromium-only here');
     await context.grantPermissions(['clipboard-read', 'clipboard-write']);
-    await page.goto('/produtos/baas/#start');
+    await page.goto(`${BAAS}#start`);
     const button = page.locator('[data-copy="qs-install"]');
 
     await button.click();
@@ -111,7 +112,7 @@ test.describe('home (en)', () => {
 
   test('theme toggle exposes its pressed state', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' });
-    await page.goto('/produtos/baas/');
+    await page.goto(BAAS);
     const toggle = page.getByRole('button', { name: 'Toggle dark mode' }).first();
     await expect(toggle).toHaveAttribute('aria-pressed', 'false');
     await toggle.click();
@@ -120,7 +121,7 @@ test.describe('home (en)', () => {
 
   test('theme toggle persists in localStorage and survives reload', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' });
-    await page.goto('/produtos/baas/');
+    await page.goto(BAAS);
     await page.getByRole('button', { name: 'Toggle dark mode' }).first().click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     expect(await page.evaluate(() => localStorage.getItem('nelcota-theme'))).toBe('dark');
@@ -133,17 +134,17 @@ test.describe('home (en)', () => {
   });
 
   test('language switch leads to the Portuguese page', async ({ page }) => {
-    await page.goto('/produtos/baas/');
+    await page.goto(BAAS);
     await page.getByRole('link', { name: /Ler em português/ }).click();
-    await expect(page).toHaveURL(/\/pt-br\/produtos\/baas\/?$/);
+    await expect(page).toHaveURL((url) => url.pathname === BAAS_PT);
     await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
   });
 
   test('language switch keeps the section being read', async ({ page }) => {
-    await page.goto('/produtos/baas/#security');
+    await page.goto(`${BAAS}#security`);
     await page.locator('[data-locale-switch]').click();
 
-    await expect(page).toHaveURL(/\/pt-br\/produtos\/baas\/#security$/);
+    await expect(page).toHaveURL((url) => url.pathname === BAAS_PT && url.hash === '#security');
   });
 });
 
@@ -151,7 +152,7 @@ test.describe('interactive sections', () => {
   test('the speed card switches between numbers and conditions', async ({ page }) => {
     // About the tabs, not the entrance: a card still sliding in can make the click miss.
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/produtos/baas/#speed');
+    await page.goto(`${BAAS}#speed`);
     const numbers = page.getByRole('tab', { name: 'Numbers' });
     const conditions = page.getByRole('tab', { name: 'Conditions' });
     await expect(numbers).toHaveAttribute('aria-selected', 'true');
@@ -169,7 +170,7 @@ test.describe('interactive sections', () => {
   });
 
   test('the step carousel moves with its arrows and stops at the ends', async ({ page }) => {
-    await page.goto('/produtos/baas/#start');
+    await page.goto(`${BAAS}#start`);
     const prev = page.getByRole('button', { name: 'Previous step' });
     const next = page.getByRole('button', { name: 'Next step' });
     const track = page.locator('#start [data-carousel-track]');
@@ -187,7 +188,7 @@ test.describe('interactive sections', () => {
   });
 
   test('the panel carousel shows both real screenshots', async ({ page }) => {
-    await page.goto('/produtos/baas/#panel');
+    await page.goto(`${BAAS}#panel`);
     const frame = page.locator('#panel [data-carousel]');
     // One slide per screen (each ships a light and a dark image).
     await expect(frame.locator('[data-carousel-track] > li')).toHaveCount(2);
@@ -201,7 +202,7 @@ test.describe('mobile menu', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
   test('closes with Escape and after following a link', async ({ page }) => {
-    await page.goto('/produtos/baas/');
+    await page.goto(BAAS);
     const menu = page.locator('[data-mobile-menu]');
     const toggle = menu.locator('summary');
 
@@ -221,7 +222,7 @@ test.describe('mobile menu', () => {
 test.describe('home (pt-br)', () => {
   test('is translated', async ({ page }) => {
     const errors = collectConsoleErrors(page);
-    await page.goto('/pt-br/produtos/baas/');
+    await page.goto(BAAS_PT);
     await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
       'Backend completo. Um binário. Sua VPS.',
@@ -251,7 +252,7 @@ test.describe('motion', () => {
     page.on('request', (request) => {
       if (request.resourceType() === 'script') scripts.push(request.url());
     });
-    await page.goto('/produtos/baas/');
+    await page.goto(BAAS);
     await page.waitForLoadState('networkidle');
     const before = scripts.length;
 
@@ -265,7 +266,7 @@ test.describe('motion', () => {
   test('opening the page on an anchor never leaves the blocks above it hidden', async ({
     page,
   }) => {
-    await page.goto('/produtos/baas/#features');
+    await page.goto(`${BAAS}#features`);
     // Let the browser finish its own smooth scroll to the anchor first.
     await expect
       .poll(() =>
@@ -284,7 +285,7 @@ test.describe('motion', () => {
   });
 
   test('a focused link inside a block that has not played yet shows at once', async ({ page }) => {
-    await page.goto('/produtos/baas/');
+    await page.goto(BAAS);
     await page.mouse.wheel(0, 200);
     const link = page.locator('#security [data-fade] a').first();
     await expect(page.locator('html')).toHaveAttribute('data-motion', 'ready');
@@ -301,7 +302,7 @@ test.describe('motion', () => {
   });
 
   test('counters end on the exact figure from the page', async ({ page }) => {
-    await page.goto('/produtos/baas/');
+    await page.goto(BAAS);
     await page.mouse.wheel(0, 200);
     await page.locator('#speed').scrollIntoViewIfNeeded();
     const first = page.locator('#speed [data-count-to]').first();
@@ -319,7 +320,7 @@ test.describe('motion', () => {
     page.on('request', (request) => {
       if (request.resourceType() === 'script') scripts.push(request.url());
     });
-    await page.goto('/produtos/baas/');
+    await page.goto(BAAS);
     await page.waitForLoadState('networkidle');
     const before = scripts.length;
 
@@ -334,7 +335,7 @@ test.describe('motion', () => {
   test('the manifesto icons are decorative, so screen readers hear each word once', async ({
     page,
   }) => {
-    await page.goto('/produtos/baas/');
+    await page.goto(BAAS);
     const manifesto = page.locator('[data-manifesto]');
 
     await expect(manifesto).toContainText('A weekend project');
@@ -346,7 +347,7 @@ test.describe('motion', () => {
 
   test('the moving band and tiles can be paused', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
-    await page.goto('/produtos/baas/');
+    await page.goto(BAAS);
     const pause = page.locator('[data-motion-pause]');
 
     await pause.click();
@@ -364,7 +365,7 @@ test.describe('motion', () => {
 test.describe('navigation aids', () => {
   test('the header marks the section being read', async ({ page }) => {
     test.skip((page.viewportSize()?.width ?? 0) < 1024, 'desktop navigation only');
-    await page.goto('/produtos/baas/');
+    await page.goto(BAAS);
 
     await page.locator('#security').scrollIntoViewIfNeeded();
 
@@ -376,7 +377,7 @@ test.describe('navigation aids', () => {
 
   test('phones get a sticky Get started once the hero is gone', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/produtos/baas/');
+    await page.goto(BAAS);
     const cta = page.locator('[data-sticky-cta]');
 
     await expect(cta).not.toHaveAttribute('data-shown', '');
@@ -387,7 +388,7 @@ test.describe('navigation aids', () => {
   });
 
   test('the footer links to the comparison page', async ({ page }) => {
-    await page.goto('/produtos/baas/');
+    await page.goto(BAAS);
 
     await page
       .getByRole('contentinfo')

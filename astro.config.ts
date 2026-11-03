@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig, fontProviders } from 'astro/config';
+import { FLAG_REDIRECTS, FLAG_ROUTES, NOINDEX_PATHS } from './src/lib/routes.ts';
 
 /**
  * SITE_URL / BASE_PATH are injected by the GitHub Pages workflow
@@ -25,16 +26,6 @@ if (env('SITE_URL') == null)
   console.warn(`[nelcota] SITE_URL is not set; canonical URLs use ${DEFAULT_SITE_URL}`);
 new URL(siteUrl); // throws on a malformed SITE_URL instead of shipping broken links
 const basePath = env('BASE_PATH') ?? '/';
-
-/** Software house pages kept out of the sitemap (they carry noindex). */
-const HOUSE_PATHS = [
-  '/',
-  '/produtos/',
-  '/produtos/ratelimit/',
-  '/servicos/',
-  '/sobre/',
-  '/transparencia/',
-] as const;
 
 /**
  * The theme bootstrap script is inlined in <head> before first paint.
@@ -82,10 +73,8 @@ export default defineConfig({
   base: basePath,
   output: 'static',
   trailingSlash: 'ignore',
-  // The Portuguese BaaS landing moved to /pt-br/produtos/baas/; / is the software house home (docs/ROADMAP.md).
-  redirects: {
-    '/pt-br': '/',
-  },
+  // SOFTWARE_HOUSE flag (src/lib/flags.ts): which page answers / and where the BaaS landing lives.
+  redirects: { ...FLAG_REDIRECTS },
   compressHTML: true,
   build: {
     // One page, small CSS: inlining removes a render-blocking request.
@@ -205,6 +194,14 @@ export default defineConfig({
     },
   },
   integrations: [
+    {
+      name: 'nelcota-flag-routes',
+      hooks: {
+        'astro:config:setup': ({ injectRoute }) => {
+          for (const route of FLAG_ROUTES) injectRoute({ ...route, prerender: true });
+        },
+      },
+    },
     sitemap({
       i18n: {
         defaultLocale: 'en',
@@ -215,7 +212,7 @@ export default defineConfig({
         const path = new URL(page).pathname;
         return (
           !path.includes('/404') &&
-          !HOUSE_PATHS.some((house) => path === `${basePath.replace(/\/$/, '')}${house}`)
+          !NOINDEX_PATHS.some((house) => path === `${basePath.replace(/\/$/, '')}${house}`)
         );
       },
     }),

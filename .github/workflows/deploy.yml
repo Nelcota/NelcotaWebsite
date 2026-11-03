@@ -51,6 +51,8 @@ jobs:
           # Canonical origin and base path of the Pages site (user site, project site or custom domain).
           SITE_URL: ${{ steps.pages.outputs.origin }}
           BASE_PATH: ${{ steps.pages.outputs.base_path || '/' }}
+          # Repository variable; unset or anything but "true" publishes the current site (src/lib/flags.ts).
+          SOFTWARE_HOUSE: ${{ vars.SOFTWARE_HOUSE }}
         run: pnpm build
 
       - uses: actions/upload-pages-artifact@v5

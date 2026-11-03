@@ -1,4 +1,5 @@
 import { expect, type Page, test } from '@playwright/test';
+import { BAAS } from './paths.ts';
 
 function collectConsoleErrors(page: Page): string[] {
   const errors: string[] = [];
@@ -11,7 +12,7 @@ function collectConsoleErrors(page: Page): string[] {
 
 test.describe('docs', () => {
   test('the header links to the docs index, which lists every group', async ({ page }) => {
-    await page.goto('/produtos/baas/');
+    await page.goto(BAAS);
     const docsLink = page
       .getByRole('navigation', { name: 'Main', includeHidden: true })
       .getByRole('link', { name: 'Docs', includeHidden: true });
