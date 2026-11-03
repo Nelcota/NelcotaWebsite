@@ -11,7 +11,7 @@ function collectConsoleErrors(page: Page): string[] {
 
 test.describe('docs', () => {
   test('the header links to the docs index, which lists every group', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/produtos/baas/');
     const docsLink = page
       .getByRole('navigation', { name: 'Main', includeHidden: true })
       .getByRole('link', { name: 'Docs', includeHidden: true });

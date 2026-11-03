@@ -1,0 +1,55 @@
+---
+import type { ProductMedia } from '../../../data/house/products.ts';
+
+/** Visual half of a product block: a code sample, or a placeholder for a screen. */
+interface Props {
+  media: ProductMedia;
+}
+const { media } = Astro.props;
+---
+
+{media.kind === 'code' && (
+  <figure class="pm-code">
+    <figcaption>{media.caption}</figcaption>
+    <pre><code>{media.code}</code></pre>
+  </figure>
+)}
+{media.kind === 'screen' && <div class="pm-screen" role="img" aria-label={media.label}>{media.label}</div>}
+
+<style>
+  .pm-code {
+    margin: 0;
+    border-radius: 16px;
+    border: 1px solid #ffffff1a;
+    background: #0f0f11;
+    overflow: hidden;
+  }
+  .pm-code figcaption {
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--h-line);
+    font-size: 13px;
+    color: var(--h-dim);
+  }
+  .pm-code pre {
+    margin: 0;
+    padding: 20px 18px;
+    overflow-x: auto;
+    font-family: var(--h-mono);
+    font-size: 13px;
+    line-height: 1.7;
+    color: #d9d9de;
+  }
+  .pm-screen {
+    aspect-ratio: 16 / 10;
+    max-width: 100%;
+    border-radius: 16px;
+    border: 1px dashed var(--h-line-strong);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--h-dim);
+  }
+</style>

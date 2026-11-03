@@ -1,0 +1,78 @@
+---
+import { ABOUT_TOOLS } from '../../../data/house/about.ts';
+
+/** "Como trabalhamos": the review flow and the internal tools behind it. */
+---
+
+<section aria-labelledby="processo" class="ab-split">
+  <div class="ab-col">
+    <span class="h-eyebrow">Como trabalhamos</span>
+    <h2 id="processo" class="ab-h2">Toda mudança passa por revisão</h2>
+    <p class="ab-text">Cada alteração vira um pull request, é revisada e só depois vai para produção. Estas são as ferramentas internas que usamos para isso.</p>
+  </div>
+  <ul class="ab-tools">
+    {ABOUT_TOOLS.map((tool) => (
+      <li>
+        <span class="ab-tool-name">{tool.name}</span>
+        <span class:list={['ab-tool-desc', { pending: tool.pending }]}>{tool.description}</span>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .ab-h2 {
+    margin: 0;
+    font-size: clamp(28px, 3vw, 36px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .ab-split {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 48px;
+    align-items: start;
+  }
+  .ab-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .ab-text {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--h-muted);
+  }
+  .ab-name,
+  .ab-role,
+  .ab-tool-name {
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .ab-name,
+  .ab-tool-name {
+    font-weight: 600;
+  }
+  .ab-tools {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--h-line-strong);
+  }
+  .ab-tools li {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--h-line);
+  }
+  .ab-tool-desc {
+    font-size: 15px;
+    color: var(--h-muted);
+  }
+  .ab-tool-desc.pending {
+    color: var(--h-dim);
+  }
+</style>

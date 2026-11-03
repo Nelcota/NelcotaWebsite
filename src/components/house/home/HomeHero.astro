@@ -1,0 +1,149 @@
+---
+import { Image } from 'astro:assets';
+import mark from '../../../assets/house/mark.webp';
+import { HOME_CTA, HOME_HERO } from '../../../data/house/home.ts';
+import RevealLines from '../RevealLines.astro';
+
+/**
+ * First screen: the logo "breathing" behind the serif title (the mockup's "pulso" mode, which
+ * ignores the pointer, so plain CSS replaces its canvas), the subtitle and the two buttons.
+ */
+---
+
+<section class="hh" aria-label="Apresentação" data-home-hero>
+  <Image class="hh-mark" src={mark} alt="" width={720} height={720} loading="eager" fetchpriority="high" />
+  <div class="h-wrap hh-content">
+    <span class="h-eyebrow">{HOME_HERO.eyebrow}</span>
+    <h1 class="h-serif hh-title"><RevealLines lines={HOME_HERO.lines} variant="hero" /></h1>
+    <p class="hh-rise hh-sub">{HOME_HERO.sub}</p>
+    <div class="hh-rise hh-actions">
+      <a class="h-btn h-btn-primary hh-btn" href={HOME_CTA.href}>{HOME_CTA.label}</a>
+      <a class="h-btn hh-btn hh-btn-soft" href="#produtos" data-word-jump="1">{HOME_HERO.secondary}</a>
+    </div>
+  </div>
+  <span class="hh-hint">{HOME_HERO.hint} ↓</span>
+</section>
+
+<style>
+  .hh {
+    position: relative;
+    height: calc(100svh - var(--h-nav-h));
+    min-height: 560px;
+    overflow: hidden;
+  }
+  .hh :global(.hh-mark) {
+    position: absolute;
+    left: 72%;
+    top: 50%;
+    width: auto;
+    height: min(80%, 46vw);
+    aspect-ratio: 1;
+    display: block;
+    translate: -50% -50%;
+    opacity: 0.9;
+    pointer-events: none;
+  }
+  .hh-content {
+    position: absolute;
+    inset: 50% 0 auto;
+    translate: 0 -50%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .hh-content > * {
+    max-width: min(620px, 52vw);
+  }
+  .hh-title {
+    margin: 0;
+    font-size: clamp(48px, 6.4vw, 92px);
+    line-height: 1.02;
+  }
+  .hh-sub {
+    margin: 0;
+    font-size: 20px;
+    line-height: 1.5;
+    color: var(--h-muted);
+  }
+  .hh-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  :global(.house) .hh-btn {
+    min-height: 48px;
+    padding: 0 22px;
+    font-size: 16px;
+  }
+  :global(.house) .hh-btn-soft {
+    border-color: var(--h-bg-3);
+    background: var(--h-bg-3);
+  }
+  .hh-hint {
+    position: absolute;
+    /* Lines up with the content, which is centered at --h-max on wide screens. */
+    left: calc(max(0px, (100% - var(--h-max)) / 2) + var(--h-gutter));
+    bottom: 24px;
+    font-family: var(--h-mono);
+    font-size: 12px;
+    color: var(--h-dim);
+  }
+
+  @media (max-width: 760px) {
+    .hh :global(.hh-mark) {
+      left: 50%;
+      top: 27%;
+      height: min(46%, 90vw);
+    }
+    .hh-content {
+      inset: auto 0 56px;
+      translate: none;
+      gap: 16px;
+    }
+    .hh-content > * {
+      max-width: 100%;
+    }
+    .hh-sub {
+      font-size: 16px;
+    }
+    :global(.house) .hh-btn {
+      flex: 1 1 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* "pulso": stays in place and breathes slightly every 4 seconds. */
+    .hh :global(.hh-mark) {
+      animation: hm-pulse 4s ease-in-out infinite;
+    }
+    /* Subtitle and buttons rise after the opening; without it they are simply there. */
+    .hh-rise {
+      animation: hm-rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 2250ms both;
+    }
+    :global(.hm-skip-intro) .hh-rise {
+      animation: none;
+    }
+  }
+
+  @keyframes hm-pulse {
+    0%,
+    100% {
+      opacity: 0.9;
+      scale: 1;
+    }
+    50% {
+      opacity: 1;
+      scale: 1.015;
+    }
+  }
+  @keyframes hm-rise {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>

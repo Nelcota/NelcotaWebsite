@@ -1,0 +1,21 @@
+---
+/** Small grey section title with a rule under it, used by most /servicos sections. */
+interface Props {
+  id: string;
+  text: string;
+}
+const { id, text } = Astro.props;
+---
+
+<h2 id={id} class="sv-label">{text}</h2>
+
+<style>
+  .sv-label {
+    margin: 0;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #ffffff1a;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--h-muted);
+  }
+</style>

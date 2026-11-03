@@ -1,0 +1,112 @@
+---
+import { HOME_TEAM } from '../../../data/house/home.ts';
+import HomeSection from './HomeSection.astro';
+import HomeSectionTitle from './HomeSectionTitle.astro';
+
+/** Team: the two partners (names, roles and photos still placeholders) and a link to /sobre. */
+---
+
+<HomeSection id="equipe" labelledBy="h-equipe">
+  <div class="ht">
+    <div class="ht-head">
+      <div class="ht-title">
+        <HomeSectionTitle id="h-equipe" eyebrow={HOME_TEAM.eyebrow} lines={HOME_TEAM.lines} />
+      </div>
+      <a class="h-btn ht-more" href={HOME_TEAM.linkHref}>
+        {HOME_TEAM.link}
+        <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7h9M8 3.5L11.5 7 8 10.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </a>
+    </div>
+    <div class="ht-grid">
+      {
+        HOME_TEAM.people.map((person) => (
+          <article class="ht-person">
+            <span class="ht-photo">{HOME_TEAM.photo}</span>
+            <div class="ht-text">
+              <span class="ht-name">{person.name}</span>
+              <span class="ht-role">{person.role}</span>
+              <p>{person.bio}</p>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</HomeSection>
+
+<style>
+  .ht {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+  .ht-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  .ht-title {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  :global(.house) .ht-more {
+    gap: 8px;
+    padding: 0 18px;
+  }
+  .ht-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    gap: 32px;
+  }
+  .ht-person {
+    display: grid;
+    grid-template-columns: 140px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+    padding-top: 24px;
+    border-top: 1px solid var(--h-line-strong);
+  }
+  .ht-photo {
+    aspect-ratio: 4 / 5;
+    max-width: 100%;
+    border-radius: 14px;
+    border: 1px dashed var(--h-line-strong);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: var(--h-mono);
+    font-size: 11px;
+    color: var(--h-dim);
+  }
+  .ht-text {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+  .ht-name {
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .ht-role {
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--h-muted);
+  }
+  .ht-text p {
+    margin: 8px 0 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--h-dim);
+  }
+  @media (max-width: 760px) {
+    .ht-person {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

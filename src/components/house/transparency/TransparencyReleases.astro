@@ -1,0 +1,108 @@
+---
+import type { Release } from '../../../data/house/transparency.ts';
+import TransparencySplit from './TransparencySplit.astro';
+
+/**
+ * "Versões do Nelcota BaaS". Every release is in the HTML; the script hides
+ * the older ones behind a toggle, so without JavaScript the full list shows.
+ */
+interface Props {
+  releases: readonly Release[];
+  visible: number;
+  allUrl: string;
+}
+const { releases, visible, allUrl } = Astro.props;
+---
+
+<TransparencySplit id="changelog" title="Versões do Nelcota BaaS" text="Cada versão publicada no GitHub, com a data e o que mudou.">
+  <a slot="aside" class="tr-releases-all" href={allUrl} target="_blank" rel="noopener">
+    Ver todas no GitHub <span aria-hidden="true">↗</span><span class="h-sr"> (abre em nova aba)</span>
+  </a>
+  <div data-releases>
+    <ol id="versoes-lista" class="tr-releases">
+      {releases.map((release, index) => (
+        <li class:list={{ latest: index === 0 }} data-release-extra={index >= visible ? '' : undefined}>
+          <span class="tr-release-v">{release.version}</span>
+          <span class="tr-release-date">{release.date}</span>
+          <span class="tr-release-title">{release.title}</span>
+        </li>
+      ))}
+    </ol>
+    <button
+      type="button"
+      class="h-btn tr-releases-toggle"
+      aria-controls="versoes-lista"
+      aria-expanded="false"
+      data-releases-toggle
+      data-label-more={`Mostrar as ${releases.length} versões`}
+      data-label-less="Mostrar menos"
+      hidden
+    >
+      {`Mostrar as ${releases.length} versões`}
+    </button>
+  </div>
+</TransparencySplit>
+
+<script>
+  import '../../../scripts/house/releases-toggle.ts';
+</script>
+
+<style>
+  .tr-releases-all {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .tr-releases {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid #ffffff1a;
+  }
+  .tr-releases li {
+    display: grid;
+    grid-template-columns: 72px 104px minmax(0, 1fr);
+    gap: 16px;
+    align-items: baseline;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--h-line);
+  }
+  .tr-releases li[hidden] {
+    display: none;
+  }
+  .tr-release-v,
+  .tr-release-date {
+    font-variant-numeric: tabular-nums;
+  }
+  .tr-release-v {
+    font-size: 15px;
+    font-weight: 500;
+  }
+  .tr-release-date {
+    font-size: 14px;
+    color: var(--h-dim);
+  }
+  .tr-release-title {
+    font-size: 15px;
+    color: var(--h-muted);
+  }
+  .tr-releases li.latest .tr-release-v {
+    font-weight: 700;
+  }
+  .tr-releases li.latest .tr-release-title {
+    color: var(--h-ink);
+  }
+  .tr-releases-toggle {
+    margin-top: 16px;
+    padding: 0 18px;
+    font-size: 14px;
+  }
+  .tr-releases-toggle[hidden] {
+    display: none;
+  }
+</style>

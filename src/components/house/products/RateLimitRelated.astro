@@ -1,0 +1,48 @@
+---
+import type { RateLimitRelated } from '../../../data/house/rate-limit.ts';
+import { HOUSE_ROUTES } from '../../../lib/house/routes.ts';
+
+/** "Outros produtos de infraestrutura": links to their blocks on /produtos. */
+interface Props {
+  links: readonly RateLimitRelated[];
+}
+const { links } = Astro.props;
+---
+
+<nav class="rr" aria-labelledby="outros">
+  <h2 id="outros">Outros produtos de infraestrutura</h2>
+  <div class="rr-links">
+    {links.map((link) => <a href={`${HOUSE_ROUTES.products}#${link.anchor}`}>{link.label}</a>)}
+  </div>
+</nav>
+
+<style>
+  .rr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-top: 32px;
+    border-top: 1px solid var(--h-line-strong);
+  }
+  .rr h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .rr-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+  }
+  .house .rr-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--h-blue-ink);
+    text-decoration: none;
+  }
+</style>

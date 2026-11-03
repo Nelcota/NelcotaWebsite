@@ -1,0 +1,37 @@
+---
+import { HOUSE_ROUTES } from '../../../lib/house/routes.ts';
+import type { TitleLine } from '../../../types/house.ts';
+import RevealLines from '../RevealLines.astro';
+
+/** Opening of /servicos, with the same title reveal as the other pages. */
+const lines: readonly TitleLine[] = [
+  ['O seu sistema,', '', ''],
+  ['na mesma base dos ', 'nossos produtos', '.'],
+];
+---
+
+<section class="sv-hero">
+  <h1 class="h-serif sv-title"><RevealLines lines={lines} variant="page" /></h1>
+  <p class="h-lead">Websites, lojas e sistemas internos sob medida, construídos sobre o Nelcota BaaS. A gente entrega e continua mantendo.</p>
+  <a class="h-btn h-btn-primary sv-cta" href={HOUSE_ROUTES.contact}>Contar o meu projeto</a>
+</section>
+
+<style>
+  .sv-hero {
+    padding-top: 88px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .sv-title {
+    margin: 0;
+    font-size: clamp(48px, 7vw, 96px);
+    line-height: 1.02;
+  }
+  .sv-cta {
+    align-self: flex-start;
+    min-height: 48px;
+    padding: 0 22px;
+    font-size: 16px;
+  }
+</style>

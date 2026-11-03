@@ -1,0 +1,105 @@
+---
+import type { ContactKind } from '../../../data/house/services.ts';
+
+/**
+ * "O que você precisa": one choice among a few. The mockup uses toggle
+ * buttons; native radios give the same look with keyboard and screen reader
+ * behavior for free, and need no script.
+ */
+interface Props {
+  kinds: readonly ContactKind[];
+  defaultKind: string;
+}
+const { kinds, defaultKind } = Astro.props;
+---
+
+<fieldset class="sv-kinds">
+  <legend>O que você precisa</legend>
+  <div class="sv-kinds-grid">
+    {kinds.map((kind) => (
+      <label class="sv-kind">
+        <input class="h-sr" type="radio" name="contato-tipo" value={kind.value} checked={kind.value === defaultKind} />
+        <span class="sv-kind-ring" aria-hidden="true"></span>
+        <span>{kind.label}</span>
+      </label>
+    ))}
+  </div>
+</fieldset>
+
+<style>
+  .sv-kinds {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+  .sv-kinds legend {
+    padding: 0;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .sv-kinds-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 8px;
+  }
+  .sv-kind {
+    /* Anchors the visually hidden radio so focusing it does not scroll the page. */
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--h-line-strong);
+    background: var(--h-bg-2);
+    color: var(--h-muted);
+    font: 500 15px var(--h-sans);
+    cursor: pointer;
+    transition:
+      border-color 0.2s ease,
+      background-color 0.2s ease;
+  }
+  .sv-kind:hover {
+    border-color: #ffffff4d;
+  }
+  .sv-kind:has(input:checked) {
+    border-color: var(--h-blue-ink);
+    background: #1a6cf51a;
+    color: var(--h-ink);
+    font-weight: 600;
+  }
+  .sv-kind:has(input:focus-visible) {
+    outline: 2px solid var(--h-blue-ink);
+    outline-offset: 3px;
+  }
+  .sv-kind-ring {
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    border: 1.5px solid #5c5c63;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .sv-kind-ring::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+  }
+  .sv-kind:has(input:checked) .sv-kind-ring {
+    border-color: var(--h-blue-ink);
+  }
+  .sv-kind:has(input:checked) .sv-kind-ring::after {
+    background: var(--h-blue-ink);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sv-kind {
+      transition: none;
+    }
+  }
+</style>

@@ -1,0 +1,102 @@
+---
+import { HOME_PRODUCT_ITEMS, HOME_PRODUCTS } from '../../../data/house/home.ts';
+import { HOUSE_ROUTES } from '../../../lib/house/routes.ts';
+import ProductCard from './ProductCard.astro';
+import ProductPicker from './ProductPicker.astro';
+import ProductWord from './ProductWord.astro';
+
+/**
+ * "Nelcota é ___": a tall section whose inner screen sticks under the header while the word
+ * and the card on top change with the scroll (scripts/house/home-word-track.ts).
+ * Without the script it shows the first word and the first card.
+ */
+const first = HOME_PRODUCT_ITEMS[0];
+const firstWord = first?.word ?? '';
+---
+
+<section id="produtos" class="hp" aria-label="Produtos" data-word-track data-word-prefix={HOME_PRODUCTS.prefix}>
+  <div class="h-wrap hp-screen" data-word-sticky>
+    <div class="hp-copy">
+      <span class="h-eyebrow">{HOME_PRODUCTS.eyebrow}</span>
+      <ProductWord prefix={HOME_PRODUCTS.prefix} word={firstWord} />
+      <p class="hp-sub">{HOME_PRODUCTS.sub}</p>
+      <ProductPicker />
+      <a class="h-btn hp-more" href={HOUSE_ROUTES.products}>
+        {HOME_PRODUCTS.allProducts}
+        <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7h9M8 3.5L11.5 7 8 10.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </a>
+    </div>
+    <div class="hp-stack">
+      {HOME_PRODUCT_ITEMS.map((item, index) => <ProductCard product={item} isFirst={index === 0} />)}
+    </div>
+  </div>
+</section>
+
+<style>
+  .hp {
+    position: relative;
+    height: calc((100svh - var(--h-nav-h)) * 4);
+    border-top: 1px solid var(--h-line);
+  }
+  .hp-screen {
+    position: sticky;
+    top: var(--h-nav-h);
+    height: calc(100svh - var(--h-nav-h));
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 520px);
+    gap: 72px;
+    align-items: center;
+  }
+  .hp-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    min-width: 0;
+  }
+  .hp-sub {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.5;
+    color: var(--h-muted);
+    max-width: 26em;
+  }
+  :global(.house) .hp-more {
+    align-self: flex-start;
+    gap: 8px;
+    padding: 0 18px;
+  }
+  .hp-stack {
+    --stack-top: 60px;
+    --stack-step: 22px;
+    position: relative;
+    height: min(680px, calc(100svh - var(--h-nav-h) - 40px));
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  @media (max-width: 760px) {
+    :global(.house) .hp-screen {
+      grid-template-columns: minmax(0, 1fr);
+      align-content: center;
+      gap: 20px;
+      padding-top: 20px;
+      padding-bottom: 24px;
+    }
+    .hp-copy {
+      gap: 16px;
+    }
+    .hp-sub {
+      display: none;
+    }
+    .hp-stack {
+      --stack-top: 40px;
+      --stack-step: 14px;
+      height: clamp(340px, calc(100svh - var(--h-nav-h) - 300px), 480px);
+    }
+  }
+
+</style>
+
+<script>
+  import '../../../scripts/house/home-word-track.ts';
+</script>

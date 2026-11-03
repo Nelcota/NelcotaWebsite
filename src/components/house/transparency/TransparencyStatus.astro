@@ -1,0 +1,113 @@
+---
+import type { ProductStatus } from '../../../data/house/transparency.ts';
+import TransparencyLabel from './TransparencyLabel.astro';
+
+/** "Status dos produtos": one row per product, scrolls sideways on phones. */
+interface Props {
+  products: readonly ProductStatus[];
+  updatedAt: string;
+}
+const { products, updatedAt } = Astro.props;
+---
+
+<section aria-labelledby="status">
+  <TransparencyLabel id="status" text="Status dos produtos">
+    <span class="tr-updated">Atualizado em {updatedAt}</span>
+  </TransparencyLabel>
+  <!-- The table keeps its width and scrolls inside this box, never the page. -->
+  <div class="tr-scroll">
+    <table class="tr-table">
+      <thead>
+        <tr>
+          <th scope="col">Produto</th>
+          <th scope="col">Família</th>
+          <th scope="col">Status</th>
+          <th scope="col">Última versão</th>
+          <th scope="col">Observação</th>
+        </tr>
+      </thead>
+      <tbody>
+        {products.map((product) => (
+          <tr>
+            <th scope="row">{product.name}</th>
+            <td class="muted">{product.family}</td>
+            <td class="nowrap">
+              <span class="tr-state" data-kind={product.kind}>{product.status}</span>
+            </td>
+            <td class="nowrap num">{product.version}</td>
+            <td class="muted note">{product.note}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<style>
+  .tr-updated {
+    font-size: 14px;
+    color: var(--h-dim);
+  }
+  .tr-scroll {
+    overflow-x: auto;
+  }
+  .tr-table {
+    width: 100%;
+    min-width: 760px;
+    border-collapse: collapse;
+    font-size: 15px;
+    text-align: left;
+  }
+  .tr-table thead th {
+    padding: 16px 20px 12px 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--h-dim);
+    border-bottom: 1px solid var(--h-line);
+  }
+  .tr-table tbody th,
+  .tr-table td {
+    padding: 18px 20px 18px 0;
+    border-bottom: 1px solid var(--h-line);
+  }
+  .tr-table th:last-child,
+  .tr-table td:last-child {
+    padding-right: 0;
+  }
+  .tr-table tbody th {
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .tr-table .muted {
+    color: var(--h-muted);
+  }
+  .tr-table .nowrap {
+    white-space: nowrap;
+  }
+  .tr-table .num {
+    font-variant-numeric: tabular-nums;
+  }
+  .tr-table .note {
+    font-size: 14px;
+  }
+  /* No status colors: products in use are white, the rest grey. */
+  .tr-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--h-muted);
+  }
+  .tr-state::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: #5c5c63;
+  }
+  .tr-state[data-kind='live'] {
+    color: var(--h-ink);
+  }
+  .tr-state[data-kind='live']::before {
+    background: var(--h-ink);
+  }
+</style>

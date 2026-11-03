@@ -1,0 +1,36 @@
+---
+import RateLimitDemo from '../../components/house/products/RateLimitDemo.astro';
+import RateLimitFeatures from '../../components/house/products/RateLimitFeatures.astro';
+import RateLimitHero from '../../components/house/products/RateLimitHero.astro';
+import RateLimitRelated from '../../components/house/products/RateLimitRelated.astro';
+import RateLimitStatus from '../../components/house/products/RateLimitStatus.astro';
+import {
+  RATE_LIMIT_FEATURES,
+  RATE_LIMIT_MISSING,
+  RATE_LIMIT_READY,
+  RATE_LIMIT_RELATED,
+} from '../../data/house/rate-limit.ts';
+import House from '../../layouts/House.astro';
+---
+
+<House
+  title="RateLimit · Nelcota"
+  description="Limitador de requisições para APIs Rust que bloqueia quando o armazenamento das regras falha."
+  current="products"
+>
+  <div class="h-wrap rl">
+    <RateLimitHero />
+    <RateLimitDemo />
+    <RateLimitFeatures features={RATE_LIMIT_FEATURES} />
+    <RateLimitStatus ready={RATE_LIMIT_READY} missing={RATE_LIMIT_MISSING} />
+    <RateLimitRelated links={RATE_LIMIT_RELATED} />
+  </div>
+</House>
+
+<style>
+  .rl {
+    display: flex;
+    flex-direction: column;
+    gap: 96px;
+  }
+</style>

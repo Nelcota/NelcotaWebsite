@@ -1,0 +1,104 @@
+---
+import type { ServiceSpec } from '../../../data/house/services.ts';
+import ServicesSpecs from './ServicesSpecs.astro';
+
+/**
+ * Two-column article: a picture (slot "media") next to a title, a summary,
+ * a spec list and one link. The column order holds when the grid stacks, as
+ * in the mockup.
+ */
+interface Props {
+  title: string;
+  summary: string;
+  summaryPending?: boolean;
+  specs: readonly ServiceSpec[];
+  href: string;
+  linkLabel: string;
+  /** External links open in a new tab and get the ↗ arrow. */
+  external: boolean;
+  /** On wide screens, put the picture on the left. */
+  mediaFirst: boolean;
+  /** Small blue square before the title, used for the product. */
+  marker?: boolean;
+}
+const { title, summary, summaryPending = false, specs, href, linkLabel, external, mediaFirst, marker = false } = Astro.props;
+---
+
+<article class:list={['sv-show', { 'media-first': mediaFirst }]}>
+  <div class="sv-show-media"><slot name="media" /></div>
+  <div class="sv-show-text">
+    <h3>{marker && <span class="sv-marker" aria-hidden="true"></span>}{title}</h3>
+    <p class:list={{ pending: summaryPending }}>{summary}</p>
+    <ServicesSpecs specs={specs} />
+    {external && (
+      <a class="sv-show-link" href={href} target="_blank" rel="noopener">
+        {linkLabel} <span aria-hidden="true">↗</span><span class="h-sr"> (abre em nova aba)</span>
+      </a>
+    )}
+    {!external && <a class="sv-show-link internal" href={href}>{linkLabel} <span aria-hidden="true">→</span></a>}
+  </div>
+</article>
+
+<style>
+  .sv-show {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
+    gap: 48px;
+    align-items: center;
+  }
+  .sv-show-media,
+  .sv-show-text {
+    min-width: 0;
+  }
+  .sv-show-media {
+    order: 2;
+  }
+  .sv-show.media-first .sv-show-media {
+    order: 0;
+  }
+  .sv-show-text {
+    order: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .sv-show-text h3 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: clamp(30px, 3vw, 40px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .sv-marker {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    background: var(--h-blue-ink);
+    flex-shrink: 0;
+  }
+  .sv-show-text p {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.5;
+    color: var(--h-muted);
+    max-width: 30em;
+  }
+  .sv-show-text p.pending {
+    color: var(--h-dim);
+  }
+  .sv-show-link {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .sv-show-link.internal {
+    color: var(--h-blue-ink);
+  }
+</style>

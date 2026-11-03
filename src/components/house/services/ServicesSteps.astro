@@ -1,0 +1,56 @@
+---
+import type { ServiceStep } from '../../../data/house/services.ts';
+import ServicesLabel from './ServicesLabel.astro';
+
+/** "Como funciona": the four steps from first talk to maintenance. */
+interface Props {
+  steps: readonly ServiceStep[];
+}
+const { steps } = Astro.props;
+---
+
+<section aria-labelledby="como">
+  <ServicesLabel id="como" text="Como funciona" />
+  <ol class="sv-steps">
+    {steps.map((step) => (
+      <li>
+        <span class="sv-step-n">{step.number}</span>
+        <h3>{step.title}</h3>
+        <p>{step.text}</p>
+      </li>
+    ))}
+  </ol>
+</section>
+
+<style>
+  .sv-steps {
+    margin: 0;
+    padding: 28px 0 0;
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+    gap: 32px;
+  }
+  .sv-steps li {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .sv-step-n {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--h-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .sv-steps h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .sv-steps p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--h-muted);
+  }
+</style>

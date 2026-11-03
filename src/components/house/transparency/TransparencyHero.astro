@@ -1,0 +1,26 @@
+---
+import type { TitleLine } from '../../../types/house.ts';
+import RevealLines from '../RevealLines.astro';
+
+/** Opening of /transparencia, with the same title reveal as the other pages. */
+const lines: readonly TitleLine[] = [['Tudo à ', 'vista', '.']];
+---
+
+<section class="tr-hero">
+  <h1 class="h-serif tr-title"><RevealLines lines={lines} variant="page" /></h1>
+  <p class="h-lead">O status de cada produto, as versões publicadas e as decisões com data. Se não está aqui, ainda não existe.</p>
+</section>
+
+<style>
+  .tr-hero {
+    padding-top: 88px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .tr-title {
+    margin: 0;
+    font-size: clamp(48px, 7vw, 96px);
+    line-height: 1.02;
+  }
+</style>

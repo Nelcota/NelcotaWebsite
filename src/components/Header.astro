@@ -1,6 +1,7 @@
 ---
 import { getRelativeLocaleUrl } from 'astro:i18n';
 import { bcp47, type Locale, otherLocale, t } from '../i18n/utils.ts';
+import { baasHomeUrl } from '../lib/baas.ts';
 import { docsIndexUrl } from '../lib/docs/links.ts';
 import { REPO_URL, SITE_NAME } from '../lib/site.ts';
 import BrandMark from './BrandMark.astro';
@@ -23,7 +24,7 @@ const { locale, path = '' } = Astro.props;
 const dict = t(locale);
 const nav = dict.nav;
 const other = otherLocale(locale);
-const home = getRelativeLocaleUrl(locale);
+const home = baasHomeUrl(locale);
 const switchUrl = getRelativeLocaleUrl(other, path);
 const isDocs = path.startsWith('docs');
 

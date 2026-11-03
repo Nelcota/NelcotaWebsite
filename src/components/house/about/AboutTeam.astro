@@ -1,0 +1,89 @@
+---
+import { ABOUT_TEAM } from '../../../data/house/about.ts';
+
+/** The partners, with a photo slot until real photos exist. */
+---
+
+<section aria-labelledby="equipe" class="ab-split">
+  <div class="ab-col">
+    <span class="h-eyebrow">Equipe</span>
+    <h2 id="equipe" class="h-serif ab-h2-serif">O que vendemos é o que <em>usamos</em> todos os dias.</h2>
+  </div>
+  <div>
+    {ABOUT_TEAM.map((person) => (
+      <article class="ab-person">
+        <div class="ab-photo">Foto em breve</div>
+        <div class="ab-person-text">
+          <span class="ab-name">{person.name}</span>
+          <span class="ab-role">{person.role}</span>
+          <p>{person.bio}</p>
+        </div>
+      </article>
+    ))}
+  </div>
+</section>
+
+<style>
+  .ab-h2-serif {
+    margin: 0;
+    font-size: clamp(36px, 4.4vw, 60px);
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+  .ab-rule p,
+  .ab-person-text p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--h-muted);
+  }
+  .ab-split {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 48px;
+    align-items: start;
+  }
+  .ab-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .ab-person {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 24px;
+    padding: 28px 0;
+    border-top: 1px solid var(--h-line-strong);
+  }
+  .ab-photo {
+    aspect-ratio: 1;
+    border-radius: 12px;
+    border: 1px dashed var(--h-line-strong);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--h-mono);
+    font-size: 12px;
+    color: var(--h-dim);
+  }
+  .ab-person-text {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+  }
+  .ab-name,
+  .ab-role,
+  .ab-tool-name {
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .ab-name,
+  .ab-tool-name {
+    font-weight: 600;
+  }
+  .ab-role {
+    color: var(--h-muted);
+  }
+</style>

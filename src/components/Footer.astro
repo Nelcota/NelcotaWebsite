@@ -1,6 +1,7 @@
 ---
 import { getRelativeLocaleUrl } from 'astro:i18n';
 import { formatDate, type Locale, t } from '../i18n/utils.ts';
+import { baasHomeUrl } from '../lib/baas.ts';
 import { docHref, isExternal } from '../lib/docs/links.ts';
 import { DOCS, LICENSE, REPO_URL, SITE_NAME } from '../lib/site.ts';
 import BrandMark from './BrandMark.astro';
@@ -17,7 +18,7 @@ interface Props {
 }
 const { locale, fetchedAt = null } = Astro.props;
 const dict = t(locale);
-const home = getRelativeLocaleUrl(locale);
+const home = baasHomeUrl(locale);
 const year = new Date().getUTCFullYear();
 const hasFetchedAt = fetchedAt != null && fetchedAt.length > 0;
 

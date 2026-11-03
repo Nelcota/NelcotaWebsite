@@ -1,0 +1,32 @@
+---
+import type { TitleLine } from '../../../types/house.ts';
+import RevealLines from '../RevealLines.astro';
+
+/** Title of /produtos, revealed line by line behind a blue caret. */
+const lines: readonly TitleLine[] = [
+  ['Seis produtos.', '', ''],
+  ['Um deles roda o ', 'seu sistema', '.'],
+];
+---
+
+<section class="ph">
+  <h1 class="h-serif ph-title"><RevealLines lines={lines} variant="page" /></h1>
+  <p class="h-lead ph-lead">Infraestrutura e aplicações que a Nelcota constrói e mantém. Os sistemas dos clientes rodam sobre o Nelcota BaaS.</p>
+</section>
+
+<style>
+  .ph {
+    padding-top: 88px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .ph-title {
+    margin: 0;
+    font-size: clamp(48px, 7vw, 96px);
+    line-height: 1.02;
+  }
+  .ph-lead {
+    max-width: 34em;
+  }
+</style>

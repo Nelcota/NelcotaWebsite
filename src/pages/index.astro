@@ -1,5 +1,53 @@
 ---
-import Home from '../components/Home.astro';
+import HouseHeader from '../components/house/HouseHeader.astro';
+import HomeAbout from '../components/house/home/HomeAbout.astro';
+import HomeContact from '../components/house/home/HomeContact.astro';
+import HomeExplore from '../components/house/home/HomeExplore.astro';
+import HomeHero from '../components/house/home/HomeHero.astro';
+import HomeIntro from '../components/house/home/HomeIntro.astro';
+import HomeProducts from '../components/house/home/HomeProducts.astro';
+import HomeServices from '../components/house/home/HomeServices.astro';
+import HomeTeam from '../components/house/home/HomeTeam.astro';
+import { HOME_CTA, HOME_NAV } from '../data/house/home.ts';
+import House from '../layouts/House.astro';
 ---
 
-<Home locale="en" />
+<House
+  title="Nelcota · Software house"
+  description="A Nelcota constrói os próprios produtos e usa a mesma base para websites e sistemas sob medida."
+  bare
+>
+  <Fragment slot="header">
+    {/* Outside <main>: its enter animation would otherwise hold the fixed opening screen. */}
+    <HomeIntro />
+    <HouseHeader links={HOME_NAV} cta={HOME_CTA} replay />
+  </Fragment>
+  <HomeHero />
+  <HomeProducts />
+  <HomeServices />
+  <HomeAbout />
+  <HomeTeam />
+  <HomeContact />
+  <HomeExplore />
+</House>
+
+<script>
+  import '../scripts/house/home-reveal.ts';
+  import '../scripts/house/home-spy.ts';
+</script>
+
+<style>
+  /* The hero and the sticky products screen are sized from the header height (--h-nav-h). */
+  :global(:root) {
+    scroll-padding-top: var(--h-nav-h);
+  }
+  /* Scrolling waits while the opening plays (scripts/house/home-intro.ts). */
+  :global(:root.hm-lock) {
+    overflow: hidden;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(:root) {
+      scroll-behavior: smooth;
+    }
+  }
+</style>

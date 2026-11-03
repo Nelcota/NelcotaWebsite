@@ -1,0 +1,50 @@
+---
+import { SERVICE_BASE_PLACEHOLDER, type ServiceSpec } from '../../../data/house/services.ts';
+import { HOUSE_ROUTES } from '../../../lib/house/routes.ts';
+import ServicesLabel from './ServicesLabel.astro';
+import ServicesShowcase from './ServicesShowcase.astro';
+
+/** "O que já vem pronto": what Nelcota BaaS gives every project. */
+interface Props {
+  specs: readonly ServiceSpec[];
+}
+const { specs } = Astro.props;
+---
+
+<section aria-labelledby="base" class="sv-base">
+  <ServicesLabel id="base" text="O que já vem pronto" />
+  <ServicesShowcase
+    title="Nelcota BaaS"
+    summary="Todo sistema que entregamos começa com isto pronto. O tempo do projeto vai para o que é só seu."
+    specs={specs}
+    href={HOUSE_ROUTES.products}
+    linkLabel="Conhecer o Nelcota BaaS"
+    external={false}
+    mediaFirst
+    marker
+  >
+    <div slot="media" class="sv-base-shot" role="img" aria-label={SERVICE_BASE_PLACEHOLDER}>{SERVICE_BASE_PLACEHOLDER}</div>
+  </ServicesShowcase>
+</section>
+
+<style>
+  .sv-base {
+    display: flex;
+    flex-direction: column;
+    gap: 72px;
+  }
+  /* Placeholder until the admin panel screenshot is approved. */
+  .sv-base-shot {
+    aspect-ratio: 16 / 10;
+    max-width: 100%;
+    border-radius: 16px;
+    border: 1px dashed var(--h-line-strong);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--h-dim);
+  }
+</style>

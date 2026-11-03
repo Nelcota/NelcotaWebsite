@@ -1,0 +1,102 @@
+---
+import { RATE_LIMIT_DEMO, RATE_LIMIT_OUTCOMES } from '../../../data/house/rate-limit.ts';
+
+/** Counters, the last-30 timeline and the spoken result line of the simulator. */
+const slots = Array.from({ length: RATE_LIMIT_DEMO.slots }, (_, index) => index);
+---
+
+<div class="ro-counters">
+  {RATE_LIMIT_OUTCOMES.map((outcome) => (
+    <div class="ro-counter">
+      <span class="ro-label"><span class="ro-dot" data-kind={outcome.kind}></span>{outcome.label}</span>
+      <span class="ro-value" data-demo-count={outcome.kind}>0</span>
+    </div>
+  ))}
+</div>
+
+<div class="ro-history">
+  <span class="ro-caption">Últimas {RATE_LIMIT_DEMO.slots} requisições, a mais nova à direita</span>
+  <div class="ro-timeline" role="img" aria-label="0 aceitas, 0 limitadas e 0 bloqueadas por falha" data-demo-timeline>
+    {slots.map(() => <span class="ro-slot" data-demo-slot data-kind="empty"></span>)}
+  </div>
+</div>
+
+<div class="ro-result" aria-live="polite" data-demo-result data-kind="idle">{RATE_LIMIT_DEMO.idle}</div>
+
+<style>
+  .ro-counters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+    gap: 12px;
+  }
+  .ro-counter {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px;
+    border-radius: 14px;
+    border: 1px solid var(--h-line);
+  }
+  .ro-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--h-muted);
+  }
+  .ro-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+  }
+  .ro-value {
+    font-family: var(--h-mono);
+    font-size: 32px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .ro-history {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .ro-caption {
+    font-size: 13px;
+    color: var(--h-muted);
+  }
+  .ro-timeline {
+    display: grid;
+    grid-template-columns: repeat(30, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .ro-slot {
+    height: 28px;
+    border-radius: 4px;
+    background: var(--h-line);
+  }
+  .ro-result {
+    font-family: var(--h-mono);
+    font-size: 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: var(--h-bg-2);
+    color: var(--h-muted);
+  }
+  /* One color per outcome, shared by the dots, the slots and the result line. */
+  [data-kind='ok'] {
+    --ro-kind: var(--h-green);
+  }
+  [data-kind='limited'] {
+    --ro-kind: var(--h-amber);
+  }
+  [data-kind='blocked'] {
+    --ro-kind: var(--h-red);
+  }
+  .ro-dot[data-kind],
+  .ro-slot:not([data-kind='empty']) {
+    background: var(--ro-kind);
+  }
+  .ro-result:not([data-kind='idle']) {
+    color: var(--ro-kind);
+  }
+</style>

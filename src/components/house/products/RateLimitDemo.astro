@@ -1,0 +1,97 @@
+---
+import { RATE_LIMIT_DEMO } from '../../../data/house/rate-limit.ts';
+import RateLimitReadout from './RateLimitReadout.astro';
+
+/**
+ * "Teste o limite": the simulator's buttons and readout. Server-rendered in
+ * the idle state; src/scripts/house/rate-limit-demo.ts makes it work.
+ */
+---
+
+<section class="rd" aria-labelledby="demo" data-rate-limit-demo>
+  <div class="rd-head">
+    <h2 id="demo">Teste o limite</h2>
+    <span class="rd-rule">{RATE_LIMIT_DEMO.ruleLabel}</span>
+  </div>
+
+  <div class="rd-controls">
+    <button type="button" class="h-btn rd-btn" data-demo-action="one">Enviar 1 requisição</button>
+    <button type="button" class="h-btn rd-btn" data-demo-action="burst">Enviar {RATE_LIMIT_DEMO.burstSize} de uma vez</button>
+    <button type="button" class="h-btn rd-btn rd-stream" data-demo-action="stream" aria-pressed="false">{RATE_LIMIT_DEMO.streamOff}</button>
+    <button type="button" class="h-btn rd-btn rd-down" data-demo-action="down" aria-pressed="false">{RATE_LIMIT_DEMO.downOff}</button>
+    <button type="button" class="rd-clear" data-demo-action="clear">Limpar</button>
+  </div>
+
+  <RateLimitReadout />
+
+  <p class="rd-foot">Simulação do algoritmo GCRA no seu navegador, com a mesma regra. Esta página não chama o RateLimit de verdade.</p>
+</section>
+
+<script>
+  import '../../../scripts/house/rate-limit-demo.ts';
+</script>
+
+<style>
+  .rd {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: clamp(20px, 3vw, 36px);
+    border-radius: 24px;
+    border: 1px solid var(--h-line-strong);
+  }
+  .rd-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .rd-head h2 {
+    margin: 0;
+    font-size: clamp(24px, 2.6vw, 32px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .rd-rule {
+    font-family: var(--h-mono);
+    font-size: 13px;
+    color: var(--h-muted);
+  }
+  .rd-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  /* Smaller than the shared .h-btn, as in the mockup. */
+  .rd-controls .rd-btn {
+    padding: 0 18px;
+    font-size: 14px;
+  }
+  .rd-controls .rd-stream[aria-pressed='true'] {
+    border-color: var(--h-ink);
+    background: var(--h-ink);
+    color: var(--h-bg);
+  }
+  .rd-controls .rd-down[aria-pressed='true'] {
+    border-color: var(--h-red);
+    background: #ff453a24;
+    color: #ff7b73;
+  }
+  .rd-clear {
+    min-height: 44px;
+    padding: 0 14px;
+    border: 0;
+    background: transparent;
+    color: var(--h-muted);
+    font: 600 14px var(--h-sans);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .rd-foot {
+    margin: 0;
+    font-size: 13px;
+    color: var(--h-dim);
+  }
+</style>

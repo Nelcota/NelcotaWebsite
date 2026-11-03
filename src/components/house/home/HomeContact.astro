@@ -1,0 +1,44 @@
+---
+import { HOME_CONTACT } from '../../../data/house/home.ts';
+import ContactForm from './ContactForm.astro';
+import HomeSection from './HomeSection.astro';
+import HomeSectionTitle from './HomeSectionTitle.astro';
+
+/** Contact: the invitation on the left, the (not yet wired) form on the right. */
+---
+
+<HomeSection id="contato" labelledBy="h-contato">
+  <div class="hc">
+    <div class="hc-copy">
+      <HomeSectionTitle id="h-contato" eyebrow={HOME_CONTACT.eyebrow} lines={HOME_CONTACT.lines} />
+      <p class="hc-sub">{HOME_CONTACT.sub}</p>
+      <span class="hc-email">{HOME_CONTACT.email}</span>
+    </div>
+    <ContactForm />
+  </div>
+</HomeSection>
+
+<style>
+  .hc {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    gap: 48px;
+    align-items: start;
+  }
+  .hc-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .hc-sub {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--h-muted);
+  }
+  .hc-email {
+    font-family: var(--h-mono);
+    font-size: 13px;
+    color: var(--h-dim);
+  }
+</style>

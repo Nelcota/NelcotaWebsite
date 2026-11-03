@@ -1,0 +1,50 @@
+---
+import type { ServiceOffer } from '../../../data/house/services.ts';
+import ServicesLabel from './ServicesLabel.astro';
+
+/** "O que construímos": one row per kind of work. */
+interface Props {
+  offers: readonly ServiceOffer[];
+}
+const { offers } = Astro.props;
+---
+
+<section aria-labelledby="oque" class="sv-offers">
+  <ServicesLabel id="oque" text="O que construímos" />
+  <ul>
+    {offers.map((offer) => (
+      <li>
+        <h3>{offer.title}</h3>
+        <p>{offer.text}</p>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .sv-offers ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .sv-offers li {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    gap: 8px 48px;
+    padding: 28px 0;
+    border-bottom: 1px solid var(--h-line);
+  }
+  .sv-offers h3 {
+    margin: 0;
+    font-size: clamp(24px, 2.4vw, 30px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .sv-offers p {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--h-muted);
+    max-width: 34em;
+  }
+</style>

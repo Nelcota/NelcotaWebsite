@@ -1,0 +1,47 @@
+---
+import { Font } from 'astro:assets';
+import HouseFooter from '../components/house/HouseFooter.astro';
+import HouseHeader from '../components/house/HouseHeader.astro';
+import type { HouseRoute } from '../lib/house/routes.ts';
+import { withBase } from '../lib/site.ts';
+import '../styles/house.css';
+
+/**
+ * Layout of the software house pages (docs/ROADMAP.md). Dark only, Portuguese
+ * only for now, and kept out of search until the phase is approved.
+ */
+interface Props {
+  title: string;
+  description: string;
+  current?: HouseRoute | undefined;
+  /** The home brings its own header (intro and scroll spy). */
+  bare?: boolean;
+}
+const { title, description, current, bare = false } = Astro.props;
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <Font cssVariable="--font-urbanist" preload />
+    <Font cssVariable="--font-instrument-serif" preload />
+    <Font cssVariable="--font-jetbrains-mono" />
+    <link rel="icon" href={withBase('favicon.png')} type="image/png" sizes="192x192" />
+    <meta name="theme-color" content="#141416" />
+    <meta name="color-scheme" content="dark" />
+  </head>
+  <body class="house">
+    <a class="h-skip" href="#main">Pular para o conteúdo</a>
+    {!bare && <HouseHeader current={current} />}
+    <slot name="header" />
+    <main id="main">
+      <slot />
+    </main>
+    <HouseFooter />
+  </body>
+</html>

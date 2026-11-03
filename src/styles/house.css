@@ -1,0 +1,206 @@
+/*
+ * Software house pages (docs/ROADMAP.md). Dark only, colors from the mockup
+ * "Nelcota · Hero da home". Every rule is scoped under .house so the docs and
+ * compare pages, which still use global.css, are not affected.
+ */
+:root {
+  --h-bg: #141416;
+  --h-bg-2: #1b1b1e;
+  --h-bg-3: #2c2c31;
+  --h-ink: #f5f5f7;
+  --h-muted: #a8a8b0;
+  --h-dim: #94949d;
+  --h-line: #ffffff14;
+  --h-line-strong: #ffffff2e;
+  --h-hover: #ffffff0f;
+  --h-blue: #1a6cf5;
+  --h-blue-ink: #6aa5ff;
+  --h-green: #32d74b;
+  --h-amber: #ffb340;
+  --h-amber-wash: #ff9f0a24;
+  --h-red: #ff453a;
+  --h-max: 1240px;
+  --h-gutter: clamp(20px, 4vw, 56px);
+  --h-nav-h: 88px;
+  --h-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --h-sans:
+    var(--font-urbanist), system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --h-serif: var(--font-instrument-serif), "Times New Roman", Georgia, serif;
+  --h-mono: var(--font-jetbrains-mono), ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+@media (max-width: 760px) {
+  :root {
+    --h-nav-h: 72px;
+  }
+}
+
+.house {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--h-bg);
+  color: var(--h-ink);
+  font-family: var(--h-sans);
+  -webkit-font-smoothing: antialiased;
+}
+.house *,
+.house *::before,
+.house *::after {
+  box-sizing: border-box;
+}
+.house a {
+  color: var(--h-ink);
+}
+.house a:hover {
+  color: #ffffff;
+}
+.house a:focus-visible,
+.house button:focus-visible,
+.house summary:focus-visible,
+.house input:focus-visible,
+.house textarea:focus-visible {
+  outline: 2px solid var(--h-blue-ink);
+  outline-offset: 3px;
+}
+
+.house .h-wrap {
+  max-width: var(--h-max);
+  margin: 0 auto;
+  padding-inline: var(--h-gutter);
+}
+
+.house .h-skip {
+  position: absolute;
+  left: -9999px;
+}
+.house .h-skip:focus {
+  left: 12px;
+  top: 12px;
+  z-index: 100;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: var(--h-ink);
+  color: var(--h-bg);
+}
+
+.house .h-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Shared type */
+.house .h-eyebrow {
+  font-family: var(--h-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--h-muted);
+}
+.house .h-serif {
+  font-family: var(--h-serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+.house .h-serif em {
+  font-style: italic;
+  color: var(--h-blue-ink);
+}
+.house .h-lead {
+  margin: 0;
+  font-size: clamp(17px, 1.6vw, 20px);
+  line-height: 1.5;
+  color: var(--h-muted);
+  max-width: 36em;
+}
+
+/* Buttons */
+.house .h-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 999px;
+  border: 1px solid var(--h-line-strong);
+  background: transparent;
+  color: var(--h-ink);
+  font: 600 15px var(--h-sans);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
+}
+.house .h-btn:hover {
+  border-color: #ffffff66;
+}
+.house .h-btn-primary {
+  border-color: var(--h-blue);
+  background: var(--h-blue);
+  color: #ffffff;
+}
+.house .h-btn-primary:hover {
+  border-color: #3b82ff;
+  background: #3b82ff;
+  color: #ffffff;
+}
+
+/* Status pill: data-kind = ok | early | dev | neutral */
+.house .h-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #ffffff12;
+  color: var(--h-muted);
+}
+.house .h-status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+}
+.house .h-status[data-kind="ok"] {
+  color: var(--h-green);
+  background: #32d74b1f;
+}
+.house .h-status[data-kind="early"] {
+  color: var(--h-blue-ink);
+  background: #1a6cf524;
+}
+.house .h-status[data-kind="dev"] {
+  color: var(--h-amber);
+  background: var(--h-amber-wash);
+}
+
+/* Page enter */
+.house main {
+  animation: h-page-in 0.35s var(--h-ease) both;
+}
+@keyframes h-page-in {
+  from {
+    opacity: 0.5;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .house main {
+    animation: none;
+  }
+  .house .h-btn {
+    transition: none;
+  }
+}

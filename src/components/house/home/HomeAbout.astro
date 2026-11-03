@@ -1,0 +1,62 @@
+---
+import { HOME_ABOUT, HOME_PRINCIPLES } from '../../../data/house/home.ts';
+import HomeSection from './HomeSection.astro';
+import HomeSectionTitle from './HomeSectionTitle.astro';
+
+/** About: who we are in one line, and the four principles. */
+---
+
+<HomeSection id="sobre" labelledBy="h-sobre">
+  <div class="ha">
+    <div class="ha-head">
+      <HomeSectionTitle id="h-sobre" eyebrow={HOME_ABOUT.eyebrow} lines={HOME_ABOUT.lines} narrow />
+      <p class="h-lead">{HOME_ABOUT.sub}</p>
+    </div>
+    <div class="ha-grid">
+      {
+        HOME_PRINCIPLES.map((item) => (
+          <div class="ha-rule">
+            <h3>{item.title}</h3>
+            <p>{item.text}</p>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</HomeSection>
+
+<style>
+  .ha {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+  .ha-head {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .ha-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    gap: 32px;
+  }
+  .ha-rule {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 20px;
+    border-top: 1px solid var(--h-line-strong);
+  }
+  .ha-rule h3 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 600;
+  }
+  .ha-rule p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--h-muted);
+  }
+</style>

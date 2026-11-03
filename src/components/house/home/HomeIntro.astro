@@ -1,0 +1,90 @@
+---
+import { Image } from 'astro:assets';
+import mark from '../../../assets/house/mark.webp';
+import RevealLines from '../RevealLines.astro';
+
+/**
+ * Opening screen: the logo with "Nelcota" typed under it, then the screen lifts like a curtain.
+ * It runs on CSS alone, so it never gets stuck without the script; scripts/house/home-intro.ts
+ * only skips it (seen in this tab, or reduced motion) and replays it from the logo.
+ */
+---
+
+<div class="hi" data-home-intro aria-hidden="true">
+  <Image class="hi-logo" src={mark} alt="" width={240} height={240} loading="eager" />
+  <span class="hi-word"><RevealLines lines={[['Nelcota', '', '']]} variant="intro" /></span>
+</div>
+
+<style>
+  .hi {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    background: var(--h-bg);
+    pointer-events: none;
+    animation: hm-intro-out 0.9s cubic-bezier(0.76, 0, 0.24, 1) 1550ms forwards;
+  }
+  .hi :global(.hi-logo) {
+    width: 120px;
+    height: 120px;
+    display: block;
+    animation: hm-intro-pop 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .hi-word {
+    font-weight: 700;
+    font-size: 56px;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+  }
+  /* The word's accessible copy is useless here: the whole screen is hidden from readers. */
+  .hi-word :global(.h-sr) {
+    display: none;
+  }
+  :global(.hm-skip-intro) .hi {
+    display: none;
+  }
+
+  @media (max-width: 760px) {
+    .hi {
+      gap: 18px;
+    }
+    .hi :global(.hi-logo) {
+      width: 88px;
+      height: 88px;
+    }
+    .hi-word {
+      font-size: 40px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hi {
+      display: none;
+    }
+  }
+
+  @keyframes hm-intro-out {
+    to {
+      transform: translateY(-100%);
+      visibility: hidden;
+    }
+  }
+  @keyframes hm-intro-pop {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  import '../../../scripts/house/home-intro.ts';
+</script>

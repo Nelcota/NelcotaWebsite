@@ -1,0 +1,51 @@
+---
+import type { Decision } from '../../../data/house/transparency.ts';
+import TransparencySplit from './TransparencySplit.astro';
+
+/** "O que decidimos, e quando": dated decisions, newest first. */
+interface Props {
+  decisions: readonly Decision[];
+}
+const { decisions } = Astro.props;
+---
+
+<TransparencySplit
+  id="decisoes"
+  title="O que decidimos, e quando"
+  text="Uma decisão só vale quando tem data. As mais recentes aparecem primeiro."
+>
+  <ol class="tr-decisions">
+    {decisions.map((decision) => (
+      <li>
+        <span class="tr-decision-date">{decision.date}</span>
+        <span class="tr-decision-text">{decision.text}</span>
+      </li>
+    ))}
+  </ol>
+</TransparencySplit>
+
+<style>
+  .tr-decisions {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid #ffffff1a;
+  }
+  .tr-decisions li {
+    display: grid;
+    grid-template-columns: 104px minmax(0, 1fr);
+    gap: 16px;
+    align-items: baseline;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--h-line);
+  }
+  .tr-decision-date {
+    font-size: 14px;
+    color: var(--h-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .tr-decision-text {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+</style>

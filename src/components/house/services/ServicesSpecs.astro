@@ -1,0 +1,37 @@
+---
+import type { ServiceSpec } from '../../../data/house/services.ts';
+
+/** Two-column label/value list; values still to be confirmed show dimmer. */
+interface Props {
+  specs: readonly ServiceSpec[];
+}
+const { specs } = Astro.props;
+---
+
+<dl class="sv-specs">
+  {specs.map((spec) => (
+    <>
+      <dt>{spec.label}</dt>
+      <dd class:list={{ pending: spec.pending }}>{spec.value}</dd>
+    </>
+  ))}
+</dl>
+
+<style>
+  .sv-specs {
+    margin: 0;
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: 10px 20px;
+    font-size: 15px;
+  }
+  .sv-specs dt,
+  .sv-specs dd.pending {
+    color: var(--h-dim);
+  }
+  .sv-specs dd {
+    margin: 0;
+    color: var(--h-ink);
+    overflow-wrap: anywhere;
+  }
+</style>

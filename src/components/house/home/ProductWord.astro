@@ -1,0 +1,110 @@
+---
+/**
+ * Title "Nelcota é <word>". scripts/house/home-word-track.ts swaps the word and flips
+ * [data-phase] between a and b, which replays the caret sweep for the new word.
+ */
+interface Props {
+  prefix: string;
+  word: string;
+}
+const { prefix, word } = Astro.props;
+---
+
+<h2 class="h-serif pw">
+  <span class="h-sr" data-word-label>{prefix} {word}</span>
+  <span aria-hidden="true">{prefix}</span><br />
+  <span class="pw-line" aria-hidden="true" data-word-line><em class="pw-text" data-word-text>{word}</em><span class="pw-caret"></span></span>
+</h2>
+
+<style>
+  .pw {
+    margin: 0;
+    font-size: clamp(44px, 7.2vw, 104px);
+    line-height: 1;
+    text-wrap: balance;
+  }
+  .pw-line {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+  }
+  .pw-text {
+    display: block;
+  }
+  .pw-caret {
+    position: absolute;
+    top: 0.24em;
+    bottom: 0.12em;
+    left: 0;
+    width: 2px;
+    border-radius: 1px;
+    background: var(--h-blue);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* Two copies of each keyframe: switching the name is what restarts the sweep. */
+    [data-phase='a'] .pw-text {
+      animation: hm-word-a 0.9s cubic-bezier(0.76, 0, 0.24, 1) both;
+    }
+    [data-phase='b'] .pw-text {
+      animation: hm-word-b 0.9s cubic-bezier(0.76, 0, 0.24, 1) both;
+    }
+    [data-phase='a'] .pw-caret {
+      animation:
+        hm-caret-a 0.9s cubic-bezier(0.76, 0, 0.24, 1) both,
+        hm-caret-blink 1.06s step-end 0.9s infinite;
+    }
+    [data-phase='b'] .pw-caret {
+      animation:
+        hm-caret-b 0.9s cubic-bezier(0.76, 0, 0.24, 1) both,
+        hm-caret-blink 1.06s step-end 0.9s infinite;
+    }
+  }
+
+  @keyframes hm-word-a {
+    from {
+      clip-path: inset(0 100% -10% 0);
+    }
+    to {
+      clip-path: inset(0 0 -10% 0);
+    }
+  }
+  @keyframes hm-word-b {
+    from {
+      clip-path: inset(0 100% -10% 0);
+    }
+    to {
+      clip-path: inset(0 0 -10% 0);
+    }
+  }
+  @keyframes hm-caret-a {
+    from {
+      left: 0;
+      opacity: 1;
+    }
+    to {
+      left: calc(100% + 0.06em);
+      opacity: 1;
+    }
+  }
+  @keyframes hm-caret-b {
+    from {
+      left: 0;
+      opacity: 1;
+    }
+    to {
+      left: calc(100% + 0.06em);
+      opacity: 1;
+    }
+  }
+  @keyframes hm-caret-blink {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0;
+    }
+  }
+</style>

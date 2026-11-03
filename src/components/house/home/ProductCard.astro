@@ -1,0 +1,151 @@
+---
+import type { HomeProduct } from '../../../data/house/home.ts';
+import ProductPreview from './ProductPreview.astro';
+
+/**
+ * One card of the "Nelcota é ___" stack. [data-pos] (next, current, prev1, prev2, gone) places
+ * it Apple Arcade style: the new card rises on top, the older ones step back, smaller and darker.
+ */
+interface Props {
+  product: HomeProduct;
+  isFirst: boolean;
+}
+const { product, isFirst } = Astro.props;
+---
+
+<article class="pc" data-word-card data-word={product.word} data-pos={isFirst ? 'current' : 'next'} aria-hidden={isFirst ? undefined : 'true'}>
+  <div class="pc-preview"><ProductPreview preview={product.preview} /></div>
+  <div class="pc-head">
+    <h3>{product.name}</h3>
+    <span class="h-status" data-kind={product.kind}>{product.status}</span>
+  </div>
+  <p class="pc-concept">{product.concept}</p>
+  <ul class="pc-facts">
+    {
+      product.facts.map((fact) => (
+        <li>
+          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 7.5l2.5 2.5L11 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          {fact}
+        </li>
+      ))
+    }
+  </ul>
+  <a class="pc-link" href={product.href} tabindex={isFirst ? undefined : -1}>
+    {product.link}
+    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7h9M8 3.5L11.5 7 8 10.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+  </a>
+</article>
+
+<style>
+  .pc {
+    position: absolute;
+    top: var(--stack-top);
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px;
+    border-radius: 20px;
+    background: var(--h-bg);
+    border: 1px solid #ffffff1a;
+    transform-origin: 50% 0;
+    transition:
+      transform 0.75s var(--h-ease),
+      opacity 0.75s var(--h-ease),
+      filter 0.75s var(--h-ease);
+  }
+  .pc[data-pos='next'] {
+    transform: translateY(110%);
+  }
+  .pc[data-pos='prev1'] {
+    transform: translateY(calc(var(--stack-step) * -1)) scale(0.94);
+    filter: brightness(0.55);
+  }
+  .pc[data-pos='prev2'] {
+    transform: translateY(calc(var(--stack-step) * -2)) scale(0.88);
+    filter: brightness(0.35);
+  }
+  .pc[data-pos='gone'] {
+    transform: translateY(calc(var(--stack-step) * -3)) scale(0.82);
+    filter: brightness(0.2);
+    opacity: 0;
+  }
+  .pc-preview {
+    height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 12px;
+  }
+  .pc-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .pc-head h3 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .pc-concept {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--h-muted);
+  }
+  .pc-facts {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .pc-facts li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 3px 0;
+    font-size: 14px;
+    color: var(--h-muted);
+  }
+  .pc-facts svg {
+    flex-shrink: 0;
+    color: var(--h-blue-ink);
+  }
+  .pc-link {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  :global(.house) .pc-link {
+    color: var(--h-blue-ink);
+  }
+
+  @media (max-width: 760px) {
+    .pc {
+      padding: 16px;
+    }
+    .pc-preview {
+      height: 150px;
+    }
+    .pc-head h3 {
+      font-size: 22px;
+    }
+    .pc-facts {
+      display: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pc {
+      transition: none;
+    }
+  }
+</style>

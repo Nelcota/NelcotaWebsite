@@ -1,0 +1,51 @@
+---
+/**
+ * Two-column section: title and intro on the left (plus the "aside" slot,
+ * e.g. a link), the list in the default slot on the right.
+ */
+interface Props {
+  id: string;
+  title: string;
+  text: string;
+}
+const { id, title, text } = Astro.props;
+---
+
+<section aria-labelledby={id} class="tr-split">
+  <div class="tr-split-intro">
+    <h2 id={id}>{title}</h2>
+    <p>{text}</p>
+    <slot name="aside" />
+  </div>
+  <div class="tr-split-body"><slot /></div>
+</section>
+
+<style>
+  .tr-split {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    gap: 48px;
+    align-items: start;
+  }
+  .tr-split-intro,
+  .tr-split-body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .tr-split-intro {
+    gap: 12px;
+  }
+  .tr-split-intro h2 {
+    margin: 0;
+    font-size: clamp(26px, 2.6vw, 32px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .tr-split-intro p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--h-muted);
+  }
+</style>

@@ -1,0 +1,70 @@
+---
+import { Image } from 'astro:assets';
+import type { ServiceCase } from '../../../data/house/services.ts';
+import ServicesLabel from './ServicesLabel.astro';
+import ServicesShowcase from './ServicesShowcase.astro';
+
+/** "Casos": client systems running on Nelcota BaaS. */
+interface Props {
+  cases: readonly ServiceCase[];
+}
+const { cases } = Astro.props;
+const sizes = '(width >= 800px) 560px, calc(100vw - 40px)';
+---
+
+<section id="clientes" aria-labelledby="clientes-titulo" class="sv-cases">
+  <ServicesLabel id="clientes-titulo" text="Casos" />
+  {cases.map((item) => (
+    <ServicesShowcase
+      title={item.name}
+      summary={item.summary}
+      summaryPending={item.summaryPending}
+      specs={item.specs}
+      href={item.href}
+      linkLabel={item.linkLabel}
+      external
+      mediaFirst={item.imageFirst}
+    >
+      <div slot="media" class:list={['sv-case-frame', item.imageFit]}>
+        <Image src={item.image} alt={item.imageAlt} widths={[400, 800]} sizes={sizes} loading="lazy" decoding="async" />
+      </div>
+    </ServicesShowcase>
+  ))}
+</section>
+
+<style>
+  .sv-cases {
+    display: flex;
+    flex-direction: column;
+    gap: 72px;
+  }
+  .sv-case-frame {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    border-radius: 16px;
+    border: 1px solid #ffffff1a;
+    overflow: hidden;
+  }
+  .sv-case-frame :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .sv-case-frame.screenshot :global(img) {
+    object-fit: cover;
+    object-position: top left;
+  }
+  /* The mascot sits centered on a dark card instead of filling the frame. */
+  .sv-case-frame.mascot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    background: var(--h-bg-2);
+  }
+  .sv-case-frame.mascot :global(img) {
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+  }
+</style>

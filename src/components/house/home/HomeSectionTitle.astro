@@ -1,0 +1,31 @@
+---
+import type { TitleLine } from '../../../types/house.ts';
+import RevealLines from '../RevealLines.astro';
+
+/** Eyebrow and serif title of a home section, revealed line by line when it reaches the screen. */
+interface Props {
+  id: string;
+  eyebrow: string;
+  lines: readonly TitleLine[];
+  /** Keeps long titles to about 13 words wide, as in the mockup's "Sobre". */
+  narrow?: boolean;
+}
+const { id, eyebrow, lines, narrow = false } = Astro.props;
+---
+
+<span class="h-eyebrow">{eyebrow}</span>
+<h2 id={id} class:list={['h-serif', 'hst', { narrow }]}>
+  <RevealLines lines={lines} variant="section" />
+</h2>
+
+<style>
+  .hst {
+    margin: 0;
+    font-size: clamp(40px, 5vw, 72px);
+    line-height: 1.02;
+    text-wrap: balance;
+  }
+  .narrow {
+    max-width: 13em;
+  }
+</style>

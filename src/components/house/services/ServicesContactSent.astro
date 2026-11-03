@@ -1,0 +1,47 @@
+---
+/**
+ * Shown after a valid submit, in place of the form. It says plainly that
+ * nothing left the page, because sending is not wired up yet.
+ */
+interface Props {
+  contactEmail: string;
+}
+const { contactEmail } = Astro.props;
+---
+
+<div class="sv-sent" role="status" data-contact-sent hidden>
+  <h3 class="sv-sent-title" tabindex="-1" data-contact-sent-title>Mensagem pronta para envio</h3>
+  <p>
+    O envio ainda não está ligado: nada saiu desta página. Quando estiver, ela vai para {contactEmail} e você recebe uma cópia em <span data-contact-sent-email></span>.
+  </p>
+  <button type="button" class="h-btn sv-sent-again" data-contact-reset>Escrever outra</button>
+</div>
+
+<style>
+  .sv-sent {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 4px;
+  }
+  .sv-sent[hidden] {
+    display: none;
+  }
+  .sv-sent-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .sv-sent p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--h-muted);
+    overflow-wrap: anywhere;
+  }
+  .sv-sent-again {
+    align-self: flex-start;
+    padding: 0 18px;
+    font-size: 14px;
+  }
+</style>

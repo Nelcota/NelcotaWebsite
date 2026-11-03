@@ -1,0 +1,51 @@
+---
+import type { ContactKind } from '../../../data/house/services.ts';
+import ServicesContactField from './ServicesContactField.astro';
+import ServicesKindPicker from './ServicesKindPicker.astro';
+
+/**
+ * The contact form markup. No `action` and no field names: it never sends
+ * anything. The submit button starts disabled and the script enables it, so
+ * without JavaScript the form cannot be submitted at all.
+ */
+interface Props {
+  kinds: readonly ContactKind[];
+  defaultKind: string;
+}
+const { kinds, defaultKind } = Astro.props;
+---
+
+<form class="sv-form" novalidate data-contact-form>
+  <ServicesContactField id="contato-nome" field="name" label="Nome" kind="text" autocomplete="name" />
+  <ServicesContactField id="contato-email" field="email" label="E-mail" kind="email" autocomplete="email" />
+  <ServicesKindPicker kinds={kinds} defaultKind={defaultKind} />
+  <ServicesContactField
+    id="contato-mensagem"
+    field="message"
+    label="Conte em poucas linhas"
+    kind="textarea"
+    placeholder="Ex.: preciso de uma loja para vender no Mercado Livre e na Shopee."
+  />
+  <button type="submit" class="h-btn h-btn-primary sv-form-submit" disabled data-contact-submit>Enviar mensagem</button>
+</form>
+
+<style>
+  .sv-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .sv-form[hidden] {
+    display: none;
+  }
+  .sv-form-submit {
+    align-self: flex-start;
+    min-height: 48px;
+    padding: 0 24px;
+    font-size: 16px;
+  }
+  .sv-form-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+</style>

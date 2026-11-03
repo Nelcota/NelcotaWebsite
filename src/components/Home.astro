@@ -4,8 +4,9 @@ import { getAbsoluteLocaleUrl } from 'astro:i18n';
 import mascot from '../assets/mascot.png';
 import { type Locale, t } from '../i18n/utils.ts';
 import Base from '../layouts/Base.astro';
+import { BAAS_PATH, baasHomeUrl } from '../lib/baas.ts';
 import { loadRepo } from '../lib/repo.ts';
-import { LICENSE, REPO_URL, SITE_NAME, spdxUrl, withBase } from '../lib/site.ts';
+import { LICENSE, REPO_URL, SITE_NAME, spdxUrl } from '../lib/site.ts';
 import { buildSnippets } from '../lib/snippets.ts';
 import HomeBand from './home/HomeBand.astro';
 import HomeBento from './home/HomeBento.astro';
@@ -37,7 +38,7 @@ const snippets = await buildSnippets(dict);
 Astro.csp?.insertStyleHash(snippets.cssHash);
 // Absolute URLs take their origin from the configured `site`; without it this throws instead of pointing at localhost.
 const site = new URL(getAbsoluteLocaleUrl(locale));
-const pageUrl = new URL(withBase(locale === 'en' ? '/' : `/${locale}/`), site).href;
+const pageUrl = new URL(baasHomeUrl(locale), site).href;
 const logo = await getImage({ src: mascot, width: 512, height: 512, format: 'png' });
 
 const jsonLd = {
@@ -70,7 +71,7 @@ const jsonLd = {
 };
 ---
 
-<Base locale={locale} jsonLd={jsonLd} fetchedAt={repo.fetchedAt}>
+<Base locale={locale} jsonLd={jsonLd} fetchedAt={repo.fetchedAt} path={BAAS_PATH}>
   <HomeHero locale={locale} />
   <HomeShowcase locale={locale} />
   <HomePanel locale={locale} />

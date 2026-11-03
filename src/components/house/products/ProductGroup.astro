@@ -1,0 +1,33 @@
+---
+import type { ProductGroup } from '../../../data/house/products.ts';
+import ProductBlock from './ProductBlock.astro';
+
+/** A titled group of products (Infraestrutura, Aplicações). */
+interface Props {
+  group: ProductGroup;
+  /** Position of the group's first product on the page, to keep the zigzag going. */
+  startIndex: number;
+}
+const { group, startIndex } = Astro.props;
+---
+
+<section class="pg" aria-label={group.title}>
+  <h2 class="pg-title">{group.title}</h2>
+  {group.items.map((product, index) => <ProductBlock product={product} flip={(startIndex + index) % 2 === 1} />)}
+</section>
+
+<style>
+  .pg {
+    display: flex;
+    flex-direction: column;
+    gap: 72px;
+  }
+  .pg-title {
+    margin: 0;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #ffffff1a;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--h-muted);
+  }
+</style>

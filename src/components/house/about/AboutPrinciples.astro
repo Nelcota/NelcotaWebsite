@@ -1,0 +1,55 @@
+---
+import { ABOUT_PRINCIPLES } from '../../../data/house/about.ts';
+
+/** "Como pensamos": the four principles under a thin rule each. */
+---
+
+<section aria-labelledby="principios" class="ab-block">
+  <h2 id="principios" class="ab-h2">Como pensamos</h2>
+  <div class="ab-grid">
+    {ABOUT_PRINCIPLES.map((item) => (
+      <div class="ab-rule">
+        <h3>{item.title}</h3>
+        <p>{item.text}</p>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .ab-block {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  .ab-h2 {
+    margin: 0;
+    font-size: clamp(28px, 3vw, 36px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .ab-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 32px;
+  }
+  .ab-rule {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 20px;
+    border-top: 1px solid var(--h-line-strong);
+  }
+  .ab-rule h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .ab-rule p,
+  .ab-person-text p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--h-muted);
+  }
+</style>

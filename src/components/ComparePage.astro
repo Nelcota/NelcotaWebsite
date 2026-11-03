@@ -1,8 +1,8 @@
 ---
-import { getRelativeLocaleUrl } from 'astro:i18n';
 import { CHECKED_ON, COMPARE_GROUPS, PRODUCT_INFO, PRODUCTS, type Product } from '../data/compare.ts';
 import { formatDate, type Locale, t } from '../i18n/utils.ts';
 import Base from '../layouts/Base.astro';
+import { baasHomeUrl } from '../lib/baas.ts';
 import { REPO_URL, SITE_NAME } from '../lib/site.ts';
 import BrandMark from './BrandMark.astro';
 import CompareTable from './CompareTable.astro';
@@ -25,7 +25,7 @@ const dict = t(locale);
 const copy = dict.compare;
 const strings = COMPARE_STRINGS;
 const issuesUrl = `${REPO_URL}/issues/new`;
-const home = getRelativeLocaleUrl(locale);
+const home = baasHomeUrl(locale);
 
 const [titleLead, titleTail] = splitLastWord(copy.title);
 const [tableLead, tableTail] = splitLastWord(copy.tableLabel);

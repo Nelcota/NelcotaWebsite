@@ -1,0 +1,97 @@
+---
+import type { BackstageTool } from '../../../data/house/products.ts';
+import BackstageIcon from './BackstageIcon.astro';
+
+/** "Ferramentas que usamos por dentro": internal tools, not for sale. */
+interface Props {
+  tools: readonly BackstageTool[];
+}
+const { tools } = Astro.props;
+---
+
+<section class="bs" aria-labelledby="bastidores">
+  <div class="bs-intro">
+    <h2 id="bastidores">Ferramentas que usamos por dentro</h2>
+    <p>Não são produtos à venda. São o que usamos para construir, revisar e testar tudo o que está acima.</p>
+  </div>
+  <ul class="bs-list">
+    {tools.map((tool) => (
+      <li>
+        <span class="bs-icon"><BackstageIcon icon={tool.icon} /></span>
+        <span class="bs-who">
+          <span class="bs-name">{tool.name}</span>
+          <span class="bs-kind">{tool.kind}</span>
+        </span>
+        <span class:list={['bs-desc', { pending: tool.pending }]}>{tool.description}</span>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .bs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    gap: 32px;
+  }
+  .bs-intro {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .bs-intro h2 {
+    margin: 0;
+    font-size: clamp(26px, 2.6vw, 32px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .bs-intro p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--h-muted);
+  }
+  .bs-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--h-line-strong);
+  }
+  .bs-list li {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 0.9fr) minmax(0, 1.4fr);
+    gap: 16px;
+    align-items: start;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--h-line);
+  }
+  .bs-icon {
+    padding-top: 1px;
+  }
+  .bs-who {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+  .bs-name {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+  }
+  .bs-kind {
+    font-size: 13px;
+    color: var(--h-dim);
+  }
+  .bs-desc {
+    font-size: 15px;
+    color: var(--h-muted);
+  }
+  .bs-desc.pending {
+    color: var(--h-dim);
+  }
+</style>

@@ -1,0 +1,39 @@
+---
+import TransparencyDecisions from '../components/house/transparency/TransparencyDecisions.astro';
+import TransparencyHero from '../components/house/transparency/TransparencyHero.astro';
+import TransparencyReleases from '../components/house/transparency/TransparencyReleases.astro';
+import TransparencyRoadmap from '../components/house/transparency/TransparencyRoadmap.astro';
+import TransparencyStatus from '../components/house/transparency/TransparencyStatus.astro';
+import {
+  DECISIONS,
+  PRODUCT_STATUSES,
+  RELEASES,
+  RELEASES_URL,
+  RELEASES_VISIBLE,
+  SITE_ROADMAP,
+  STATUS_UPDATED_AT,
+} from '../data/house/transparency.ts';
+import House from '../layouts/House.astro';
+---
+
+<House
+  title="Transparência · Nelcota"
+  description="O status de cada produto, as versões publicadas e as decisões com data."
+  current="transparency"
+>
+  <div class="h-wrap tr">
+    <TransparencyHero />
+    <TransparencyStatus products={PRODUCT_STATUSES} updatedAt={STATUS_UPDATED_AT} />
+    <TransparencyReleases releases={RELEASES} visible={RELEASES_VISIBLE} allUrl={RELEASES_URL} />
+    <TransparencyDecisions decisions={DECISIONS} />
+    <TransparencyRoadmap items={SITE_ROADMAP} />
+  </div>
+</House>
+
+<style>
+  .tr {
+    display: flex;
+    flex-direction: column;
+    gap: 96px;
+  }
+</style>

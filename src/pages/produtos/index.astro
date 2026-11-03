@@ -1,0 +1,29 @@
+---
+import BackstageTools from '../../components/house/products/BackstageTools.astro';
+import ProductGroup from '../../components/house/products/ProductGroup.astro';
+import ProductsHero from '../../components/house/products/ProductsHero.astro';
+import { BACKSTAGE_TOOLS, PRODUCT_GROUPS } from '../../data/house/products.ts';
+import House from '../../layouts/House.astro';
+
+// Each group continues the left/right zigzag where the previous one stopped.
+const groups = PRODUCT_GROUPS.map((group, groupIndex) => ({
+  group,
+  startIndex: PRODUCT_GROUPS.slice(0, groupIndex).reduce((total, previous) => total + previous.items.length, 0),
+}));
+---
+
+<House title="Produtos · Nelcota" description="Infraestrutura e aplicações que a Nelcota constrói e mantém." current="products">
+  <div class="h-wrap pr">
+    <ProductsHero />
+    {groups.map(({ group, startIndex }) => <ProductGroup group={group} startIndex={startIndex} />)}
+    <BackstageTools tools={BACKSTAGE_TOOLS} />
+  </div>
+</House>
+
+<style>
+  .pr {
+    display: flex;
+    flex-direction: column;
+    gap: 96px;
+  }
+</style>

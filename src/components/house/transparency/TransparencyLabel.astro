@@ -1,0 +1,34 @@
+---
+/**
+ * Small grey section title with a rule under it. Anything in the slot sits
+ * on the right of the same line (e.g. the update date).
+ */
+interface Props {
+  id: string;
+  text: string;
+}
+const { id, text } = Astro.props;
+---
+
+<div class="tr-label">
+  <h2 id={id}>{text}</h2>
+  <slot />
+</div>
+
+<style>
+  .tr-label {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #ffffff1a;
+  }
+  .tr-label h2 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--h-muted);
+  }
+</style>

@@ -1,0 +1,33 @@
+---
+/**
+ * Frame shared by the home sections below the products: top rule, page width, vertical rhythm,
+ * and [data-reveal] so their titles animate in (scripts/house/home-reveal.ts).
+ */
+interface Props {
+  id: string;
+  labelledBy: string;
+}
+const { id, labelledBy } = Astro.props;
+---
+
+<section class="hs" id={id} aria-labelledby={labelledBy} data-reveal>
+  <div class="h-wrap hs-inner">
+    <slot />
+  </div>
+</section>
+
+<style>
+  .hs {
+    border-top: 1px solid var(--h-line);
+  }
+  :global(.house) .hs-inner {
+    padding-top: 120px;
+    padding-bottom: 120px;
+  }
+  @media (max-width: 760px) {
+    :global(.house) .hs-inner {
+      padding-top: 72px;
+      padding-bottom: 72px;
+    }
+  }
+</style>

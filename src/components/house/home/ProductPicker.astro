@@ -1,0 +1,71 @@
+---
+import { HOME_PRODUCT_ITEMS, HOME_PRODUCTS } from '../../../data/house/home.ts';
+
+/** The bars under "Nelcota é ___" (one per word) and the 01 / 04 counter, driven by home-word-track.ts. */
+const total = String(HOME_PRODUCT_ITEMS.length).padStart(2, '0');
+---
+
+<div class="hp-pick">
+  <fieldset class="hp-dots" aria-label={HOME_PRODUCTS.dotsLabel}>
+    {
+      HOME_PRODUCT_ITEMS.map((item, index) => (
+        <button
+          type="button"
+          class="hp-dot"
+          data-word-dot={index}
+          aria-label={`${HOME_PRODUCTS.prefix} ${item.word}`}
+          aria-current={index === 0 ? 'true' : 'false'}
+        >
+          <span />
+        </button>
+      ))
+    }
+  </fieldset>
+  <span class="hp-counter" data-word-counter>01 / {total}</span>
+</div>
+
+<style>
+  .hp-pick {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hp-dots {
+    display: flex;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .hp-dot {
+    width: 44px;
+    height: 44px;
+    padding: 0 6px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+  .hp-dot span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    border-radius: 2px;
+    background: #ffffff29;
+  }
+  .hp-dot[aria-current='true'] span {
+    background: var(--h-blue-ink);
+  }
+  .hp-counter {
+    font-family: var(--h-mono);
+    font-size: 12px;
+    color: var(--h-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .hp-dot span {
+      transition: background-color 0.3s ease;
+    }
+  }
+</style>

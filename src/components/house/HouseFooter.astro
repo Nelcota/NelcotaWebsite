@@ -1,0 +1,77 @@
+---
+import mark from '../../assets/house/mark.webp';
+import { HOUSE_ROUTES } from '../../lib/house/routes.ts';
+
+/** Giant wordmark footer from the mockup, with the way to the BaaS landing, its docs and the comparison. */
+const year = new Date().getFullYear();
+const links = [
+  { label: 'Nelcota BaaS', href: HOUSE_ROUTES.baas },
+  { label: 'Documentação', href: HOUSE_ROUTES.docs },
+  { label: 'Comparação', href: HOUSE_ROUTES.compare },
+] as const;
+---
+
+<footer class="hf">
+  <div class="h-wrap hf-inner">
+    <div class="hf-mark" aria-hidden="true"><img src={mark.src} alt="" width="216" height="216" />Nelcota</div>
+    <nav class="hf-links" aria-label="Nelcota BaaS">
+      {links.map((link) => <a href={link.href}>{link.label}</a>)}
+    </nav>
+    <div class="hf-meta">
+      <span>© {year} Nelcota</span>
+      <span>Política de privacidade (em breve)</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .hf {
+    margin-top: 120px;
+    border-top: 1px solid var(--h-line);
+  }
+  .hf-inner {
+    padding-top: 48px;
+    padding-bottom: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+  }
+  .hf-mark {
+    display: flex;
+    align-items: center;
+    gap: 0.08em;
+    font-weight: 700;
+    font-size: clamp(64px, 15vw, 216px);
+    line-height: 0.8;
+    letter-spacing: -0.05em;
+  }
+  .hf-mark img {
+    width: 1em;
+    height: 1em;
+    margin-left: -0.14em;
+    display: block;
+    flex-shrink: 0;
+  }
+  .hf-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 24px;
+  }
+  .hf-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--h-blue-ink);
+    text-decoration: none;
+  }
+  .hf-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--h-dim);
+  }
+</style>

@@ -1,0 +1,62 @@
+---
+import { CONTACT_EMAIL_PLACEHOLDER, type ContactKind } from '../../../data/house/services.ts';
+import ServicesContactForm from './ServicesContactForm.astro';
+import ServicesContactSent from './ServicesContactSent.astro';
+import ServicesSpecs from './ServicesSpecs.astro';
+
+/**
+ * "Conte o seu projeto". The form only validates in the browser: nothing is
+ * sent anywhere yet (src/scripts/house/contact-form.ts).
+ */
+interface Props {
+  kinds: readonly ContactKind[];
+  defaultKind: string;
+}
+const { kinds, defaultKind } = Astro.props;
+---
+
+<section id="contato" aria-labelledby="contato-titulo" class="sv-contact" data-contact>
+  <div class="sv-contact-intro">
+    <h2 id="contato-titulo">Conte o seu projeto</h2>
+    <p>Algumas linhas bastam. A gente volta com perguntas e, depois, uma proposta por escrito.</p>
+    <ServicesSpecs specs={[{ label: 'E-mail', value: CONTACT_EMAIL_PLACEHOLDER, pending: true }]} />
+  </div>
+  <div>
+    <ServicesContactSent contactEmail={CONTACT_EMAIL_PLACEHOLDER} />
+    <ServicesContactForm kinds={kinds} defaultKind={defaultKind} />
+  </div>
+</section>
+
+<script>
+  import '../../../scripts/house/contact-form.ts';
+</script>
+
+<style>
+  .sv-contact {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    gap: 48px;
+    align-items: start;
+    padding-top: 40px;
+    border-top: 1px solid #ffffff1a;
+    scroll-margin-top: calc(var(--h-nav-h) + 16px);
+  }
+  .sv-contact-intro {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .sv-contact-intro h2 {
+    margin: 0;
+    font-size: clamp(30px, 3vw, 40px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .sv-contact-intro p {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--h-muted);
+    max-width: 28em;
+  }
+</style>

@@ -1,0 +1,59 @@
+---
+import type { RoadmapItem } from '../../../data/house/transparency.ts';
+import TransparencyLabel from './TransparencyLabel.astro';
+
+/** "Roadmap do site": now, next and later. */
+interface Props {
+  items: readonly RoadmapItem[];
+}
+const { items } = Astro.props;
+---
+
+<section aria-labelledby="roadmap">
+  <TransparencyLabel id="roadmap" text="Roadmap do site" />
+  <ol class="tr-roadmap">
+    {items.map((item) => (
+      <li>
+        <span class="tr-roadmap-when">{item.when}</span>
+        <span class="tr-roadmap-body">
+          <span class="tr-roadmap-title">{item.title}</span>
+          <span class="tr-roadmap-text">{item.text}</span>
+        </span>
+      </li>
+    ))}
+  </ol>
+</section>
+
+<style>
+  .tr-roadmap {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .tr-roadmap li {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 8px 24px;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--h-line);
+  }
+  .tr-roadmap-when {
+    font-size: 15px;
+    color: var(--h-dim);
+  }
+  .tr-roadmap-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+  .tr-roadmap-title {
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .tr-roadmap-text {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--h-muted);
+  }
+</style>

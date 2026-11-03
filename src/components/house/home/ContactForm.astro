@@ -1,0 +1,124 @@
+---
+import { HOME_CONTACT } from '../../../data/house/home.ts';
+
+/**
+ * Contact form of the home. Sending is not wired up: method="dialog" makes a submit a no-op
+ * even without the script (nothing goes to the URL or the network), and
+ * scripts/house/home-contact.ts only validates and says so.
+ */
+const fields = [
+  { key: 'name', id: 'home-nome', label: HOME_CONTACT.fields.name, type: 'text', autocomplete: 'name' },
+  { key: 'email', id: 'home-email', label: HOME_CONTACT.fields.email, type: 'email', autocomplete: 'email' },
+] as const;
+---
+
+<div class="cf">
+  <form class="cf-form" method="dialog" novalidate data-contact-form>
+    {
+      fields.map((field) => (
+        <div class="cf-field">
+          <label for={field.id}>{field.label}</label>
+          <input id={field.id} type={field.type} autocomplete={field.autocomplete} aria-describedby={`${field.id}-erro`} data-contact-field={field.key} />
+          <span id={`${field.id}-erro`} class="cf-error" />
+        </div>
+      ))
+    }
+    <div class="cf-field">
+      <label for="home-mensagem">{HOME_CONTACT.fields.message}</label>
+      <textarea id="home-mensagem" rows="4" placeholder={HOME_CONTACT.placeholder} aria-describedby="home-mensagem-erro" data-contact-field="message"></textarea>
+      <span id="home-mensagem-erro" class="cf-error"></span>
+    </div>
+    <button type="submit" class="h-btn h-btn-primary cf-send">{HOME_CONTACT.send}</button>
+    <p class="cf-notice">{HOME_CONTACT.notice}</p>
+  </form>
+  <div class="cf-done" data-contact-done hidden>
+    <span class="cf-done-title" tabindex="-1" data-contact-done-title>{HOME_CONTACT.doneTitle}</span>
+    <span class="cf-done-text">{HOME_CONTACT.doneText}</span>
+    <button type="button" class="h-btn cf-again" data-contact-reset>{HOME_CONTACT.again}</button>
+  </div>
+</div>
+
+<style>
+  .cf-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .cf-form[hidden] {
+    display: none;
+  }
+  .cf-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .cf-field label {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .cf-field input,
+  .cf-field textarea {
+    min-height: 48px;
+    padding: 0 14px;
+    border-radius: 12px;
+    border: 1px solid var(--h-line-strong);
+    background: var(--h-bg-2);
+    color: var(--h-ink);
+    font: 400 16px var(--h-sans);
+  }
+  .cf-field textarea {
+    padding: 12px 14px;
+    resize: vertical;
+  }
+  .cf-field [aria-invalid='true'] {
+    border-color: #ff7b73;
+  }
+  .cf-error {
+    min-height: 1em;
+    font-size: 13px;
+    color: #ff7b73;
+  }
+  :global(.house) .cf-send {
+    align-self: flex-start;
+    min-height: 48px;
+    padding: 0 24px;
+    font-size: 16px;
+  }
+  .cf-notice {
+    margin: 0;
+    font-size: 13px;
+    color: var(--h-dim);
+  }
+  .cf-done {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid #ffb34066;
+  }
+  .cf-done[hidden] {
+    display: none;
+  }
+  .cf-done-title {
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .cf-done-title:focus {
+    outline: none;
+  }
+  .cf-done-text {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--h-muted);
+  }
+  :global(.house) .cf-again {
+    align-self: flex-start;
+    padding: 0 18px;
+    font-size: 14px;
+  }
+</style>
+
+<script>
+  import '../../../scripts/house/home-contact.ts';
+</script>

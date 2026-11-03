@@ -1,0 +1,120 @@
+---
+import type { TitleLine } from '../../types/house.ts';
+
+/**
+ * Title lines uncovered by a blue caret that sweeps left to right (the mockup's "pl-line"),
+ * shared by every software house page. Screen readers get the whole sentence once; the
+ * animated copies are hidden from them.
+ */
+interface Props {
+  lines: readonly TitleLine[];
+  /**
+   * intro: the word of the opening screen. hero: after the opening (sooner when it is skipped).
+   * section: when the closest [data-reveal] ancestor gets [data-revealed] (scripts/house/home-reveal.ts).
+   * page: the title at the top of the other pages, right after load.
+   */
+  variant: 'intro' | 'hero' | 'section' | 'page';
+}
+const { lines, variant } = Astro.props;
+const label = lines.map((line) => line.join('')).join(' ');
+---
+
+<span class="h-sr">{label}</span>
+{
+  lines.map(([lead, accent, tail], index) => (
+    <span class:list={['rl', `rl-${variant}`, `rl-i${index}`]} aria-hidden="true">
+      {/* One line on purpose: a line break here would add a space before the accent or the tail. */}
+      <span class="rl-text">{lead}{accent.length > 0 && <em>{accent}</em>}{tail}</span>
+      <span class="rl-caret" />
+    </span>
+  ))
+}
+
+<style>
+  .rl {
+    --rl-i: 0;
+    --rl-base: 120ms;
+    --rl-delay: calc(var(--rl-base) + var(--rl-i) * 140ms);
+    display: block;
+    position: relative;
+    width: fit-content;
+    max-width: 100%;
+  }
+  .rl-i1 {
+    --rl-i: 1;
+  }
+  .rl-i2 {
+    --rl-i: 2;
+  }
+  .rl-intro,
+  .rl-page {
+    --rl-base: 450ms;
+  }
+  /* The opening slides away at 1550 ms; the title starts right after. */
+  .rl-hero {
+    --rl-base: 1800ms;
+  }
+  :global(.hm-skip-intro) .rl-hero {
+    --rl-base: 300ms;
+  }
+  .rl-text {
+    display: block;
+    clip-path: inset(0 0 -10% 0);
+  }
+  .rl-caret {
+    position: absolute;
+    top: 0.24em;
+    bottom: 0.12em;
+    left: 0;
+    width: 2px;
+    border-radius: 1px;
+    background: var(--h-blue);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .rl-intro .rl-text,
+    .rl-hero .rl-text,
+    .rl-page .rl-text,
+    :global([data-revealed]) .rl-section .rl-text {
+      animation: hm-rl-text 0.9s cubic-bezier(0.76, 0, 0.24, 1) var(--rl-delay) both;
+    }
+    .rl-intro .rl-caret,
+    .rl-hero .rl-caret,
+    .rl-page .rl-caret,
+    :global([data-revealed]) .rl-section .rl-caret {
+      animation:
+        hm-rl-caret 0.9s cubic-bezier(0.76, 0, 0.24, 1) var(--rl-delay) both,
+        hm-rl-caret-out 0.25s ease calc(var(--rl-delay) + 900ms) forwards;
+    }
+    /* With the script running, section titles wait hidden until they reach the screen. */
+    :global(.hm-js [data-reveal]:not([data-revealed])) .rl-section .rl-text {
+      clip-path: inset(0 100% -10% 0);
+    }
+  }
+
+  @keyframes hm-rl-text {
+    from {
+      clip-path: inset(0 100% -10% 0);
+    }
+    to {
+      clip-path: inset(0 0 -10% 0);
+    }
+  }
+  @keyframes hm-rl-caret {
+    from {
+      left: 0;
+      opacity: 1;
+    }
+    to {
+      left: calc(100% + 0.06em);
+      opacity: 1;
+    }
+  }
+  @keyframes hm-rl-caret-out {
+    to {
+      opacity: 0;
+    }
+  }
+</style>

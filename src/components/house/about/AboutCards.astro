@@ -1,0 +1,52 @@
+---
+import { HOUSE_ROUTES } from '../../../lib/house/routes.ts';
+
+/** Two cards to the transparency and services pages. */
+---
+
+<section class="ab-cards">
+  <a href={HOUSE_ROUTES.transparency} class="ab-card">
+    <span class="ab-card-t">Status e versões</span>
+    <span class="ab-card-s">O estado real de cada produto, o changelog e as decisões com data.</span>
+    <span class="ab-card-go">Ver transparência →</span>
+  </a>
+  <a href={HOUSE_ROUTES.services} class="ab-card">
+    <span class="ab-card-t">Sistemas para clientes</span>
+    <span class="ab-card-s">Websites e sistemas sobre o Nelcota BaaS, a mesma base dos nossos produtos.</span>
+    <span class="ab-card-go">Ver serviços →</span>
+  </a>
+</section>
+
+<style>
+  .ab-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .ab-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 28px;
+    border-radius: 20px;
+    border: 1px solid var(--h-line-strong);
+    text-decoration: none;
+    transition: border-color 0.25s ease;
+  }
+  .ab-card:hover {
+    border-color: #1a73ff99;
+  }
+  .ab-card-t {
+    font-size: 22px;
+    font-weight: 600;
+  }
+  .ab-card-s {
+    font-size: 15px;
+    color: var(--h-muted);
+  }
+  .ab-card-go {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--h-blue-ink);
+  }
+</style>

@@ -1,0 +1,69 @@
+---
+import type { ContactField } from '../../../utils/contact-validation.ts';
+
+/**
+ * One labelled text field with its error line. Fields carry no `name` on
+ * purpose: even if the form were submitted natively, no value would leave it.
+ */
+interface Props {
+  id: string;
+  field: ContactField;
+  label: string;
+  kind: 'text' | 'email' | 'textarea';
+  autocomplete?: string;
+  placeholder?: string;
+}
+const { id, field, label, kind, autocomplete, placeholder } = Astro.props;
+const errorId = `${id}-erro`;
+---
+
+<div class="sv-field">
+  <label for={id}>{label}</label>
+  {kind === 'textarea' && (
+    <textarea id={id} rows="5" placeholder={placeholder} aria-describedby={errorId} data-contact-field={field}></textarea>
+  )}
+  {kind !== 'textarea' && (
+    <input id={id} type={kind} autocomplete={autocomplete} placeholder={placeholder} aria-describedby={errorId} data-contact-field={field} />
+  )}
+  <span id={errorId} class="sv-field-error" data-contact-error={field}></span>
+</div>
+
+<style>
+  .sv-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .sv-field label {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .sv-field input,
+  .sv-field textarea {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid var(--h-line-strong);
+    background: var(--h-bg-2);
+    color: var(--h-ink);
+    font: 400 16px var(--h-sans);
+  }
+  .sv-field input {
+    height: 48px;
+    padding: 0 14px;
+  }
+  .sv-field textarea {
+    padding: 12px 14px;
+    resize: vertical;
+  }
+  .sv-field input::placeholder,
+  .sv-field textarea::placeholder {
+    color: #75757d;
+  }
+  .sv-field [aria-invalid='true'] {
+    border-color: #ff7b73;
+  }
+  .sv-field-error {
+    font-size: 13px;
+    color: #ff7b73;
+  }
+</style>

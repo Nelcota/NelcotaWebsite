@@ -1,0 +1,60 @@
+---
+import type { RateLimitFeature } from '../../../data/house/rate-limit.ts';
+
+/** "Como funciona": four short columns. */
+interface Props {
+  features: readonly RateLimitFeature[];
+}
+const { features } = Astro.props;
+---
+
+<section class="rf" aria-labelledby="como">
+  <h2 id="como">Como funciona</h2>
+  <div class="rf-grid">
+    {features.map((feature) => (
+      <div class="rf-item">
+        <h3>{feature.title}</h3>
+        <p>{feature.text}</p>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .rf {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  .rf h2 {
+    margin: 0;
+    font-size: clamp(28px, 3vw, 36px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .rf-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr));
+    gap: 32px;
+  }
+  .rf-item {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 20px;
+    border-top: 1px solid var(--h-line-strong);
+  }
+  .rf-item h3 {
+    margin: 0;
+    font-family: var(--h-mono);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--h-amber);
+  }
+  .rf-item p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--h-muted);
+  }
+</style>

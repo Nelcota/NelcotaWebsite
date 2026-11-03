@@ -1,0 +1,133 @@
+---
+import { HOME_SERVICE_OFFERS, HOME_SERVICES } from '../../../data/house/home.ts';
+import HomeSection from './HomeSection.astro';
+import HomeSectionTitle from './HomeSectionTitle.astro';
+
+/** Services: what we build for clients; the three offers slide in one after the other. */
+---
+
+<HomeSection id="servicos" labelledBy="h-servicos">
+  <div class="sv">
+    <div class="sv-copy">
+      <HomeSectionTitle id="h-servicos" eyebrow={HOME_SERVICES.eyebrow} lines={HOME_SERVICES.lines} />
+      <p class="h-lead">{HOME_SERVICES.sub}</p>
+      <div class="sv-actions">
+        <a class="h-btn h-btn-primary sv-btn" href="#contato">{HOME_SERVICES.cta}</a>
+        <a class="h-btn sv-btn sv-btn-soft" href={HOME_SERVICES.linkHref}>{HOME_SERVICES.link}</a>
+      </div>
+    </div>
+    <ul class="sv-offers">
+      {
+        HOME_SERVICE_OFFERS.map((offer) => (
+          <li class="sv-offer">
+            <span class="sv-line" aria-hidden="true" />
+            <h3>{offer.title}</h3>
+            <p>{offer.text}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</HomeSection>
+
+<style>
+  .sv {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+    gap: 56px;
+    align-items: stretch;
+  }
+  .sv-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .sv-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  :global(.house) .sv-btn {
+    min-height: 48px;
+    padding: 0 22px;
+    font-size: 16px;
+  }
+  :global(.house) .sv-btn-soft {
+    border-color: var(--h-bg-3);
+    background: var(--h-bg-3);
+  }
+  .sv-offers {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 32px;
+  }
+  .sv-offer {
+    --sv-delay: 0ms;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .sv-offer:nth-child(2) {
+    --sv-delay: 160ms;
+  }
+  .sv-offer:nth-child(3) {
+    --sv-delay: 320ms;
+  }
+  .sv-line {
+    display: block;
+    height: 1px;
+    background: #ffffff1f;
+    transform-origin: left;
+  }
+  .sv-offer h3 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .sv-offer p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--h-muted);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global([data-revealed]) .sv-offer {
+      animation: hm-sv-in 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) var(--sv-delay) both;
+    }
+    :global([data-revealed]) .sv-line {
+      animation: hm-sv-line 0.9s cubic-bezier(0.76, 0, 0.24, 1) var(--sv-delay) both;
+    }
+    :global(.hm-js [data-reveal]:not([data-revealed])) .sv-offer {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    :global(.hm-js [data-reveal]:not([data-revealed])) .sv-line {
+      transform: scaleX(0);
+    }
+  }
+
+  @keyframes hm-sv-in {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes hm-sv-line {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+</style>

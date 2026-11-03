@@ -1,0 +1,103 @@
+---
+import { HOUSE_ROUTES } from '../../../lib/house/routes.ts';
+
+/** Top of /produtos/ratelimit: breadcrumb, product badge, title and the README warning. */
+---
+
+<section class="rh">
+  <nav class="rh-trail" aria-label="Trilha">
+    <a href={HOUSE_ROUTES.products}>Produtos</a><span aria-hidden="true">/</span><span>Infraestrutura</span><span aria-hidden="true">/</span><span aria-current="page">RateLimit</span>
+  </nav>
+  <div class="rh-badge">
+    <span class="rh-mark" aria-hidden="true">R</span>
+    <span class="rh-name">RateLimit</span>
+    <span class="h-status" data-kind="neutral">Implementado e testado</span>
+  </div>
+  <h1 class="rh-title">Quando algo falha, <span>bloqueia</span>.</h1>
+  <p class="h-lead">Limitador de requisições para APIs Rust. Se o armazenamento das regras cai, ele bloqueia em vez de deixar tudo passar. GCRA, regras atômicas, em memória ou Valkey, para Tower e axum.</p>
+  <div class="rh-note" role="note">
+    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M8 1.5l6.5 12H1.5z M8 6v3.5 M8 11.5v.5"></path>
+    </svg>
+    <span>Nenhum crate publicado ainda. O próprio README avisa que isto não é uma certificação de produção.</span>
+  </div>
+</section>
+
+<style>
+  .rh {
+    padding-top: 56px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .rh-trail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--h-dim);
+  }
+  .house .rh-trail a {
+    color: var(--h-muted);
+  }
+  .rh-trail [aria-current] {
+    color: var(--h-ink);
+  }
+  .rh-badge {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+  }
+  .rh-mark {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--h-mono);
+    font-weight: 700;
+    background: var(--h-amber-wash);
+    color: var(--h-amber);
+  }
+  .rh-name {
+    font-family: var(--h-mono);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--h-amber);
+  }
+  .rh-title {
+    margin: 0;
+    font-family: var(--h-mono);
+    font-weight: 600;
+    font-size: clamp(38px, 5.6vw, 76px);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+    max-width: 14em;
+  }
+  .rh-title span {
+    color: var(--h-amber);
+  }
+  .rh-note {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    max-width: 40em;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid #ff9f0a55;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .rh-note svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+    fill: none;
+    stroke: var(--h-amber);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+</style>

@@ -1,0 +1,130 @@
+---
+import type { Product } from '../../../data/house/products.ts';
+import GithubLink from './GithubLink.astro';
+import ProductMedia from './ProductMedia.astro';
+
+/** One product: media on one side, name, line, specs and links on the other. */
+interface Props {
+  product: Product;
+  /** Puts the media after the text, so blocks alternate down the page. */
+  flip: boolean;
+}
+const { product, flip } = Astro.props;
+---
+
+<article id={product.id} class:list={['pb', { flip }]}>
+  <div class="pb-media">
+    <ProductMedia media={product.media} />
+  </div>
+
+  <div class="pb-text">
+    <h3 class="pb-name"><span class="pb-hue" data-hue={product.hue} aria-hidden="true"></span>{product.name}</h3>
+    <p class="pb-line">{product.line}</p>
+    <dl class="pb-specs">
+      {product.specs.map((spec) => (
+        <>
+          <dt>{spec.label}</dt>
+          <dd>{spec.value}</dd>
+        </>
+      ))}
+    </dl>
+    <div class="pb-links">
+      <GithubLink name={product.name} href={product.github} />
+      {product.links.map((link) => <a class="pb-more" href={link.href}>{link.label}</a>)}
+    </div>
+  </div>
+</article>
+
+<style>
+  .pb {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
+    gap: 48px;
+    align-items: center;
+    scroll-margin-top: calc(var(--h-nav-h) + 24px);
+  }
+  .pb-media,
+  .pb-text {
+    min-width: 0;
+  }
+  /* Order, not DOM position: the reading order stays text after media. */
+  .flip .pb-media {
+    order: 2;
+  }
+  .pb-text {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .pb-name {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: clamp(30px, 3vw, 40px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .pb-hue {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .pb-hue[data-hue='blue'] {
+    background: var(--h-blue-ink);
+  }
+  .pb-hue[data-hue='amber'] {
+    background: var(--h-amber);
+  }
+  .pb-hue[data-hue='green'] {
+    background: var(--h-green);
+  }
+  .pb-hue[data-hue='violet'] {
+    background: #bf9dff;
+  }
+  .pb-hue[data-hue='coral'] {
+    background: #eb9a7e;
+  }
+  .pb-hue[data-hue='sky'] {
+    background: #7cb0ff;
+  }
+  .pb-line {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.5;
+    color: var(--h-muted);
+    max-width: 30em;
+  }
+  .pb-specs {
+    margin: 0;
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: 10px 20px;
+    font-size: 15px;
+  }
+  .pb-specs dt {
+    color: var(--h-dim);
+  }
+  .pb-specs dd {
+    margin: 0;
+  }
+  .pb-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 24px;
+    margin-top: 4px;
+  }
+  .pb-more {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .house .pb-more {
+    color: var(--h-blue-ink);
+  }
+</style>

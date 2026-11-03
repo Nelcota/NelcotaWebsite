@@ -1,0 +1,40 @@
+---
+import ServicesBase from '../components/house/services/ServicesBase.astro';
+import ServicesCases from '../components/house/services/ServicesCases.astro';
+import ServicesContact from '../components/house/services/ServicesContact.astro';
+import ServicesHero from '../components/house/services/ServicesHero.astro';
+import ServicesOffers from '../components/house/services/ServicesOffers.astro';
+import ServicesSteps from '../components/house/services/ServicesSteps.astro';
+import {
+  CONTACT_DEFAULT_KIND,
+  CONTACT_KINDS,
+  SERVICE_BASE,
+  SERVICE_CASES,
+  SERVICE_OFFERS,
+  SERVICE_STEPS,
+} from '../data/house/services.ts';
+import House from '../layouts/House.astro';
+---
+
+<House
+  title="Serviços · Nelcota"
+  description="Websites, lojas e sistemas internos sob medida, construídos sobre o Nelcota BaaS."
+  current="services"
+>
+  <div class="h-wrap sv">
+    <ServicesHero />
+    <ServicesOffers offers={SERVICE_OFFERS} />
+    <ServicesBase specs={SERVICE_BASE} />
+    <ServicesCases cases={SERVICE_CASES} />
+    <ServicesSteps steps={SERVICE_STEPS} />
+    <ServicesContact kinds={CONTACT_KINDS} defaultKind={CONTACT_DEFAULT_KIND} />
+  </div>
+</House>
+
+<style>
+  .sv {
+    display: flex;
+    flex-direction: column;
+    gap: 96px;
+  }
+</style>

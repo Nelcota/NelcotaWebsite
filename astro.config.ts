@@ -26,6 +26,16 @@ if (env('SITE_URL') == null)
 new URL(siteUrl); // throws on a malformed SITE_URL instead of shipping broken links
 const basePath = env('BASE_PATH') ?? '/';
 
+/** Software house pages kept out of the sitemap (they carry noindex). */
+const HOUSE_PATHS = [
+  '/',
+  '/produtos/',
+  '/produtos/ratelimit/',
+  '/servicos/',
+  '/sobre/',
+  '/transparencia/',
+] as const;
+
 /**
  * The theme bootstrap script is inlined in <head> before first paint.
  * Its SHA-256 is added to the CSP so the page can keep a strict policy
@@ -72,6 +82,10 @@ export default defineConfig({
   base: basePath,
   output: 'static',
   trailingSlash: 'ignore',
+  // The Portuguese BaaS landing moved to /pt-br/produtos/baas/; / is the software house home (docs/ROADMAP.md).
+  redirects: {
+    '/pt-br': '/',
+  },
   compressHTML: true,
   build: {
     // One page, small CSS: inlining removes a render-blocking request.
@@ -120,6 +134,48 @@ export default defineConfig({
         ],
       },
     },
+    {
+      provider: fontProviders.local(),
+      name: 'Urbanist',
+      cssVariable: '--font-urbanist',
+      fallbacks: ['sans-serif'],
+      options: {
+        variants: [
+          {
+            // Variable font, 100–900 (Fontsource, latin subset). Used by the software house pages.
+            weight: '100 900',
+            style: 'normal',
+            src: ['./src/assets/fonts/urbanist-latin-wght-normal.woff2'],
+            display: 'swap',
+            unicodeRange: [...latin],
+          },
+        ],
+      },
+    },
+    {
+      provider: fontProviders.local(),
+      name: 'Instrument Serif',
+      cssVariable: '--font-instrument-serif',
+      fallbacks: ['serif'],
+      options: {
+        variants: [
+          {
+            weight: 400,
+            style: 'normal',
+            src: ['./src/assets/fonts/instrument-serif-latin-400-normal.woff2'],
+            display: 'swap',
+            unicodeRange: [...latin],
+          },
+          {
+            weight: 400,
+            style: 'italic',
+            src: ['./src/assets/fonts/instrument-serif-latin-400-italic.woff2'],
+            display: 'swap',
+            unicodeRange: [...latin],
+          },
+        ],
+      },
+    },
   ],
   image: {
     responsiveStyles: false,
@@ -154,7 +210,14 @@ export default defineConfig({
         defaultLocale: 'en',
         locales: { en: 'en', 'pt-br': 'pt-BR' },
       },
-      filter: (page) => !page.includes('/404'),
+      // The software house pages are noindex until the phase is approved (docs/ROADMAP.md).
+      filter: (page) => {
+        const path = new URL(page).pathname;
+        return (
+          !path.includes('/404') &&
+          !HOUSE_PATHS.some((house) => path === `${basePath.replace(/\/$/, '')}${house}`)
+        );
+      },
     }),
   ],
   vite: {
