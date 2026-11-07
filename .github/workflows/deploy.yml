@@ -5,7 +5,7 @@ on:
     branches: [main]
   schedule:
     # Daily rebuild so the release list stays fresh.
-    - cron: '17 5 * * *'
+    - cron: "17 5 * * *"
   workflow_dispatch:
   repository_dispatch:
     # Trigger from another repo's release workflow:

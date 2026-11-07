@@ -30,13 +30,13 @@ pnpm install
 pnpm dev        # http://localhost:4321
 ```
 
-| Command | What it does |
-| --- | --- |
-| `pnpm build` / `pnpm preview` | Static build in `dist/` and a local server for it |
-| `pnpm lint` / `pnpm check` | Biome and type checks |
-| `pnpm test:unit` / `pnpm test` | Unit tests and Playwright tests (after a build) |
-| `pnpm sizes` / `pnpm lhci` | Size budgets and Lighthouse CI |
-| `pnpm docs:sync` | Pull the latest guides from `Nelcota/Nelcota` |
+| Command                        | What it does                                      |
+| ------------------------------ | ------------------------------------------------- |
+| `pnpm build` / `pnpm preview`  | Static build in `dist/` and a local server for it |
+| `pnpm lint` / `pnpm check`     | Biome and type checks                             |
+| `pnpm test:unit` / `pnpm test` | Unit tests and Playwright tests (after a build)   |
+| `pnpm sizes` / `pnpm lhci`     | Size budgets and Lighthouse CI                    |
+| `pnpm docs:sync`               | Pull the latest guides from `Nelcota/Nelcota`     |
 
 ## Contributing
 

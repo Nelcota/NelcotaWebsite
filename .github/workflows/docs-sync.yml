@@ -6,7 +6,7 @@ name: Sync docs from Nelcota/Nelcota
 # merging deploys it. Nothing is published without review.
 on:
   schedule:
-    - cron: '40 4 * * *'
+    - cron: "40 4 * * *"
   workflow_dispatch:
     inputs:
       ref:
