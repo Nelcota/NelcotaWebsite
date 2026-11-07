@@ -15,14 +15,14 @@ Thanks for helping. The organization-wide [code of conduct](https://github.com/N
 | ----------------------------------- | --------------------------- | ------------------------------------------------------------------------------- |
 | Node.js                             | 26 (`.nvmrc`, `engines`)    | Runs the TypeScript scripts directly (type stripping)                           |
 | pnpm                                | 12.14.0 (`packageManager`)  |                                                                                 |
-| Astro                               | 7.4.0                       | `output: 'static'`, native i18n routing, Fonts API, Content Layer, CSP          |
-| Tailwind CSS                        | 4.3.3 (`@tailwindcss/vite`) | CSS-first config in `src/styles/global.css` (`@theme`), no `tailwind.config.js` |
+| Astro                               | 7.4.5                       | `output: 'static'`, native i18n routing, Fonts API, Content Layer, CSP          |
+| Tailwind CSS                        | 4.3.4 (`@tailwindcss/vite`) | CSS-first config in `src/styles/global.css` (`@theme`), no `tailwind.config.js` |
 | TypeScript                          | 6.0.3                       | `strict` + `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`             |
 | Biome                               | 2.6.4                       | Lint + format, full `.astro` support enabled                                    |
 | Playwright                          | 1.64.1                      | Smoke tests against the production build                                        |
 | Lighthouse CI                       | 0.15.1                      | Mobile audit of `/` and `/pt-br/` with budgets                                  |
-| shiki                               | 4.5.0                       | Build-time highlighting emitted as classes (no inline styles, CSP-safe)         |
-| satori + @resvg/resvg-js            | 0.62.0 + 2.6.2              | Open Graph images rendered at build time                                        |
+| shiki                               | 4.6.0                       | Build-time highlighting emitted as classes (no inline styles, CSP-safe)         |
+| satori + @resvg/resvg-js            | 0.63.2 + 2.6.2              | Open Graph images rendered at build time                                        |
 | sharp                               | 0.35.5                      | Image service (AVIF/WebP + raster icons from the mascot)                        |
 | @astrojs/sitemap                    | 3.7.4                       | `sitemap-index.xml` with hreflang alternates                                    |
 | subset-font, @fontsource(-variable) | 2.9.0, 5.3.0                | Dev-only: regenerate the self-hosted font files                                 |
