@@ -16,6 +16,7 @@ import { execFile as execFileCallback } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { parseArgs, promisify } from 'node:util';
 import { z } from 'astro/zod';
 import { type DocsLock, isCommitSha, lockSchema, packageVersions } from '../src/lib/docs/lock.ts';
@@ -28,7 +29,7 @@ import { REPO } from '../src/lib/site.ts';
 const execFile = promisify(execFileCallback);
 
 function vendorDirectory(version: DocsVersion): string {
-  return new URL(`../vendor/${docsVersion(version).directory}/`, import.meta.url).pathname;
+  return fileURLToPath(new URL(`../vendor/${docsVersion(version).directory}/`, import.meta.url));
 }
 const REQUEST_TIMEOUT_MS = 15_000;
 const GIT_MAX_BUFFER = 16 * 1024 * 1024;

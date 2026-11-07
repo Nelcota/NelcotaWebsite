@@ -11,21 +11,21 @@ Thanks for helping. The organization-wide [code of conduct](https://github.com/N
 
 ## Stack
 
-| Tool | Version | Notes |
-| --- | --- | --- |
-| Node.js | 26 (`.nvmrc`, `engines`) | Runs the TypeScript scripts directly (type stripping) |
-| pnpm | 12.14.0 (`packageManager`) | |
-| Astro | 7.4.0 | `output: 'static'`, native i18n routing, Fonts API, Content Layer, CSP |
-| Tailwind CSS | 4.3.3 (`@tailwindcss/vite`) | CSS-first config in `src/styles/global.css` (`@theme`), no `tailwind.config.js` |
-| TypeScript | 6.0.3 | `strict` + `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes` |
-| Biome | 2.5.15 | Lint + format, full `.astro` support enabled |
-| Playwright | 1.64.1 | Smoke tests against the production build |
-| Lighthouse CI | 0.15.1 | Mobile audit of `/` and `/pt-br/` with budgets |
-| shiki | 4.5.0 | Build-time highlighting emitted as classes (no inline styles, CSP-safe) |
-| satori + @resvg/resvg-js | 0.62.0 + 2.6.2 | Open Graph images rendered at build time |
-| sharp | 0.35.5 | Image service (AVIF/WebP + raster icons from the mascot) |
-| @astrojs/sitemap | 3.7.4 | `sitemap-index.xml` with hreflang alternates |
-| subset-font, @fontsource(-variable) | 2.9.0, 5.3.0 | Dev-only: regenerate the self-hosted font files |
+| Tool                                | Version                     | Notes                                                                           |
+| ----------------------------------- | --------------------------- | ------------------------------------------------------------------------------- |
+| Node.js                             | 26 (`.nvmrc`, `engines`)    | Runs the TypeScript scripts directly (type stripping)                           |
+| pnpm                                | 12.14.0 (`packageManager`)  |                                                                                 |
+| Astro                               | 7.4.0                       | `output: 'static'`, native i18n routing, Fonts API, Content Layer, CSP          |
+| Tailwind CSS                        | 4.3.3 (`@tailwindcss/vite`) | CSS-first config in `src/styles/global.css` (`@theme`), no `tailwind.config.js` |
+| TypeScript                          | 6.0.3                       | `strict` + `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`             |
+| Biome                               | 2.6.4                       | Lint + format, full `.astro` support enabled                                    |
+| Playwright                          | 1.64.1                      | Smoke tests against the production build                                        |
+| Lighthouse CI                       | 0.15.1                      | Mobile audit of `/` and `/pt-br/` with budgets                                  |
+| shiki                               | 4.5.0                       | Build-time highlighting emitted as classes (no inline styles, CSP-safe)         |
+| satori + @resvg/resvg-js            | 0.62.0 + 2.6.2              | Open Graph images rendered at build time                                        |
+| sharp                               | 0.35.5                      | Image service (AVIF/WebP + raster icons from the mascot)                        |
+| @astrojs/sitemap                    | 3.7.4                       | `sitemap-index.xml` with hreflang alternates                                    |
+| subset-font, @fontsource(-variable) | 2.9.0, 5.3.0                | Dev-only: regenerate the self-hosted font files                                 |
 
 Direct versions are pinned exactly in `package.json`. Patched audit-tool
 dependencies and the approved native build scripts are pinned in
@@ -62,11 +62,11 @@ pnpm test:ci        # docs:check + test:unit + build + test + sizes + lhci
 
 Optional environment variables (see `.env.example`):
 
-| Variable | Purpose |
-| --- | --- |
+| Variable       | Purpose                                                                                                   |
+| -------------- | --------------------------------------------------------------------------------------------------------- |
 | `GITHUB_TOKEN` | Raises the GitHub API rate limit for the loader and `pnpm snapshot`. Works without it (60 requests/hour). |
-| `SITE_URL` | Public origin, used for canonical URLs, sitemap, OG image URLs. Default `https://nelcota.github.io`. |
-| `BASE_PATH` | Base path for project-page deployments (`/repo/`). Default `/`. |
+| `SITE_URL`     | Public origin, used for canonical URLs, sitemap, OG image URLs. Default `https://nelcota.github.io`.      |
+| `BASE_PATH`    | Base path for project-page deployments (`/repo/`). Default `/`.                                           |
 
 ## How the content works
 
@@ -142,10 +142,10 @@ caddy run --config deploy/Caddyfile
 
 Measured with Lighthouse 12.6 (mobile, simulated slow 4G) on the production build, 2026-10-18:
 
-| Page | Perf | A11y | Best practices | SEO | FCP | LCP | TBT | CLS |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `/` | 100 | 100 | 100 | 100 | 1.1 s | 1.8 s | 0 ms | 0 |
-| `/pt-br/` | 100 | 100 | 100 | 100 | 1.1 s | 1.8 s | 0 ms | 0 |
+| Page      | Perf | A11y | Best practices | SEO | FCP   | LCP   | TBT  | CLS |
+| --------- | ---- | ---- | -------------- | --- | ----- | ----- | ---- | --- |
+| `/`       | 100  | 100  | 100            | 100 | 1.1 s | 1.8 s | 0 ms | 0   |
+| `/pt-br/` | 100  | 100  | 100            | 100 | 1.1 s | 1.8 s | 0 ms | 0   |
 
 Home page: 3.6 KiB of client JavaScript and 17.3 KiB of CSS (gzip, imported chunks included), plus 43.7 KiB of GSAP loaded only after the first interaction, logos and icons in one content-hashed sprite, no third parties. The LCP element is the hero subtitle, so the paint waits for the preloaded Manrope file after the document (caps: LCP 2.0 s, FCP 1.4 s, performance ≥ 0.98). CI fails if the budgets in `lighthouserc.cjs`, `budgets.json` or `scripts/sizes.ts` are exceeded.
 
@@ -177,4 +177,3 @@ tests/               smoke.spec.ts, docs.spec.ts, compare.spec.ts, unit/ (node -
 deploy/              Caddyfile
 .github/workflows/   ci.yml, deploy.yml, docs-sync.yml
 ```
-

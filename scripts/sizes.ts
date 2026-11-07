@@ -10,12 +10,13 @@
  */
 import { readdir, readFile } from 'node:fs/promises';
 import { dirname, join, posix, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import { gzip as gzipCallback } from 'node:zlib';
 
 const gzip = promisify(gzipCallback);
 
-const DIST = new URL('../dist/', import.meta.url).pathname;
+const DIST = fileURLToPath(new URL('../dist/', import.meta.url));
 const BYTES_PER_KB = 1024;
 const BUDGET = { js: 5 * BYTES_PER_KB, css: 20 * BYTES_PER_KB, lazyJs: 48 * BYTES_PER_KB } as const;
 const GZIP_LEVEL = 9;
