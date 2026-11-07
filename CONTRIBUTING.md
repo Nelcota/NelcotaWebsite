@@ -18,9 +18,9 @@ Thanks for helping. The organization-wide [code of conduct](https://github.com/N
 | Astro                               | 7.4.0                       | `output: 'static'`, native i18n routing, Fonts API, Content Layer, CSP          |
 | Tailwind CSS                        | 4.3.3 (`@tailwindcss/vite`) | CSS-first config in `src/styles/global.css` (`@theme`), no `tailwind.config.js` |
 | TypeScript                          | 6.0.3                       | `strict` + `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`             |
-| Biome                               | 2.6.4                       | Lint + format, full `.astro` support enabled                                    |
+| Biome                               | 2.6.5                       | Lint + format, full `.astro` support enabled                                    |
 | Playwright                          | 1.64.1                      | Smoke tests against the production build                                        |
-| Lighthouse CI                       | 0.15.1                      | Mobile audit of `/` and `/pt-br/` with budgets                                  |
+| Lighthouse CI                       | 0.16.0                      | Mobile audit of `/` and `/pt-br/` with budgets                                  |
 | shiki                               | 4.5.0                       | Build-time highlighting emitted as classes (no inline styles, CSP-safe)         |
 | satori + @resvg/resvg-js            | 0.62.0 + 2.6.2              | Open Graph images rendered at build time                                        |
 | sharp                               | 0.35.5                      | Image service (AVIF/WebP + raster icons from the mascot)                        |
@@ -31,7 +31,7 @@ Direct versions are pinned exactly in `package.json`. Patched audit-tool
 dependencies and the approved native build scripts are pinned in
 `pnpm-workspace.yaml`, which pnpm 12 reads instead of the former `package.json`
 `pnpm` field. Keep the Docker build's initial `COPY` in sync with these files.
-Lighthouse CI 0.15.1 retains Lighthouse 12.6.1 and its audit IDs, with patched
+Lighthouse CI 0.16.0 uses Lighthouse 13.6.0, with patched
 Puppeteer 25.16.0/browser-download dependencies in place of the older archive chain. Preserve all existing audit assertions and size budgets when
 updating this tooling, and run `pnpm audit` and `pnpm peers check` as well as
 the full CI checks below.
