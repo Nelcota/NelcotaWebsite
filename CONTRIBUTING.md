@@ -15,7 +15,7 @@ Thanks for helping. The organization-wide [code of conduct](https://github.com/N
 | ----------------------------------- | --------------------------- | ------------------------------------------------------------------------------- |
 | Node.js                             | 26 (`.nvmrc`, `engines`)    | Runs the TypeScript scripts directly (type stripping)                           |
 | pnpm                                | 12.14.0 (`packageManager`)  |                                                                                 |
-| Astro                               | 7.4.5                       | `output: 'static'`, native i18n routing, Fonts API, Content Layer, CSP          |
+| Astro                               | 7.4.7                       | `output: 'static'`, native i18n routing, Fonts API, Content Layer, CSP          |
 | Tailwind CSS                        | 4.3.4 (`@tailwindcss/vite`) | CSS-first config in `src/styles/global.css` (`@theme`), no `tailwind.config.js` |
 | TypeScript                          | 6.0.3                       | `strict` + `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`             |
 | Biome                               | 2.6.5                       | Lint + format, full `.astro` support enabled                                    |
